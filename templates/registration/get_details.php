@@ -33,7 +33,7 @@ foreach ($mptbm_all_transport_id as $key => $value) {
 if ($mptbm_available_for_all_time == false) {
 
 	foreach ($mptbm_all_transport_id as $key => $value) {
-		array_push($mptbm_schedule, MP_Global_Function::get_schedule($value));
+		array_push($mptbm_schedule, MPTBM_Function::get_schedule($value));
 	}
 	foreach ($mptbm_schedule as $dayArray) {
 		foreach ($dayArray as $times) {
