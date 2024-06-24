@@ -65,32 +65,7 @@ if (!class_exists('MP_Global_Function')) {
 			return self::data_sanitize($data);
 		}
 
-		public static function get_schedule($post_id)
-		{
-			$days = MP_Global_Function::week_day();
-			$days_name = array_keys($days);
-			$all_empty = true;
-			$schedule = [];
-			foreach ($days_name as $name) {
-				$start_time = get_post_meta($post_id, "mptbm_" . $name . "_start_time", true);
-				$end_time = get_post_meta($post_id, "mptbm_" . $name . "_end_time", true);
-				if ($start_time !== "" && $end_time !== "") {
-					$schedule[$name] = [$start_time, $end_time];
-				}
-			}
-			foreach ($schedule as $times) {
-				if (!empty($times[0]) || !empty($times[1])) {
-					$all_empty = false;
-					break;
-				}
-			}
-			if ($all_empty) {
-				$default_start_time = get_post_meta($post_id, "mptbm_default_start_time", true);
-				$default_end_time = get_post_meta($post_id, "mptbm_default_end_time", true);
-				$schedule['default'] = [$default_start_time, $default_end_time];
-			}
-			return $schedule;
-		}
+		
 
 		//***********************************//
 		public static function get_taxonomy($name)
