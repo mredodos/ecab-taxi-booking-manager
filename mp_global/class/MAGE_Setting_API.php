@@ -2,8 +2,8 @@
 	if (!defined('ABSPATH')) {
 		die;
 	} // Cannot access pages directly.
-	if (!class_exists('MPTBM_Setting_API')) {
-		class MPTBM_Setting_API {
+	if (!class_exists('MAGE_Setting_API')) {
+		class MAGE_Setting_API {
 			protected $settings_sections = array();
 			protected $settings_fields = array();
 			public function __construct() {}
@@ -39,7 +39,7 @@
 					if (isset($section['desc']) && !empty($section['desc'])) {
 						$section['desc'] = '<div class="inside">' . $section['desc'] . '</div>';
 						$callback = function () use ($section) {
-							echo esc_html(str_replace('"', '\"', $section['desc']));
+							echo str_replace('"', '\"', $section['desc']);
 						};
 					}
 					else if (isset($section['callback'])) {
@@ -119,6 +119,7 @@
 			function callback_mp_select2($args) {
 				$value = MP_Global_Function::get_settings($args['section'], $args['id'], $args['std']);
 				$name = $args['section'] . '[' . $args['id'] . ']';
+
 				?>
 				<label>
 					<select name="<?php echo esc_attr($name); ?>" class="formControl mp_select2">
@@ -132,13 +133,13 @@
 			function callback_mp_select2_role($args) {
 				global $wp_roles;
 				$value = MP_Global_Function::get_settings($args['section'], $args['id'], $args['std']);
-				$name = $args['section'] . '[' . $args['id'] . ']';
-				$value=is_array($value)?$value:[$value];
+				$name = $args['section'] . '[' . $args['id'] . '][]';
+                $value=is_array($value)?$value:[$value];
 				?>
 				<label>
 					<select name="<?php echo esc_attr($name); ?>" class="formControl mp_select2" multiple>
 						<?php foreach ($wp_roles->roles as $key => $label) { ?>
-							<option value="<?php echo esc_attr($key); ?>" <?php echo esc_attr(in_array($key, $value) ? 'selected' : ''); ?>><?php echo esc_html($label['name']); ?></option>
+							<option value="<?php echo esc_attr($key); ?>" <?php echo in_array($key, $value) ? 'selected' : ''; ?>><?php echo esc_html($label['name']); ?></option>
 						<?php } ?>
 					</select>
 				</label>
@@ -173,11 +174,8 @@
 						<?php echo esc_html($args['desc']); ?>
 					</label>
 				</fieldset>
-				
-				
 				<?php
 			}
-
 			function callback_switch_button($args) {
 				$value = MP_Global_Function::get_settings($args['section'], $args['id'], $args['std']);
 				$name = $args['section'] . '[' . $args['id'] . ']';
@@ -191,7 +189,6 @@
 				</fieldset>
 				<?php
 			}
-
 			function callback_multicheck($args) {
 				$value = MP_Global_Function::get_settings($args['section'], $args['id'], $args['std']);
 				$name = $args['section'] . '[' . $args['id'] . ']';
@@ -311,7 +308,7 @@
 					'id' => $args['section'] . '[' . $args['id'] . ']',
 					'echo' => 0
 				);
-				echo wp_kses_post(wp_dropdown_pages($dropdown_args));
+				echo wp_dropdown_pages($dropdown_args);
 			}
 			function sanitize_options($options) {
 				if (!$options) {
@@ -347,13 +344,13 @@
 				$count = count($this->settings_sections);
 				if ($count > 1) {
 					?>
-					
-					<?php foreach ($this->settings_sections as $tab) { ?>
-						<li data-tabs-target="#<?php echo esc_attr($tab['id']); ?>">
-							<span class="<?php echo esc_attr(array_key_exists('icon',$tab)?$tab['icon']:''); ?>"></span><?php echo esc_html($tab['title']); ?>
-						</li>
-					<?php } ?>
-					
+					<ul class="tabLists bgLight">
+						<?php foreach ($this->settings_sections as $tab) { ?>
+							<li data-tabs-target="#<?php echo esc_attr($tab['id']); ?>">
+								<span class="<?php echo esc_attr(array_key_exists('icon',$tab)?$tab['icon']:''); ?>"></span><?php echo esc_html($tab['title']); ?>
+							</li>
+						<?php } ?>
+					</ul>
 					<?php
 				}
 			}

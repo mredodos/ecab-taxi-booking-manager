@@ -10,11 +10,12 @@
 		class MPTBM_Settings_Global {
 			protected $settings_api;
 			public function __construct() {
-				$this->settings_api = new MPTBM_Setting_API;
+				$this->settings_api = new MAGE_Setting_API;
 				add_action('admin_menu', array($this, 'global_settings_menu'));
 				add_action('admin_init', array($this, 'admin_init'));
 				add_filter('mp_settings_sec_reg', array($this, 'settings_sec_reg'), 10);
 				add_filter('mp_settings_sec_fields', array($this, 'settings_sec_fields'), 10);
+				add_filter('filter_mp_global_settings', array($this, 'global_taxi'), 10);
 
 			}
 			public function global_settings_menu() {
@@ -22,25 +23,21 @@
 				add_submenu_page('edit.php?post_type=' . $cpt, esc_html__('Global Settings', 'ecab-taxi-booking-manager'), esc_html__('Global Settings', 'ecab-taxi-booking-manager'), 'manage_options', 'mptbm_settings_page', array($this, 'settings_page'));
 			}
 			public function settings_page() {
-				$label = MPTBM_Function::get_name();
 				?>
-				<div class="mpStyle ">
-					<div class="mpPanel">
-						<div class="mpPanelHeader"><?php echo esc_html($label) . ' ' . esc_html__(' Global Settings', 'ecab-taxi-booking-manager'); ?></div>
-						<div class="mpPanelBody mptbm_settings mp_zero">
-							<div class="mpTabs leftTabs d-flex justify-content-between">
-								<ul class="tabLists _max_300">
-									<?php $this->settings_api->show_navigation(); ?>
-								</ul>
-								<div class="tabsContent global-settings">
+                <div class="mpStyle mp_global_settings">
+                    <div class="mpPanel">
+                        <div class="mpPanelHeader"><?php echo esc_html(esc_html__(' Global Settings', 'ecab-taxi-booking-manager')); ?></div>
+                        <div class="mpPanelBody mp_zero">
+                            <div class="mpTabs leftTabs">
+								<?php $this->settings_api->show_navigation(); ?>
+                                <div class="tabsContent">
 									<?php $this->settings_api->show_forms(); ?>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 				<?php
-				
 			}
 			
 			public function admin_init() {
@@ -290,6 +287,38 @@
 				);
 				return array_merge($default_fields, $settings_fields);
 			}
+            public function global_taxi($default_sec) {
+	            $label = MPTBM_Function::get_name();
+	            $sections = array(
+		            array(
+			            'name' => 'set_book_status',
+			            'label' => $label.' '.esc_html__('Seat Booked Status', 'ecab-taxi-booking-manager'),
+			            'desc' => esc_html__('Please Select when and which order status Seat Will be Booked/Reduced.', 'ecab-taxi-booking-manager'),
+			            'type' => 'multicheck',
+			            'default' => array(
+				            'processing' => 'processing',
+				            'completed' => 'completed'
+			            ),
+			            'options' => array(
+				            'on-hold' => esc_html__('On Hold', 'ecab-taxi-booking-manager'),
+				            'pending' => esc_html__('Pending', 'ecab-taxi-booking-manager'),
+				            'processing' => esc_html__('Processing', 'ecab-taxi-booking-manager'),
+				            'completed' => esc_html__('Completed', 'ecab-taxi-booking-manager'),
+			            )
+		            ),
+		            array(
+			            'name' => 'km_or_mile',
+			            'label' =>  $label.' '.esc_html__('Duration By Kilometer or Mile', 'ecab-taxi-booking-manager'),
+			            'type' => 'select',
+			            'default' => 'km',
+			            'options' => array(
+				            'km' => esc_html__('Kilometer', 'ecab-taxi-booking-manager'),
+				            'mile' => esc_html__('Mile', 'ecab-taxi-booking-manager')
+			            )
+		            ),
+	            );
+	            return array_merge($default_sec, $sections);
+            }
 			
 		}
 		new  MPTBM_Settings_Global();

@@ -11,7 +11,6 @@ $km_or_mile = MP_Global_Function::get_settings('mp_global_settings', 'km_or_mile
 $price_based = $price_based ?? '';
 $map = $map ?? 'yes';
 $all_dates = MPTBM_Function::get_all_dates($price_based);
-
 $form_style = $form_style ?? 'horizontal';
 $form_style_class = $form_style == 'horizontal' ? 'inputHorizontal' : 'inputInline';
 $area_class = $price_based == 'manual' ? ' ' : 'justifyBetween';
@@ -19,11 +18,11 @@ $area_class = $form_style != 'horizontal' ? 'mptbm_form_details_area fdColumn' :
 $mptbm_all_transport_id = MP_Global_Function::get_all_post_id('mptbm_rent');
 $mptbm_available_for_all_time = false;
 $mptbm_schedule = [];
-
 // Initialize variables to hold the global smallest and largest values
 $min_schedule_value = 0;
 $max_schedule_value = 24;
 $loop = 1;
+
 foreach ($mptbm_all_transport_id as $key => $value) {
 	if (MP_Global_Function::get_post_info($value, 'mptbm_available_for_all_time') == 'on') {
 		$mptbm_available_for_all_time = true;
