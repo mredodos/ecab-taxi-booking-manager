@@ -275,9 +275,38 @@ function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_
     return false;
 }
 $start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_date"]) : "";
-$start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) * 3600 : "";
 $start_time_schedule = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
-$date = $start_date && $start_time ? gmdate("Y-m-d", strtotime($start_date)) . " " . gmdate("H:i", $start_time) : "";
+$start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
+
+if ($start_time !== "") {
+    if ($start_time !== "0") {
+        // Convert start time to hours and minutes
+        list($hours, $decimal_part) = explode('.', $start_time);
+        $interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time');
+        if ($interval_time == "5" || $interval_time == "15") {
+            $minutes = isset($decimal_part) ? (int) $decimal_part * 1 : 0; // Multiply by 1 to convert to minutes
+        }else {
+            $minutes = isset($decimal_part) ? (int) $decimal_part * 10 : 0; // Multiply by 10 to convert to minutes
+        }
+        
+    } else {
+        $hours = 0;
+        $minutes = 0;
+    }
+} else {
+    $hours = 0;
+    $minutes = 0;
+}
+
+// Format hours and minutes
+$start_time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+
+// Combine date and time if both are available
+$date = $start_date ? gmdate("Y-m-d", strtotime($start_date)) : "";
+if ($date && $start_time !== "") {
+    $date .= " " . $start_time_formatted;
+}
+
 $start_place = isset($_POST["start_place"]) ? sanitize_text_field($_POST["start_place"]) : "";
 $start_place_coordinates = $_POST["start_place_coordinates"];
 $end_place_coordinates = $_POST["end_place_coordinates"];
@@ -286,6 +315,7 @@ $two_way = isset($_POST["two_way"]) ? absint($_POST["two_way"]) : 1;
 $waiting_time = isset($_POST["waiting_time"]) ? sanitize_text_field($_POST["waiting_time"]) : 0;
 $fixed_time = isset($_POST["fixed_time"]) ? sanitize_text_field($_POST["fixed_time"]) : "";
 $return_time_schedule=null;
+
 $price_based = sanitize_text_field($_POST["price_based"]);
 if ($two_way > 1 && MP_Global_Function::get_settings("mptbm_general_settings", "enable_return_in_different_date") == "yes") {
     $return_date = isset($_POST["return_date"]) ? sanitize_text_field($_POST["return_date"]) : "";

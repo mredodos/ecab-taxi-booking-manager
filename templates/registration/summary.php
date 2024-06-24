@@ -17,6 +17,7 @@
 	$fixed_time = $fixed_time ?? '';
 	$return_date_time = $return_date_time ?? '';
 	$price_based = $price_based ?? '';
+	
 ?>
 	<div class="leftSidebar">
 		<div class="mp_sticky_area">
