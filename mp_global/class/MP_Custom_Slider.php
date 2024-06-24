@@ -57,7 +57,7 @@
 									?>
 									<div class="abTopLeft">
 										<button type="button" class="_dButton_bgWhite_textDefault" data-target-popup="superSlider" data-slide-index="1">
-											<?php echo esc_html__( 'View All', 'ecab-taxi-booking-manager' ) . ' ' . esc_html(sizeof( $image_ids )) . ' ' . esc_html__( 'Images', 'ecab-taxi-booking-manager' ); ?>
+											<?php echo esc_html__( 'View All', 'bus-ticket-booking-with-seat-reservation' ) . ' ' . sizeof( $image_ids ) . ' ' . esc_html__( 'Images', 'bus-ticket-booking-with-seat-reservation' ); ?>
 										</button>
 									</div>
 									<?php
@@ -96,7 +96,7 @@
 								$image_url = MP_Global_Function::get_image_url( '', $id );
 								?>
 								<div class="sliderItem" data-slide-index="<?php echo esc_html( $count ); ?>" data-target-popup="superSlider" data-placeholder>
-									<div data-bg-image="<?php echo esc_url( $image_url ); ?>"></div>
+									<div data-bg-image="<?php echo esc_html( $image_url ); ?>"></div>
 								</div>
 								<?php
 								$count ++;
@@ -136,18 +136,18 @@
 					$image_url = MP_Global_Function::get_image_url( '', $id );
 					if ( $count < 4 ) {
 						?>
-						<div class="sliderShowcaseItem" data-slide-target="<?php echo esc_attr( $count ); ?>" data-placeholder>
-							<div data-bg-image="<?php echo esc_url( $image_url ); ?>"></div>
+						<div class="sliderShowcaseItem" data-slide-target="<?php echo esc_html( $count ); ?>" data-placeholder>
+							<div data-bg-image="<?php echo esc_html( $image_url ); ?>"></div>
 						</div>
 						<?php
 					}
 					if ( $count == 4 ) {
 						?>
 						<div class="sliderShowcaseItem" data-target-popup="superSlider" data-placeholder>
-							<div data-bg-image="<?php echo esc_url( $image_url ); ?>"></div>
+							<div data-bg-image="<?php echo esc_html( $image_url ); ?>"></div>
 							<div class="sliderMoreItem">
 								<span class="fas fa-plus"></span>
-								<?php echo esc_html(sizeof( $image_ids ) - 4); ?>
+								<?php echo sizeof( $image_ids ) - 4; ?>
 								<span class="far fa-image"></span>
 							</div>
 						</div>
@@ -162,8 +162,8 @@
 					$image_url = MP_Global_Function::get_image_url( '', $id );
 					if ( $count > 1 && $count < 5 ) {
 						?>
-						<div class="sliderShowcaseItem" data-target-popup="superSlider" data-slide-index="<?php echo esc_attr( $count ); ?>" data-placeholder>
-							<div data-bg-image="<?php echo esc_url( $image_url ); ?>"></div>
+						<div class="sliderShowcaseItem" data-target-popup="superSlider" data-slide-index="<?php echo esc_html( $count ); ?>" data-placeholder>
+							<div data-bg-image="<?php echo esc_html( $image_url ); ?>"></div>
 						</div>
 						<?php
 					}
@@ -179,8 +179,8 @@
 							foreach ( $image_ids as $id ) {
 								$image_url = MP_Global_Function::get_image_url( '', $id, array( 150, 100 ) );
 								?>
-								<div class="slideIndicatorItem" data-slide-target="<?php echo esc_attr( $count ); ?>">
-									<div data-bg-image="<?php echo esc_url( $image_url ); ?>"></div>
+								<div class="slideIndicatorItem" data-slide-target="<?php echo esc_html( $count ); ?>">
+									<div data-bg-image="<?php echo esc_html( $image_url ); ?>"></div>
 								</div>
 								<?php
 								$count ++;
@@ -210,7 +210,7 @@
 					<div class="sliderPopup" data-popup="superSlider">
 						<div class="superSlider">
 							<div class="popupHeader">
-								<h2><?php echo esc_html(get_the_title( $post_id )); ?></h2>
+								<h2><?php echo get_the_title( $post_id ); ?></h2>
 								<span class="fas fa-times popupClose"></span>
 							</div>
 							<div class="popupBody">
