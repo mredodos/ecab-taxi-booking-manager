@@ -86,7 +86,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 				</section>
 				<section data-collapse="#mp_distance" class="<?php echo esc_attr($price_based == 'distance' || $price_based == 'distance_duration' ? 'mActive' : ''); ?>">
 					<div>
-						<label for=""><?php esc_html_e('Price/KM or Price/MILE', 'ecab-taxi-booking-manager'); ?></label>
+						<label for=""><?php esc_html_e('Price/KM', 'ecab-taxi-booking-manager'); ?></label>
 						<span><?php MPTBM_Settings::info_text('mptbm_km_price'); ?></span>
 					</div>
 					<input class="formControl mp_price_validation" name="mptbm_km_price" value="<?php echo esc_attr($distance_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
