@@ -319,9 +319,38 @@ $return_time_schedule=null;
 $price_based = sanitize_text_field($_POST["price_based"]);
 if ($two_way > 1 && MP_Global_Function::get_settings("mptbm_general_settings", "enable_return_in_different_date") == "yes") {
     $return_date = isset($_POST["return_date"]) ? sanitize_text_field($_POST["return_date"]) : "";
-    $return_time = isset($_POST["return_time"]) ? sanitize_text_field($_POST["return_time"]) * 3600 : "";
+    $return_time = isset($_POST["return_time"]) ? sanitize_text_field($_POST["return_time"]): "";
     $return_time_schedule = isset($_POST["return_time"]) ? sanitize_text_field($_POST["return_time"]) : "";
-    $return_date_time = $return_date && $return_time ? gmdate("Y-m-d", strtotime($return_date)) . " " . gmdate("H:i", $return_time) : "";
+
+    if ($return_time !== "") {
+        if ($return_time !== "0") {
+            // Convert start time to hours and minutes
+            list($hours, $decimal_part) = explode('.', $return_time);
+            $interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time');
+            if ($interval_time == "5" || $interval_time == "15") {
+                $minutes = isset($decimal_part) ? (int) $decimal_part * 1 : 0; // Multiply by 1 to convert to minutes
+            }else {
+                $minutes = isset($decimal_part) ? (int) $decimal_part * 10 : 0; // Multiply by 10 to convert to minutes
+            }
+            
+        } else {
+            $hours = 0;
+            $minutes = 0;
+        }
+    } else {
+        $hours = 0;
+        $minutes = 0;
+    }
+    
+    // Format hours and minutes
+    $return_time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+    
+    // Combine date and time if both are available
+    $return_date_time = $return_date ? gmdate("Y-m-d", strtotime($return_date)) : "";
+    if ($return_date_time && $return_time !== "") {
+        $return_date_time .= " " . $return_time_formatted;
+    }
+
 }
 if (MP_Global_Function::get_settings("mptbm_general_settings", "enable_filter_via_features") == "yes") {
     $feature_passenger_number = isset($_POST["feature_passenger_number"]) ? sanitize_text_field($_POST["feature_passenger_number"]) : "";
