@@ -208,7 +208,7 @@ function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_
     if ($operation_area_id && $price_based !== "manual") {
         mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $start_place_coordinates, $end_place_coordinates);
     } else {
-        echo $post_id;
+        
 ?>
 		<script>
 			var post_id = <?php echo wp_json_encode($post_id); ?>;
