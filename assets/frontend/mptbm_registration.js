@@ -27,8 +27,7 @@ function mptbm_set_cookie_distance_duration(start_place = "", end_place = "") {
                 let distance_text = result.routes[0].legs[0].distance.text;
                 let duration = result.routes[0].legs[0].duration.value;
                 var duration_text = result.routes[0].legs[0].duration.text;
-                if (kmOrMile == 'mile') {
-                    console.log(kmOrMile);
+if(kmOrMile == 'mile'){
                     // Convert distance from kilometers to miles
                     var distanceInKilometers = distance / 1000;
                     var distanceInMiles = distanceInKilometers * 0.621371;
@@ -403,6 +402,26 @@ function mptbmCreateMarker(place) {
             .trigger("click");
     });
     $(document).on("change", "#mptbm_map_return_date", function () {
+        let mptbm_enable_return_in_different_date = $('[name="mptbm_enable_return_in_different_date"]').val();
+        if (mptbm_enable_return_in_different_date == 'yes') {
+            var selectedTime = parseFloat($('#mptbm_map_start_time').val());
+            var selectedDate = $('#mptbm_map_start_date').val();
+            var dateValue = $('#mptbm_map_return_date').val();
+            // Clear existing options
+            $('#mptbm_map_return_time').siblings('.mp_input_select_list').empty();
+            // Populate options for return time
+            $('.mp_input_select_list li').each(function () {
+                var timeValue = parseFloat($(this).attr('data-value')); 
+                if (timeValue > selectedTime && selectedDate == dateValue) {
+                    $('#mptbm_map_return_time').siblings('.mp_input_select_list').append($(this).clone());
+                }
+            });
+            if ($('#mptbm_map_return_time').siblings('.mp_input_select_list').children().length === 0) {
+            $('.mp_input_select_list li').each(function () {
+                $('#mptbm_map_return_time').siblings('.mp_input_select_list').append($(this).clone());
+            });
+        }
+        }
         let parent = $(this).closest(".mptbm_transport_search_area");
         mptbm_content_refresh(parent);
         parent
@@ -411,27 +430,18 @@ function mptbmCreateMarker(place) {
             .find("input.formControl")
             .trigger("click");
     });
-    $(document).on("click", ".mp_input_select_list li", function () {
+    $(document).on("click", ".start_time_list li", function () {
         let selectedValue = $(this).attr('data-value');
         $('#mptbm_map_start_time').val(selectedValue).trigger('change');
     });
+    $(document).on("click", ".return_time_list li", function () {
+        let selectedValue = $(this).attr('data-value');
+        $('#mptbm_map_return_time').val(selectedValue).trigger('change');
+    });
     $(document).on("change", "#mptbm_map_start_time", function () {
-        let mptbm_enable_return_in_different_date = $('[name="mptbm_enable_return_in_different_date"]').val();
-        if (mptbm_enable_return_in_different_date == 'yes') {
-            var selectedTime = parseFloat($('#mptbm_map_start_time').val());
-            // Clear existing options
-            $('#mptbm_map_return_time').siblings('.mp_input_select_list').empty();
-            // Populate options for return time
-            $('.mp_input_select_list li').each(function () {
-                var timeValue = parseFloat($(this).attr('data-value'));
-                if (timeValue > selectedTime) {
-                    $('#mptbm_map_return_time').siblings('.mp_input_select_list').append($(this).clone());
-                }
-            });
-            let parent = $(this).closest(".mptbm_transport_search_area");
-            mptbm_content_refresh(parent);
-            parent.find("#mptbm_map_start_place").focus();
-        }
+        let parent = $(this).closest(".mptbm_transport_search_area");
+        mptbm_content_refresh(parent);
+        parent.find("#mptbm_map_start_place").focus();
     });
     $(document).on("change", "#mptbm_manual_start_place", function () {
         let parent = $(this).closest(".mptbm_transport_search_area");

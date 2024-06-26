@@ -99,7 +99,7 @@ if (sizeof($all_dates) > 0) {
 						<span class="far fa-clock mptbm_left_icon allCenter"></span>
 					</label>
 
-					<ul class="mp_input_select_list">
+					<ul class="mp_input_select_list start_time_list">
 						<?php
 						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
 							// Calculate hours and minutes
@@ -194,7 +194,7 @@ if (sizeof($all_dates) > 0) {
 								<input type="text" class="formControl" placeholder="<?php esc_html_e('Please Select Time', 'ecab-taxi-booking-manager'); ?>" value="" readonly />
 								<span class="far fa-clock mptbm_left_icon allCenter"></span>
 							</label>
-							<ul class="mp_input_select_list">
+							<ul class="mp_input_select_list return_time_list">
 								<?php
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
 									// Calculate hours and minutes
