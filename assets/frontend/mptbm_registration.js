@@ -27,8 +27,7 @@ function mptbm_set_cookie_distance_duration(start_place = "", end_place = "") {
                 let distance_text = result.routes[0].legs[0].distance.text;
                 let duration = result.routes[0].legs[0].duration.value;
                 var duration_text = result.routes[0].legs[0].duration.text;
-                if(kmOrMile == 'mile'){
-                    
+if(kmOrMile == 'mile'){
                     // Convert distance from kilometers to miles
                     var distanceInKilometers = distance / 1000;
                     var distanceInMiles = distanceInKilometers * 0.621371;
@@ -485,10 +484,7 @@ function mptbmCreateMarker(place) {
         let parent = $(this).closest(".mptbm_transport_search_area");
         mptbm_content_refresh(parent);
     });
-    $(document).on(
-        "change",
-        "#mptbm_map_start_place,#mptbm_map_end_place",
-        function () {
+    $(document).on("change", "#mptbm_map_start_place,#mptbm_map_end_place", function () {
             let parent = $(this).closest(".mptbm_transport_search_area");
             mptbm_content_refresh(parent);
             let start_place = parent.find("#mptbm_map_start_place").val();
@@ -506,10 +502,7 @@ function mptbmCreateMarker(place) {
             }
         }
     );
-    $(document).on(
-        "change",
-        ".mptbm_transport_search_area [name='mptbm_taxi_return']",
-        function () {
+    $(document).on("change", ".mptbm_transport_search_area [name='mptbm_taxi_return']", function () {
             let parent = $(this).closest(".mptbm_transport_search_area");
             mptbm_content_refresh(parent);
         }
@@ -614,7 +607,8 @@ function mptbm_price_calculation(parent) {
                                 target_summary.slideDown(350);
                                 target_extra_service.slideDown(350);
                                 target_extra_service_summary.slideDown(350);
-                                pageScrollTo(target_extra_service);
+                                //pageScrollTo(target_extra_service);
+                                $('html, body').animate({scrollTop: $this.closest('.mptbm_booking_item').position().top += $this.closest('.mptbm_booking_item').outerHeight()}, 1000);
                                 dLoaderRemove(parent.find('.tabsContentNext'));
                             });
                         },
@@ -647,49 +641,44 @@ function mptbm_price_calculation(parent) {
     });
     //===========================//
     $(document).on('click', '.mptbm_transport_search_area .mptbm_get_vehicle_prev', function () {
-        {
-            var mptbmTemplateExists = $(".mptbm-show-search-result").length;
-            if (mptbmTemplateExists) {
-                // Function to retrieve cookie value by name
-                function getCookie(name) {
-                    // Split the cookies by semicolon
-                    var cookies = document.cookie.split(";");
-                    // Loop through each cookie to find the one with the specified name
-                    for (var i = 0; i < cookies.length; i++) {
-                        var cookie = cookies[i].trim();
-                        // Check if the cookie starts with the specified name
-                        if (cookie.startsWith(name + "=")) {
-                            // Return the value of the cookie
-                            return cookie.substring(name.length + 1);
-                        }
+        var mptbmTemplateExists = $(".mptbm-show-search-result").length;
+        if (mptbmTemplateExists) {
+            // Function to retrieve cookie value by name
+            function getCookie(name) {
+                // Split the cookies by semicolon
+                var cookies = document.cookie.split(";");
+                // Loop through each cookie to find the one with the specified name
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Check if the cookie starts with the specified name
+                    if (cookie.startsWith(name + "=")) {
+                        // Return the value of the cookie
+                        return cookie.substring(name.length + 1);
                     }
-                    // Return null if the cookie is not found
-                    return null;
                 }
-                // Usage example:
-                var httpReferrerValue = getCookie("httpReferrer");
-                // Function to delete a cookie by setting its expiry date to a past time
-                function deleteCookie(name) {
-                    document.cookie =
-                        name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                }
-                deleteCookie("httpReferrer");
-                window.location.href = httpReferrerValue;
-            } else {
-                let parent = $(this).closest(".mptbm_transport_search_area");
-                parent.find(".get_details_next_link").slideDown("fast");
-                parent.find(".nextTab_prev").trigger("click");
+                // Return null if the cookie is not found
+                return null;
             }
+            // Usage example:
+            var httpReferrerValue = getCookie("httpReferrer");
+            // Function to delete a cookie by setting its expiry date to a past time
+            function deleteCookie(name) {
+                document.cookie =
+                    name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            }
+            deleteCookie("httpReferrer");
+            window.location.href = httpReferrerValue;
+        } else {
+            let parent = $(this).closest(".mptbm_transport_search_area");
+            parent.find(".get_details_next_link").slideDown("fast");
+            parent.find(".nextTab_prev").trigger("click");
         }
     });
     $(document).on('click', '.mptbm_transport_search_area .mptbm_summary_prev', function () {
-        var mptbmTemplateExists = $(".mptbm-show-search-result").length;
+        let mptbmTemplateExists = $(".mptbm-show-search-result").length;
         if (mptbmTemplateExists) {
             $(".mptbm_order_summary").css("display", "none");
-            $(".mptbm_map_search_result")
-                .css("display", "block")
-                .hide()
-                .slideDown("slow");
+            $(".mptbm_map_search_result").css("display", "block").hide().slideDown("slow");
             $(".step-place-order").removeClass("active");
         } else {
             let parent = $(this).closest(".mptbm_transport_search_area");
