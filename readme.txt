@@ -142,6 +142,10 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 
 
 == Changelog ==
+= 1.4.6 =
+1. Manual Pricing Slug is fixed
+2. Fixed Hourly Responsive issue Fixed
+3. KM to mile feature added
 = 1.4.5 =
 1. Geo Fence fixed and intercity with extra pricing added for pro version 
 2. Return Time and date added
@@ -149,3 +153,5 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 4. Transport Schedule added
 5. Initial Price added 
 6. Location taxonomy added for manual pricing 
+7.Manual Pricing Slug issue fixed
+8. Fixed Hourly Responsive issue Fixed
