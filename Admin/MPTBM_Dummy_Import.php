@@ -203,6 +203,8 @@
 									//gallery_settings
 									'mp_slider_images' => [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 									//date_settings
+									'mptbm_available_for_all_time'=>'on',
+									'mptbm_active_days'=>'60',
 									'mptbm_default_start_time'=> '0.5',
 									'mptbm_default_end_time'=> '23.5',
 									//extras_settings
@@ -282,6 +284,8 @@
 										2 => 'Watch as Gerry McCambridge performs comedy and magic',
 									],
 									//date_settings
+									'mptbm_available_for_all_time'=>'on',
+									'mptbm_active_days'=>'60',
 									'mptbm_default_start_time'=> '0.5',
 									'mptbm_default_end_time'=> '23.5',
 									//gallery_settings
@@ -365,6 +369,8 @@
 									//gallery_settings
 									'mp_slider_images' => [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 									//date_settings
+									'mptbm_available_for_all_time'=>'on',
+									'mptbm_active_days'=>'60',
 									'mptbm_default_start_time'=> '0.5',
 									'mptbm_default_end_time'=> '23.5',
 									//extras_settings
@@ -446,6 +452,8 @@
 									//gallery_settings
 									'mp_slider_images' => [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 									//date_settings
+									'mptbm_available_for_all_time'=>'on',
+									'mptbm_active_days'=>'60',
 									'mptbm_default_start_time'=> '0.5',
 									'mptbm_default_end_time'=> '23.5',
 									//extras_settings
@@ -526,6 +534,8 @@
 									//gallery_settings
 									'mp_slider_images' => [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 									//date_settings
+									'mptbm_available_for_all_time'=>'on',
+									'mptbm_active_days'=>'60',
 									'mptbm_default_start_time'=> '0.5',
 									'mptbm_default_end_time'=> '23.5',
 									//extras_settings
@@ -606,6 +616,8 @@
 									//gallery_settings
 									'mp_slider_images' => [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 									//date_settings
+									'mptbm_available_for_all_time'=>'on',
+									'mptbm_active_days'=>'60',
 									'mptbm_default_start_time'=> '0.5',
 									'mptbm_default_end_time'=> '23.5',
 									//extras_settings
@@ -686,6 +698,8 @@
 									//gallery_settings
 									'mp_slider_images' => [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 									//date_settings
+									'mptbm_available_for_all_time'=>'on',
+									'mptbm_active_days'=>'60',
 									'mptbm_default_start_time'=> '0.5',
 									'mptbm_default_end_time'=> '23.5',
 									//extras_settings

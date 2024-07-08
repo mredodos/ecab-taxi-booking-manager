@@ -46,6 +46,14 @@ if (!class_exists('MPTBM_Function')) {
 			return apply_filters('filter_mptbm_details_template', $name);
 		}
 
+		public static function get_feature_bag($post_id){
+			return get_post_meta($post_id, "mptbm_maximum_bag", 0);
+		}
+
+		public static function get_feature_passenger($post_id){
+			return get_post_meta($post_id, "mptbm_maximum_passenger", 0);
+		}
+
 		public static function get_schedule($post_id)
 		{
 			$days = MP_Global_Function::week_day();
