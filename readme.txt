@@ -88,6 +88,8 @@ Set fixed area for transport by using  google map
 **🏬 Establish GEO FENCE Boundaries and Pricing**
 Utilize Google Maps to delineate both intercity and intracity zones, along with corresponding pricing 
 
+**≣ Comprehensive Order List Section
+View and manage all bookings in a detailed order list
 
 **Third-Party Service:**
 This plugin relies on the Google Maps API, a service provided by Google, Inc. It is used for displaying Google Maps and finding distance. Please note that your usage of this plugin constitutes acceptance of Google's terms and policies.
