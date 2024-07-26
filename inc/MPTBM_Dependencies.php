@@ -35,14 +35,15 @@ if (!class_exists('MPTBM_Dependencies')) {
         {
             $api_key = MP_Global_Function::get_settings('mptbm_map_api_settings', 'gmap_api_key');
             if ($api_key) {
-                wp_enqueue_script('mptbm_map_api', 'https://maps.googleapis.com/maps/api/js?libraries=places,drawing&language=en&v=weekly&loading=async&key=' . $api_key, array('jquery'), null, true);
-                wp_enqueue_script('mptbm_geoLib', MPTBM_PLUGIN_URL . '/assets/admin/geolib.js',null,true);
+                wp_enqueue_script('mptbm_map_api', 'https://maps.googleapis.com/maps/api/js?libraries=places,drawing&language=en&v=weekly&key=' . $api_key, array(), null, true);
+                wp_enqueue_script('mptbm_geoLib', MPTBM_PLUGIN_URL . '/assets/admin/geolib.js', array(), null, true);
                 wp_enqueue_script('mptbm_admin_map', MPTBM_PLUGIN_URL . '/assets/admin/mptbm_map.js', array('mptbm_map_api'), time(), true);
             } else {
                 add_action('admin_notices', [$this, 'map_api_not_active']);
             }
             do_action('add_mptbm_common_script');
         }
+
         public function admin_enqueue()
         {
             $this->global_enqueue();
