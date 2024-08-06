@@ -17,6 +17,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 		public function price_settings($post_id)
 		{
 			$initial_price = MP_Global_Function::get_post_info($post_id, 'mptbm_initial_price');
+			$min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price');
 			$display_map = MP_Global_Function::get_settings('mptbm_map_api_settings', 'display_map', 'enable');
 			$price_based = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
 			$price_based = $display_map == 'disable' ? 'manual' : $price_based;
@@ -55,6 +56,13 @@ if (!class_exists('MPTBM_Price_Settings')) {
 						<span><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
 					</div>
 					<input class="formControl mp_price_validation" name="mptbm_initial_price" value="<?php echo esc_attr($initial_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+				</section>
+				<section>
+					<div>
+						<label><?php esc_html_e('Minimum Price', 'ecab-taxi-booking-manager'); ?></label>
+						<span><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+					</div>
+					<input class="formControl mp_price_validation" name="mptbm_min_price" value="<?php echo esc_attr($min_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 				</section>
 				<?php if ($waiting_time_check == 'enable') { ?>
 					<section class="<?php echo esc_attr($price_based == 'duration' || $price_based == 'distance' || $price_based == 'distance_duration' || $price_based == 'manual' ? 'mActive' : ''); ?>">
@@ -296,6 +304,8 @@ if (!class_exists('MPTBM_Price_Settings')) {
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
 				$initial_price = isset($_POST['mptbm_initial_price']) ? sanitize_text_field($_POST['mptbm_initial_price']) : '';
 				update_post_meta($post_id, 'mptbm_initial_price', $initial_price);
+				$min_price = isset($_POST['mptbm_min_price']) ? sanitize_text_field($_POST['mptbm_min_price']) : '';
+				update_post_meta($post_id, 'mptbm_min_price', $min_price);
 				$price_based = isset($_POST['mptbm_price_based']) ? sanitize_text_field($_POST['mptbm_price_based']) : '';
 				update_post_meta($post_id, 'mptbm_price_based', $price_based);
 				$distance_price = isset($_POST['mptbm_km_price']) ? sanitize_text_field($_POST['mptbm_km_price']) : 0;

@@ -225,6 +225,7 @@ if (!class_exists('MPTBM_Function')) {
 				session_start();
 			}
 			$initial_price = MP_Global_Function::get_post_info($post_id, 'mptbm_initial_price');
+			$min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price');
 			$price_based = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
 
 			$waiting_price = MP_Global_Function::get_post_info($post_id, 'mptbm_waiting_price', 0) * $waiting_time;
@@ -260,6 +261,10 @@ if (!class_exists('MPTBM_Function')) {
 			}
 			if ($initial_price > 0) {
 				$price = $price + $initial_price;
+			}
+			if($min_price > 0 && $min_price > $price){
+
+				$price = $min_price;
 			}
 			
 			// Check if session key exists for the specific post_id
