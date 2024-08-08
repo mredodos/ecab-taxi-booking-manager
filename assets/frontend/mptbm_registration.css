@@ -3,7 +3,7 @@
 	div.mptbm_transport_search_area {width: 100%;max-width: 1200px;}
 	div.mptbm_transport_search_area div.tabsContentNext {padding: 0; margin: 30px 0 0 0; }
 	div.mptbm_transport_search_area div.mptbm_distance_time { margin: var(--dmp) 0 0 0; }
-	div.mptbm_distance_time h6 {font-size: var(--fs);color: var(--color_light_1);}
+	div.mptbm_distance_time h6 {font-size: var(--fs);color: var(--d_color);}
 	div.mptbm_distance_time strong {font-size: var(--fs);}
 	#mptbm_map_area { width: 100%; height: 100%; min-height: 200px;border-radius: 15px; }
 	div.mptbm_form_details_area #mptbm_map_area{min-height: 300px;}
@@ -91,4 +91,10 @@
 
 #ui-datepicker-div {
 	width:auto;
+}
+.mpTabsNext .tabItemNext.active [class*="circleIcon"]::after{
+	border-width: 5px;
+}
+.mpTabsNext .tabItemNext [class*="circleIcon"]::after{
+	border-width: 5px;
 }

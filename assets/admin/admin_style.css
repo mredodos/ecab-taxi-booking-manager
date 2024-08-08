@@ -855,7 +855,6 @@
 #mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section label + span {
   color: #6B7280;
 }
-
 #mp_meta_box_panel .mptbm_settings .tabsContent .span-row {
   color: #6B7280;
   font-size: 13px;
@@ -879,7 +878,12 @@
   .leftTabs [data-tabs-target] {
     border-bottom: 0px solid var(--mpl-light);
   }
-
+  .leftTabs > .tabLists {
+    -webkit-flex-flow: column;
+    flex-flow: column;
+    min-width: inherit;
+    max-width: inherit;
+  }
   div.mpStyle [data-tabs-target] {
     color: var(--mpl-secondary);
   }
@@ -1189,10 +1193,13 @@ div.mpStyle span.mp_remove_multi_image {
 .global-settings table th label {
   display: block;
 }
-.mp_settings_area_item{
-  width: 100%;
+
+div.mp_global_settings label .info_text {
+  line-height: 0.9rem;
 }
+
+div.mp_global_settings .mpPanel .mpPanelBody .mpTabs .tabLists {
+  width: 25%;
+}
+
 /*# sourceMappingURL=admin_style.css.map */
-.disable-operation-area{
-  cursor: no-drop;
-}
