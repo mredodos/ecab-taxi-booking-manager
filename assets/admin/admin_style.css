@@ -1202,4 +1202,8 @@ div.mp_global_settings .mpPanel .mpPanelBody .mpTabs .tabLists {
   width: 25%;
 }
 
+#ui-datepicker-div {
+  width: auto;
+}
+
 /*# sourceMappingURL=admin_style.css.map */
