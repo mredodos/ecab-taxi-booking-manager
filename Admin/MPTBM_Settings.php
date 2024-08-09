@@ -15,7 +15,7 @@
 			public function settings_meta() {
 				$label = MPTBM_Function::get_name();
 				$cpt = MPTBM_Function::get_cpt();
-				add_meta_box('mp_meta_box_panel', '' . $label . esc_html__(' Information Settings : ', 'ecab-taxi-booking-manager') . get_the_title(get_the_id()), array($this, 'settings'), $cpt, 'normal', 'high');
+				add_meta_box('mp_meta_box_panel', $label . __('Information Settings '.'<span class="version"> V'.MPTBM_PLUGIN_VERSION.'</span>', 'ecab-taxi-booking-manager'), array($this, 'settings'), $cpt, 'normal', 'high');
 			}
 			//******************************//
 			public function settings() {
