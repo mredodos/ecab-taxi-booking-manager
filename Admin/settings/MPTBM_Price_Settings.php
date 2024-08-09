@@ -41,70 +41,77 @@ if (!class_exists('MPTBM_Price_Settings')) {
 ?>
 			<div class="tabsItem" data-tabs="#mptbm_settings_pricing">
 				<h2><?php esc_html_e('Price Settings', 'ecab-taxi-booking-manager'); ?></h2>
-				<p><?php esc_html_e('Price Settings', 'ecab-taxi-booking-manager'); ?></p>
+				<p><?php esc_html_e('here you can set initial price, Waiting Time price, price calculation model', 'ecab-taxi-booking-manager'); ?></p>
 
-				<section class="bg-light">
-					<div>
-						<label><?php esc_html_e('Price Settings', 'ecab-taxi-booking-manager'); ?></label>
-						<span><?php esc_html_e('Price Settings', 'ecab-taxi-booking-manager'); ?></span>
-					</div>
+				<section class="bg-light" >
+					<h6><?php esc_html_e('Price Settings', 'ecab-taxi-booking-manager'); ?></h6>
+					<span><?php esc_html_e('Here you can set price', 'ecab-taxi-booking-manager'); ?></span>
 				</section>
 				<section>
-					<div>
-						<label><?php esc_html_e('Initial Price', 'ecab-taxi-booking-manager'); ?></label>
-						<span><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
-					</div>
-					<input class="formControl mp_price_validation" name="mptbm_initial_price" value="<?php echo esc_attr($initial_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					<label class="label">
+						<div>
+							<h6><?php esc_html_e('Initial Price', 'ecab-taxi-booking-manager'); ?></h6>
+							<span><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+						</div>
+						<input class="formControl mp_price_validation" name="mptbm_initial_price" value="<?php echo esc_attr($initial_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					</label>
 				</section>
 				<?php if ($waiting_time_check == 'enable') { ?>
 					<section class="<?php echo esc_attr($price_based == 'duration' || $price_based == 'distance' || $price_based == 'distance_duration' || $price_based == 'manual' ? 'mActive' : ''); ?>">
-						<div >
-							<label for=""><?php esc_html_e('Waiting Time Price/Hour', 'ecab-taxi-booking-manager'); ?></label>
-							<span><?php MPTBM_Settings::info_text('mptbm_waiting_price'); ?></span>
-						</div>
-						<input class="formControl mp_price_validation" name="mptbm_waiting_price" value="<?php echo esc_attr($waiting_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+						<label class="label">
+							<div >
+								<h6><?php esc_html_e('Waiting Time Price/Hour', 'ecab-taxi-booking-manager'); ?></h6>
+								<span><?php MPTBM_Settings::info_text('mptbm_waiting_price'); ?></span>
+							</div>
+							<input class="formControl mp_price_validation" name="mptbm_waiting_price" value="<?php echo esc_attr($waiting_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+						</label>
 					</section>
 				<?php } ?>
 				<section>
-					<div>
-						<label for=""><?php esc_html_e('Pricing based on', 'ecab-taxi-booking-manager'); ?></label>
-						<span><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
-					</div>
-					<div>
-						<select class="formControl" name="mptbm_price_based" data-collapse-target>
-							<option disabled><?php esc_html_e('Please select ...', 'ecab-taxi-booking-manager'); ?></option>
-							<option value="distance" data-option-target data-option-target-multi="#mp_distance" <?php echo esc_attr($distance_selected); ?>><?php esc_html_e('Distance as google map', 'ecab-taxi-booking-manager'); ?></option>
-							<option value="duration" data-option-target data-option-target-multi="#mp_duration" <?php echo esc_attr($duration_selected); ?>><?php esc_html_e('Duration/Time as google map', 'ecab-taxi-booking-manager'); ?></option>
-							<option value="distance_duration" data-option-target data-option-target-multi="#mp_distance #mp_duration" <?php echo esc_attr($distance_duration_selected); ?>><?php esc_html_e('Distance + Duration as google map', 'ecab-taxi-booking-manager'); ?></option>
-							<option value="manual" data-option-target data-option-target-multi="#mp_manual" <?php echo esc_attr($price_based == 'manual' ? 'selected' : ''); ?>><?php esc_html_e('Manual as fixed Location', 'ecab-taxi-booking-manager'); ?></option>
-							<option value="fixed_hourly" data-option-target="#mp_duration" <?php echo esc_attr($fixed_hourly_selected); ?>><?php esc_html_e('Fixed Hourly', 'ecab-taxi-booking-manager'); ?></option>
-						</select>
-						<?php if ($display_map == 'disable') { ?>
-							<p><?php esc_html_e('To enable google map pricing option you must enable  ', 'ecab-taxi-booking-manager'); ?><a href="<?php echo esc_attr($gm_api_url); ?>"><?php esc_html_e('google map base pricing option', 'ecab-taxi-booking-manager'); ?></a></p>
-						<?php } ?>
-					</div>
+					<label class="label">
+						<div>
+							<h6><?php esc_html_e('Pricing based on', 'ecab-taxi-booking-manager'); ?></h6>
+							<?php if ($display_map == 'disable') { ?>
+								<span><?php esc_html_e('To enable google map pricing option you must enable  ', 'ecab-taxi-booking-manager'); ?><a href="<?php echo esc_attr($gm_api_url); ?>"><?php esc_html_e('google map base pricing option', 'ecab-taxi-booking-manager'); ?></a></span>
+							<?php }else{ ?>
+								<span><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
+							<?php } ?>
+						</div>
+						<div>
+							<select class="formControl" name="mptbm_price_based" data-collapse-target>
+								<option disabled><?php esc_html_e('Please select ...', 'ecab-taxi-booking-manager'); ?></option>
+								<option value="distance" data-option-target data-option-target-multi="#mp_distance" <?php echo esc_attr($distance_selected); ?>><?php esc_html_e('Distance as google map', 'ecab-taxi-booking-manager'); ?></option>
+								<option value="duration" data-option-target data-option-target-multi="#mp_duration" <?php echo esc_attr($duration_selected); ?>><?php esc_html_e('Duration/Time as google map', 'ecab-taxi-booking-manager'); ?></option>
+								<option value="distance_duration" data-option-target data-option-target-multi="#mp_distance #mp_duration" <?php echo esc_attr($distance_duration_selected); ?>><?php esc_html_e('Distance + Duration as google map', 'ecab-taxi-booking-manager'); ?></option>
+								<option value="manual" data-option-target data-option-target-multi="#mp_manual" <?php echo esc_attr($price_based == 'manual' ? 'selected' : ''); ?>><?php esc_html_e('Manual as fixed Location', 'ecab-taxi-booking-manager'); ?></option>
+								<option value="fixed_hourly" data-option-target="#mp_duration" <?php echo esc_attr($fixed_hourly_selected); ?>><?php esc_html_e('Fixed Hourly', 'ecab-taxi-booking-manager'); ?></option>
+							</select>
+						</div>
+					</label>
 				</section>
 				<section data-collapse="#mp_distance" class="<?php echo esc_attr($price_based == 'distance' || $price_based == 'distance_duration' ? 'mActive' : ''); ?>">
-					<div>
-						<label for=""><?php esc_html_e('Price/KM', 'ecab-taxi-booking-manager'); ?></label>
-						<span><?php MPTBM_Settings::info_text('mptbm_km_price'); ?></span>
-					</div>
-					<input class="formControl mp_price_validation" name="mptbm_km_price" value="<?php echo esc_attr($distance_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					<label class="label">
+						<div>
+							<h6><?php esc_html_e('Price/KM', 'ecab-taxi-booking-manager'); ?></h6>
+							<span><?php MPTBM_Settings::info_text('mptbm_km_price'); ?></span>
+						</div>
+						<input class="formControl mp_price_validation" name="mptbm_km_price" value="<?php echo esc_attr($distance_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					</label>
 				</section>
 				<section data-collapse="#mp_duration" class="<?php echo esc_attr($price_based == 'duration' || $price_based == 'distance_duration' || $price_based == 'fixed_hourly' ? 'mActive' : ''); ?>">
-					<div >
-						<label for=""><?php esc_html_e('Price/Hour', 'ecab-taxi-booking-manager'); ?></label>
-						<span><?php MPTBM_Settings::info_text('mptbm_hour_price'); ?></span>
-					</div>
-					<input class="formControl mp_price_validation" name="mptbm_hour_price" value="<?php echo esc_attr($time_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					<label class="label">
+						<div >
+							<h6><?php esc_html_e('Price/Hour', 'ecab-taxi-booking-manager'); ?></h6>
+							<span><?php MPTBM_Settings::info_text('mptbm_hour_price'); ?></span>
+						</div>
+						<input class="formControl mp_price_validation" name="mptbm_hour_price" value="<?php echo esc_attr($time_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					</label>
 				</section>
 				
 				<!-- Manual price -->
 				<section class="bg-light" style="margin-top: 20px;" data-collapse="#mp_manual">
-					<div>
-						<label><?php esc_html_e('Manual Price Settings', 'ecab-taxi-booking-manager'); ?></label>
-						<span><?php esc_html_e('Manual Price Settings', 'ecab-taxi-booking-manager'); ?></span>
-					</div>
+					<h6><?php esc_html_e('Manual Price Settings', 'ecab-taxi-booking-manager'); ?></h6>
+					<span><?php esc_html_e('Manual Price Settings', 'ecab-taxi-booking-manager'); ?></span>
 				</section>
 				<section class="<?php echo esc_attr($price_based == 'manual' ? 'mActive' : ''); ?>" data-collapse="#mp_manual">
 					<div class="mp_settings_area">
