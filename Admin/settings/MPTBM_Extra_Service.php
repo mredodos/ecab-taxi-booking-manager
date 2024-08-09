@@ -127,33 +127,35 @@
 					<p ><?php esc_html_e( 'On/Off Extra Service Settings', 'ecab-taxi-booking-manager' ); ?></p>
 					
 					<section class="bg-light">
-						<div>
-							<label><?php esc_html_e( 'On/Off Extra Service Settings', 'ecab-taxi-booking-manager' ); ?></label>
-							<span><?php esc_html_e( 'On/Off Extra Service Settings', 'ecab-taxi-booking-manager' ); ?></span>
-						</div>
+						<h6><?php esc_html_e( 'On/Off Extra Service Settings', 'ecab-taxi-booking-manager' ); ?></h6>
+						<span><?php esc_html_e( 'On/Off Extra Service Settings', 'ecab-taxi-booking-manager' ); ?></span>
 					</section>
 					<section>
-                        <div>
-                            <label for=""><?php esc_html_e( 'On/Off Extra Service Settings', 'ecab-taxi-booking-manager' ); ?></label>
-                            <span><?php MPTBM_Settings::info_text( 'display_mptbm_extra_services' ); ?></span>
-                        </div>
-                        <?php MP_Custom_Layout::switch_button( 'display_mptbm_extra_services', $checked ); ?>
-                    </section>
-					<div data-collapse="#display_mptbm_extra_services" class="mp_settings_area <?php echo esc_attr( $active ); ?>">
-						<section>
+                        <label class="label">
 							<div>
-								<label for=""><?php esc_html_e( 'Select extra option :', 'ecab-taxi-booking-manager' ); ?></label>
-								<span><?php MPTBM_Settings::info_text( 'mptbm_extra_services_id' ); ?></span>
+								<h6><?php esc_html_e( 'On/Off Extra Service Settings', 'ecab-taxi-booking-manager' ); ?></h6>
+								<span><?php MPTBM_Settings::info_text( 'display_mptbm_extra_services' ); ?></span>
 							</div>
-							<select class="formControl" name="mptbm_extra_services_id">
-								<option value="" selected><?php esc_html_e( 'Select extra option', 'ecab-taxi-booking-manager' ); ?></option>
-								<option value="<?php echo esc_attr( $post_id ); ?>" <?php echo esc_attr( $service_id == $post_id ? 'selected' : '' ); ?>><?php esc_html_e( 'Custom', 'ecab-taxi-booking-manager' ); ?></option>
-								<?php if ( sizeof( $all_ex_services_id ) > 0 ) { ?>
-									<?php foreach ( $all_ex_services_id as $ex_services_id ) { ?>
-										<option value="<?php echo esc_attr( $ex_services_id ); ?>" <?php echo esc_attr( $service_id == $ex_services_id ? 'selected' : '' ); ?>><?php echo esc_html(get_the_title( $ex_services_id )); ?></option>
+							<?php MP_Custom_Layout::switch_button( 'display_mptbm_extra_services', $checked ); ?>
+						</label>
+                    </section>
+					<div data-collapse="#display_mptbm_extra_services" class="mp_settings_area <?php echo $active; ?>">
+						<section>
+							<label class="label">
+								<div>
+									<h6><?php esc_html_e( 'Select extra option :', 'ecab-taxi-booking-manager' ); ?></h6>
+									<span><?php MPTBM_Settings::info_text( 'mptbm_extra_services_id' ); ?></span>
+								</div>
+								<select class="formControl" name="mptbm_extra_services_id">
+									<option value="" selected><?php esc_html_e( 'Select extra option', 'ecab-taxi-booking-manager' ); ?></option>
+									<option value="<?php echo esc_attr( $post_id ); ?>" <?php echo esc_attr( $service_id == $post_id ? 'selected' : '' ); ?>><?php esc_html_e( 'Custom', 'ecab-taxi-booking-manager' ); ?></option>
+									<?php if ( sizeof( $all_ex_services_id ) > 0 ) { ?>
+										<?php foreach ( $all_ex_services_id as $ex_services_id ) { ?>
+											<option value="<?php echo esc_attr( $ex_services_id ); ?>" <?php echo esc_attr( $service_id == $ex_services_id ? 'selected' : '' ); ?>><?php echo esc_html(get_the_title( $ex_services_id )); ?></option>
+										<?php } ?>
 									<?php } ?>
-								<?php } ?>
-							</select>
+								</select>
+							</label>
 						</section>
 						<div class="mptbm_extra_service_area ">
 							<?php $this->ex_service_table( $service_id, $post_id ); ?>
