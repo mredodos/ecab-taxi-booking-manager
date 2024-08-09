@@ -72,20 +72,35 @@
             font-size: 16px;
             font-weight: 300;
             line-height: 24px;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
           }
           section{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border: 1px solid #d8d8d8;
             padding: 20px;
             margin-top: -1px;
-            label{
-              + span{
-                color: #6B7280;
+            .label{
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              cursor: pointer;
+              h6{
+                line-height: 1.25rem;
               }
-              
+              span{
+                line-height: 1.25rem;
+              }
+              .formControl{
+                width: 260px;
+              }
+              .roundSwitchLabel{
+                input{
+                  &:checked{
+                    + .roundSwitch{
+                      background-color: $color-primary;
+                    }
+                  }
+                }
+              }
             }
           }
          

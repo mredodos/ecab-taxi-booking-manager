@@ -84,18 +84,30 @@
   font-size: 16px;
   font-weight: 300;
   line-height: 24px;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 #mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   border: 1px solid #d8d8d8;
   padding: 20px;
   margin-top: -1px;
 }
-#mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section label + span {
-  color: #6B7280;
+#mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+#mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label h6 {
+  line-height: 1.25rem;
+}
+#mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label span {
+  line-height: 1.25rem;
+}
+#mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label .formControl {
+  width: 260px;
+}
+#mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label .roundSwitchLabel input:checked + .roundSwitch {
+  background-color: var(--mptbm-primary);
 }
 #mp_meta_box_panel .mptbm_settings .tabsContent .span-row {
   color: #6B7280;
