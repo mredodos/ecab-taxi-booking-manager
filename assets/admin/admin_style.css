@@ -91,6 +91,9 @@
   padding: 20px;
   margin-top: -1px;
 }
+#mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section.bg-light {
+  background-color: var(--mptbm-light);
+}
 #mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label {
   display: flex;
   justify-content: space-between;
@@ -98,10 +101,16 @@
   cursor: pointer;
 }
 #mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label h6 {
+  color: var(--mptbm-secondary);
   line-height: 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
 }
 #mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label span {
   line-height: 1.25rem;
+  color: var(--mptbm-secondary);
+  font-size: 0.95rem;
+  font-weight: normal;
 }
 #mp_meta_box_panel .mptbm_settings .tabsContent .tabsItem section .label .formControl {
   width: 260px;

@@ -78,16 +78,25 @@
             border: 1px solid #d8d8d8;
             padding: 20px;
             margin-top: -1px;
+            &.bg-light{
+              background-color: $color-light;
+            }
             .label{
               display: flex;
               justify-content: space-between;
               align-items: center;
               cursor: pointer;
               h6{
+                color: $color-secondary;
                 line-height: 1.25rem;
+                font-size: 1rem;
+                font-weight: 500;
               }
               span{
                 line-height: 1.25rem;
+                color: $color-secondary;
+                font-size: .95rem;
+                font-weight: normal;
               }
               .formControl{
                 width: 260px;

@@ -53,7 +53,7 @@
                     <h2 ><?php esc_html_e('General Information Settings', 'ecab-taxi-booking-manager'); ?></h2>
 					<p><?php esc_html_e('Basic Configuration', 'ecab-taxi-booking-manager'); ?></p>
                     <div class="mp_settings_area">
-						<section class="bgLight">
+						<section class="bg-light">
 							<h6><?php esc_html_e('Feature Configuration', 'ecab-taxi-booking-manager'); ?></h6>
 							<span><?php esc_html_e('Here you can On/Off feature list and create new feature.', 'ecab-taxi-booking-manager'); ?></span>
 						</section>
