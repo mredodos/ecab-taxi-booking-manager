@@ -117,7 +117,7 @@
 							</select>
 						</label>
 					</section>
-					<section data-collapse="#mp_particular" style="display:none" class="<?php echo esc_attr($date_type == 'particular' ? 'mActive' : ''); ?>">
+					<section data-collapse="#mp_particular" class="<?php echo esc_attr($date_type == 'particular' ? 'mActive' : ''); ?>">
 						<label class="label" style="align-items: start;">
 							<div>
 								<h6><?php esc_html_e('Particular Dates', 'ecab-taxi-booking-manager'); ?></h6>
