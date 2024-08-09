@@ -118,10 +118,13 @@
 						</label>
 					</section>
 					<section data-collapse="#mp_particular" style="display:none" class="<?php echo esc_attr($date_type == 'particular' ? 'mActive' : ''); ?>">
-						<div class="w-100 d-flex justify-content-between align-items-center">
-							<label for=""><?php esc_html_e('Particular Dates', 'ecab-taxi-booking-manager'); ?> <i class="fas fa-question-circle tool-tips"></i></label>
-							<div class=" d-flex justify-content-between">
-								<div class="mp_settings_area">
+						<label class="label" style="align-items: start;">
+							<div>
+								<h6><?php esc_html_e('Particular Dates', 'ecab-taxi-booking-manager'); ?></h6>
+								<span><?php esc_html_e('Add Particular Dates', 'ecab-taxi-booking-manager'); ?></span>
+							</div>
+							
+							<div class="mp_settings_area">
 									<div class="mp_item_insert mp_sortable_area">
 										<?php
 											$particular_date_lists = MP_Global_Function::get_post_info($post_id, 'mptbm_particular_dates', array());
@@ -141,8 +144,7 @@
 										</div>
 									</div>
 								</div>
-							</div>
-						</div>
+						</label>
 					</section>
 					<?php
 						$repeated_start_date = MP_Global_Function::get_post_info($post_id, 'mptbm_repeated_start_date');
