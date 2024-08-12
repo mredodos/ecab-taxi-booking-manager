@@ -252,21 +252,23 @@ if (!class_exists('MPTBM_Operation_Areas')) {
             <div class="tabsItem " data-tabs="#mptbm_setting_operation_area">
                 <?php wp_nonce_field('mptbm_operate_areas_tab', 'mptbm_operate_areas_tab'); ?>
                 <h2><?php esc_html_e('Operation Area Settings', 'ecab-taxi-booking-manager'); ?></h2>
-					<p><?php esc_html_e('Operation Area configureation', 'ecab-taxi-booking-manager'); ?></p>
+				<p><?php esc_html_e('Here you can set operation area', 'ecab-taxi-booking-manager'); ?></p>
                 <div class="mp_settings_area ">
                     <section>
-                        <div>
-                            <label for=""><?php esc_html_e('Select operation area :', 'ecab-taxi-booking-manager'); ?></label>
-                            <span><?php MPTBM_Settings::info_text('mptbm_extra_services_id'); ?></span>
-                        </div>
-                        <select class="formControl" name="mptbm_tranport_selected_operation_area" id="mptbm_tranport_selected_operation_area" data-collapse-target>
-                            <option value=0>Please Select...</option>
-                            <?php if (sizeof($all_operation_area_infos) > 0) {
-                                foreach ($all_operation_area_infos as $area_info) { ?>
-                                    <option <?php echo esc_attr(get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true) == $area_info['post_id'] ? 'selected' : ''); ?> data-option-target="#operation-area-type_<?php echo esc_attr($area_info['post_id']); ?>" value="<?php echo esc_attr($area_info['post_id']); ?>"><?php echo esc_html(get_the_title($area_info['post_id'])); ?></option>
-                            <?php }
-                            } ?>
-                        </select>
+                        <label class="label">
+                            <div>
+                                <h6><?php esc_html_e('Select operation area', 'ecab-taxi-booking-manager'); ?></h6>
+                                <span class="desc"><?php MPTBM_Settings::info_text('mptbm_extra_services_id'); ?></span>
+                            </div>
+                            <select class="formControl" name="mptbm_tranport_selected_operation_area" id="mptbm_tranport_selected_operation_area" data-collapse-target>
+                                <option value=0>Please Select...</option>
+                                <?php if (sizeof($all_operation_area_infos) > 0) {
+                                    foreach ($all_operation_area_infos as $area_info) { ?>
+                                        <option <?php echo esc_attr(get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true) == $area_info['post_id'] ? 'selected' : ''); ?> data-option-target="#operation-area-type_<?php echo esc_attr($area_info['post_id']); ?>" value="<?php echo esc_attr($area_info['post_id']); ?>"><?php echo esc_html(get_the_title($area_info['post_id'])); ?></option>
+                                <?php }
+                                } ?>
+                            </select>
+                        </label>
                     </section>
                     
                     <section>
@@ -318,10 +320,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
-
                         </div>
-
-
                     </section>
                 </div>
             </div>

@@ -108,7 +108,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Date Type', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span><?php _e('Here you can configure general date', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php _e('Here you can configure general date', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<select class="formControl" name="mptbm_date_type" data-collapse-target required>
 								<option disabled selected><?php esc_html_e('Please select ...', 'ecab-taxi-booking-manager'); ?></option>
@@ -121,7 +121,7 @@
 						<label class="label" style="align-items: start;">
 							<div>
 								<h6><?php esc_html_e('Particular Dates', 'ecab-taxi-booking-manager'); ?></h6>
-								<span><?php esc_html_e('Add Particular Dates', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Add Particular Dates', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							
 							<div class="mp_settings_area">
@@ -161,7 +161,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Repeated Start Date', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span><?php esc_html_e('Repeated Start Date', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Repeated Start Date', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<div >
 								<input type="hidden" name="mptbm_repeated_start_date" value="<?php echo esc_attr($hidden_repeated_start_date); ?>" required/>
@@ -174,7 +174,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Repeated after', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span><?php esc_html_e('Repeated after', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Repeated after', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<input type="text" name="mptbm_repeated_after" class="formControl mp_number_validation" value="<?php echo esc_attr($repeated_after); ?>"/>
 						</label>
@@ -184,7 +184,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Maximum Advanced Day Booking', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span><?php esc_html_e('Maximum Advanced Day Booking', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Maximum Advanced Day Booking', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<input type="text" name="mptbm_active_days" class="formControl mp_number_validation" value="<?php echo esc_attr($active_days); ?>"/>
 						</label>
@@ -194,7 +194,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Make Transport Available For 24 Hours', 'ecab-taxi-booking-manager'); ?></h6>
-								<span><?php MPTBM_Settings::info_text('display_mptbm_features'); ?></span>
+								<span class="desc"><?php MPTBM_Settings::info_text('display_mptbm_features'); ?></span>
 							</div>
 							<?php MP_Custom_Layout::switch_button('mptbm_available_for_all_time', $checked); ?>
 						</label>
@@ -238,7 +238,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Off Day', 'ecab-taxi-booking-manager'); ?></h6>
-								<span><?php esc_html_e('Select checkbox for off day', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Select checkbox for off day', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<div>
 								<?php
@@ -264,7 +264,7 @@
 						<label class="label" style="align-items: start;">
 							<div>
 								<h6><?php esc_html_e('Off Dates', 'ecab-taxi-booking-manager'); ?></h6>
-								<span><?php esc_html_e('Add off dates', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Add off dates', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<div class="mp_settings_area">
 								<div class="mp_item_insert mp_sortable_area mb-1">

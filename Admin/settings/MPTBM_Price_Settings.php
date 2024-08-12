@@ -51,7 +51,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 					<label class="label">
 						<div>
 							<h6><?php esc_html_e('Initial Price', 'ecab-taxi-booking-manager'); ?></h6>
-							<span><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
 						</div>
 						<input class="formControl mp_price_validation" name="mptbm_initial_price" value="<?php echo esc_attr($initial_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 					</label>
@@ -61,7 +61,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 						<label class="label">
 							<div >
 								<h6><?php esc_html_e('Waiting Time Price/Hour', 'ecab-taxi-booking-manager'); ?></h6>
-								<span><?php MPTBM_Settings::info_text('mptbm_waiting_price'); ?></span>
+								<span class="desc"><?php MPTBM_Settings::info_text('mptbm_waiting_price'); ?></span>
 							</div>
 							<input class="formControl mp_price_validation" name="mptbm_waiting_price" value="<?php echo esc_attr($waiting_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 						</label>
@@ -72,9 +72,9 @@ if (!class_exists('MPTBM_Price_Settings')) {
 						<div>
 							<h6><?php esc_html_e('Pricing based on', 'ecab-taxi-booking-manager'); ?></h6>
 							<?php if ($display_map == 'disable') { ?>
-								<span><?php esc_html_e('To enable google map pricing option you must enable  ', 'ecab-taxi-booking-manager'); ?><a href="<?php echo esc_attr($gm_api_url); ?>"><?php esc_html_e('google map base pricing option', 'ecab-taxi-booking-manager'); ?></a></span>
+								<span class="desc"><?php esc_html_e('To enable google map pricing option you must enable  ', 'ecab-taxi-booking-manager'); ?><a href="<?php echo esc_attr($gm_api_url); ?>"><?php esc_html_e('google map base pricing option', 'ecab-taxi-booking-manager'); ?></a></span>
 							<?php }else{ ?>
-								<span><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
+								<span class="desc"><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
 							<?php } ?>
 						</div>
 						<div>
@@ -93,16 +93,16 @@ if (!class_exists('MPTBM_Price_Settings')) {
 					<label class="label">
 						<div>
 							<h6><?php esc_html_e('Price/KM', 'ecab-taxi-booking-manager'); ?></h6>
-							<span><?php MPTBM_Settings::info_text('mptbm_km_price'); ?></span>
+							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_km_price'); ?></span>
 						</div>
 						<input class="formControl mp_price_validation" name="mptbm_km_price" value="<?php echo esc_attr($distance_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 					</label>
 				</section>
 				<section data-collapse="#mp_duration" class="<?php echo esc_attr($price_based == 'duration' || $price_based == 'distance_duration' || $price_based == 'fixed_hourly' ? 'mActive' : ''); ?>">
 					<label class="label">
-						<div >
+						<div>
 							<h6><?php esc_html_e('Price/Hour', 'ecab-taxi-booking-manager'); ?></h6>
-							<span><?php MPTBM_Settings::info_text('mptbm_hour_price'); ?></span>
+							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_hour_price'); ?></span>
 						</div>
 						<input class="formControl mp_price_validation" name="mptbm_hour_price" value="<?php echo esc_attr($time_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 					</label>

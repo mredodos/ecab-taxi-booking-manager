@@ -134,7 +134,7 @@
                         <label class="label">
 							<div>
 								<h6><?php esc_html_e( 'On/Off Extra Service Settings', 'ecab-taxi-booking-manager' ); ?></h6>
-								<span><?php MPTBM_Settings::info_text( 'display_mptbm_extra_services' ); ?></span>
+								<span class="desc"><?php MPTBM_Settings::info_text( 'display_mptbm_extra_services' ); ?></span>
 							</div>
 							<?php MP_Custom_Layout::switch_button( 'display_mptbm_extra_services', $checked ); ?>
 						</label>
@@ -144,7 +144,7 @@
 							<label class="label">
 								<div>
 									<h6><?php esc_html_e( 'Select extra option :', 'ecab-taxi-booking-manager' ); ?></h6>
-									<span><?php MPTBM_Settings::info_text( 'mptbm_extra_services_id' ); ?></span>
+									<span class="desc"><?php MPTBM_Settings::info_text( 'mptbm_extra_services_id' ); ?></span>
 								</div>
 								<select class="formControl" name="mptbm_extra_services_id">
 									<option value="" selected><?php esc_html_e( 'Select extra option', 'ecab-taxi-booking-manager' ); ?></option>
