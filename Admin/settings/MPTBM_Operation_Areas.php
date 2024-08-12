@@ -167,8 +167,8 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                             <span class="desc"><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
                                         </div>
                                         <select class="formControl" name="mptbm-geo-fence-direction" id="mptbm-geo-fence-direction">
-                                            <option <?php echo esc_attr(empty($mptbm_geo_fence_direction) || $mptbm_geo_fence_direction == 'geo-fence-one-direction') ? 'selected' : ''; ?> value="geo-fence-one-direction"><?php esc_html_e('Origin => Destination(One Direction)', 'ecab-taxi-booking-manager'); ?></option>
-                                            <option <?php echo esc_attr(empty($mptbm_geo_fence_direction) || $mptbm_geo_fence_direction == 'geo-fence-both-direction') ? 'selected' : ''; ?> value="geo-fence-both-direction"><?php esc_html_e('Origin <==> Destination(Both Direction)', 'ecab-taxi-booking-manager'); ?></option>
+                                            <option <?php echo esc_attr(empty($mptbm_geo_fence_direction) || $mptbm_geo_fence_direction == 'geo-fence-one-direction') ? 'selected' : ''; ?> value="geo-fence-one-direction"><?php esc_html_e('One Direction (Origin &rarr; Dest)', 'ecab-taxi-booking-manager'); ?></option>
+                                            <option <?php echo esc_attr(empty($mptbm_geo_fence_direction) || $mptbm_geo_fence_direction == 'geo-fence-both-direction') ? 'selected' : ''; ?> value="geo-fence-both-direction"><?php esc_html_e('Both Direction (Origin &harr; Dest)', 'ecab-taxi-booking-manager'); ?></option>
                                         </select>
                                     </label>
                                 </section>
