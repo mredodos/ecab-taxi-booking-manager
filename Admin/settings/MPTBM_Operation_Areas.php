@@ -271,40 +271,39 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                         </label>
                     </section>
                     
-                    <section>
-                        <div class="mp_settings_area_item mT">
-                            <?php foreach ($all_operation_area_infos as $operation_info) : ?>
-                                <div class="operation-info" data-collapse="#operation-area-type_<?php echo esc_attr($operation_info['post_id']); ?>">
-                                    <?php if ($operation_info['operation_type'] !== 'fixed-operation-area-type') : ?>
-                                        <div style="display: flex; justify-content:space-around">
-                                            <?php if ($operation_info['coordinates_one']) : ?>
-                                                <div class="mptbm_geo_fence_settings_map" style="width: 49%; margin-right: 5px;">
-                                                    <div id="geo-fence-location-one_<?php echo $operation_info['post_id']; ?>" class="mptbm_map_area padding" style="height: 600px;width:100%"></div>
-                                                    <script>
-                                                        jQuery(document).ready(function($) {
-                                                            var coordinates = <?php echo wp_json_encode($operation_info['coordinates_one']); ?>;
-                                                            var mapCanvasId = "geo-fence-location-one_<?php echo $operation_info['post_id']; ?>";
-                                                            var mapAppendId = null;
-                                                            iniSavedtMap(coordinates, mapCanvasId, mapAppendId);
-                                                        });
-                                                    </script>
-                                                </div>
-                                            <?php endif; ?>
-                                            <?php if ($operation_info['coordinates_two']) : ?>
-                                                <div class="mptbm_geo_fence_settings_map" style="width: 49%; margin-left: 5px;">
-                                                    <div id="geo-fence-location-two_<?php echo $operation_info['post_id']; ?>" class="mptbm_map_area padding" style="height: 600px;width:100%"></div>
-                                                    <script>
-                                                        jQuery(document).ready(function($) {
-                                                            var coordinates = <?php echo wp_json_encode($operation_info['coordinates_two']); ?>;
-                                                            var mapCanvasId = 'geo-fence-location-two_<?php echo $operation_info['post_id']; ?>';
-                                                            var mapAppendId = null;
-                                                            iniSavedtMap(coordinates, mapCanvasId, mapAppendId);
-                                                        });
-                                                    </script>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
+                    <div class="mp_settings_area_item">
+                        <?php foreach ($all_operation_area_infos as $operation_info) : ?>
+                            <section class="operation-info" data-collapse="#operation-area-type_<?php echo esc_attr($operation_info['post_id']); ?>">
+                                <?php if ($operation_info['operation_type'] !== 'fixed-operation-area-type') : ?>
+                                    <div style="display: flex; justify-content:space-around">
+                                        <?php if ($operation_info['coordinates_one']) : ?>
+                                            <div class="mptbm_geo_fence_settings_map" style="width: 49%; margin-right: 5px;">
+                                                <div id="geo-fence-location-one_<?php echo $operation_info['post_id']; ?>" class="mptbm_map_area padding" style="height: 600px;width:100%"></div>
+                                                <script>
+                                                    jQuery(document).ready(function($) {
+                                                        var coordinates = <?php echo wp_json_encode($operation_info['coordinates_one']); ?>;
+                                                        var mapCanvasId = "geo-fence-location-one_<?php echo $operation_info['post_id']; ?>";
+                                                        var mapAppendId = null;
+                                                        iniSavedtMap(coordinates, mapCanvasId, mapAppendId);
+                                                    });
+                                                </script>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ($operation_info['coordinates_two']) : ?>
+                                            <div class="mptbm_geo_fence_settings_map" style="width: 49%; margin-left: 5px;">
+                                                <div id="geo-fence-location-two_<?php echo $operation_info['post_id']; ?>" class="mptbm_map_area padding" style="height: 600px;width:100%"></div>
+                                                <script>
+                                                    jQuery(document).ready(function($) {
+                                                        var coordinates = <?php echo wp_json_encode($operation_info['coordinates_two']); ?>;
+                                                        var mapCanvasId = 'geo-fence-location-two_<?php echo $operation_info['post_id']; ?>';
+                                                        var mapAppendId = null;
+                                                        iniSavedtMap(coordinates, mapCanvasId, mapAppendId);
+                                                    });
+                                                </script>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
 
                                     <?php if (isset($operation_info['coordinates_three'])) : ?>
                                         <div id="<?php echo esc_attr($operation_info['post_id']); ?>" style="width: 100%; height: 600px">
@@ -318,10 +317,9 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                             });
                                         </script>
                                     <?php endif; ?>
-                                </div>
+                                </section>
                             <?php endforeach; ?>
-                        </div>
-                    </section>
+                    </div>
                 </div>
             </div>
     <?php
