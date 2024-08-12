@@ -50,69 +50,66 @@
 				}
 				?>
                 <div class="tabsItem" data-tabs="#mptbm_general_info">
-                    <h2 class="h4 text-primary my-1 p-0"><?php esc_html_e('General Information Settings', 'ecab-taxi-booking-manager'); ?></h2>
+                    <h2 ><?php esc_html_e('General Information Settings', 'ecab-taxi-booking-manager'); ?></h2>
 					<p><?php esc_html_e('Basic Configuration', 'ecab-taxi-booking-manager'); ?></p>
                     <div class="mp_settings_area">
-					<section class="bg-light">
-							<div>
-								<label><?php esc_html_e('Feature Configuration', 'ecab-taxi-booking-manager'); ?></label>
-								<span><?php esc_html_e('Here you can On/Off feature list and create new feature.', 'ecab-taxi-booking-manager'); ?></span>
-							</div>
-					</section>
-					<section class="component d-flex justify-content-between align-items-center mb-2">
-						<div class="w-100 d-flex justify-content-between align-items-center">
-							<label for=""><?php esc_html_e('Maximum Passenger', 'ecab-taxi-booking-manager'); ?> <i class="fas fa-question-circle tool-tips"><span><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span></i></label>
-							<div class=" d-flex justify-content-between">
+						<section class="bg-light">
+							<h6><?php esc_html_e('Feature Configuration', 'ecab-taxi-booking-manager'); ?></h6>
+							<span ><?php esc_html_e('Here you can On/Off feature list and create new feature.', 'ecab-taxi-booking-manager'); ?></span>
+						</section>
+						<section>
+							<label class="label">
+								<div>
+									<h6><?php esc_html_e('Maximum Passenger', 'ecab-taxi-booking-manager'); ?></h6>
+									<span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+								</div>
 								<input class="formControl mp_price_validation" name="mptbm_maximum_passenger" value="<?php echo esc_attr($max_passenger); ?>" type="text" placeholder="<?php esc_html_e('EX:4', 'ecab-taxi-booking-manager'); ?>" />
-							</div>
-						</div>
-					</section>
-					<section class="component d-flex justify-content-between align-items-center mb-2">
-						<div class="w-100 d-flex justify-content-between align-items-center">
-							<label for=""><?php esc_html_e('Maximum Bag', 'ecab-taxi-booking-manager'); ?> <i class="fas fa-question-circle tool-tips"><span><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span></i></label>
-							<div class=" d-flex justify-content-between">
+							</label>
+						</section>
+						<section>
+							<label class="label">
+								<div>
+									<h6><?php esc_html_e('Maximum Bag', 'ecab-taxi-booking-manager'); ?></h6>
+									<span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+								</div>
 								<input class="formControl mp_price_validation" name="mptbm_maximum_bag" value="<?php echo esc_attr($max_bag); ?>" type="text" placeholder="<?php esc_html_e('EX:4', 'ecab-taxi-booking-manager'); ?>" />
-							</div>
-						</div>
-					</section>
-					<section class="component d-flex justify-content-between align-items-center mb-2">
-						<div class="w-100 d-flex justify-content-between align-items-center">
-							<label for=""><?php esc_html_e('On/Off Feature Extra feature', 'ecab-taxi-booking-manager'); ?> <i class="fas fa-question-circle tool-tips"><span><?php MPTBM_Settings::info_text('display_mptbm_features'); ?></span></i></label>
-							<div class=" d-flex justify-content-between">
+							</label>
+						</section>
+						<section >
+							<label class="label">
+								<div>
+									<h6><?php esc_html_e('On/Off Feature Extra feature', 'ecab-taxi-booking-manager'); ?></h6>
+									<span class="desc"><?php MPTBM_Settings::info_text('display_mptbm_features'); ?></span>
+								</div>
 								<?php MP_Custom_Layout::switch_button('display_mptbm_features', $checked); ?>
-							</div>
-						</div>
-					</section>
-
-
-
-                        <div data-collapse="#display_mptbm_features" class="component <?php echo esc_attr($active); ?>">
-                            <table>
-                                <thead>
-                                <tr class="bg-dark">
-                                    <th class="_w_150"><?php esc_html_e('Icon/Image', 'ecab-taxi-booking-manager'); ?></th>
-                                    <th><?php esc_html_e('Label', 'ecab-taxi-booking-manager'); ?></th>
-                                    <th><?php esc_html_e('Text', 'ecab-taxi-booking-manager'); ?></th>
-                                    <th class="_w_125"><?php esc_html_e('Action', 'ecab-taxi-booking-manager'); ?></th>
-                                </tr>
-                                </thead>
-                                <tbody class="mp_sortable_area mp_item_insert">
-								<?php
-								if (is_array($all_features) && sizeof($all_features) > 0) {
-									foreach ($all_features as $features) {
-										$this->features_item($features);
+							</label>
+						</section>
+						<section data-collapse="#display_mptbm_features" class="<?php echo esc_attr($active); ?>">
+								<table>
+									<thead>
+									<tr class="bg-dark">
+										<th class="_w_150"><?php esc_html_e('Icon/Image', 'ecab-taxi-booking-manager'); ?></th>
+										<th><?php esc_html_e('Label', 'ecab-taxi-booking-manager'); ?></th>
+										<th><?php esc_html_e('Text', 'ecab-taxi-booking-manager'); ?></th>
+										<th class="_w_125"><?php esc_html_e('Action', 'ecab-taxi-booking-manager'); ?></th>
+									</tr>
+									</thead>
+									<tbody class="mp_sortable_area mp_item_insert">
+									<?php
+									if (is_array($all_features) && sizeof($all_features) > 0) {
+										foreach ($all_features as $features) {
+											$this->features_item($features);
+										}
+									} else {
+										$this->features_item();
 									}
-								} else {
-									$this->features_item();
-								}
-								?>
-                                </tbody>
-                            </table>
-                            <div class="my-2"></div>
-							<?php MP_Custom_Layout::add_new_button(esc_html__('Add New Item', 'ecab-taxi-booking-manager')); ?>
-							
-							<?php do_action('add_mp_hidden_table', 'add_hidden_mptbm_features_item'); ?>
-                        </div>
+									?>
+									</tbody>
+								</table>
+								<div class="my-2"></div>
+								<?php MP_Custom_Layout::add_new_button(esc_html__('Add New Item', 'ecab-taxi-booking-manager')); ?>
+								<?php do_action('add_mp_hidden_table', 'add_hidden_mptbm_features_item'); ?>
+						</section >
                     </div>
                 </div>
 				<?php

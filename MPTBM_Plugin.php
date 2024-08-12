@@ -38,6 +38,9 @@ if (!class_exists('MPTBM_Plugin')) {
 			if (!defined('MPTBM_PLUGIN_DATA')) {
 				define('MPTBM_PLUGIN_DATA', get_plugin_data(__FILE__));
 			}
+			if (!defined('MPTBM_PLUGIN_VERSION')) {
+				define('MPTBM_PLUGIN_VERSION', '1.0.7');
+			}
 			require_once MPTBM_PLUGIN_DIR . '/mp_global/MP_Global_File_Load.php';
 			if (MP_Global_Function::check_woocommerce() == 1) {
 				add_action('activated_plugin', array($this, 'activation_redirect'), 90, 1);

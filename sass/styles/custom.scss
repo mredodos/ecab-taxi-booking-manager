@@ -1,4 +1,4 @@
-#{$main-selector}{
+#mp_meta_box_panel{
     .postbox-header{
         background-color: $color-primary;
         .handle-actions{
@@ -6,11 +6,17 @@
             .handle-order-higher, .handle-order-lower, .toggle-indicator{
                 color: $color-white;
             }
-            
         }
+      h2{
+        span{
+          font-size: 12px;
+          margin:  0 5px;
+          margin-top: 5px;
+        }
+      }
     }
     .mptbm_settings{
-      background-color: #fff;
+      background-color:  $color-white;
       .tabLists{
         width: 20%;
         padding: 25px;
@@ -22,9 +28,9 @@
           padding:15px;
           color:$color-secondary;
           border-left: 2px solid transparent;
-          i{
+          span{
             margin-right: 25px;
-            color: $color-primary
+            color: $color-primary;
           }
           &::after{
             content: '';
@@ -35,7 +41,7 @@
             width: 91%;
           }
           &.active,&:hover{
-            background-color: #fff;
+            background-color:  $color-white;
             color: #333;
             font-weight: normal;
             border-left: 2px solid $color-primary;
@@ -66,20 +72,43 @@
             font-size: 16px;
             font-weight: 300;
             line-height: 24px;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
           }
           section{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border: 1px solid #d8d8d8;
             padding: 20px;
             margin-top: -1px;
-            label{
-              + span{
-                color: #6B7280;
+            &.bg-light{
+              background-color: $color-light;
+            }
+            .label{
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              cursor: pointer;
+              h6{
+                color: $color-secondary;
+                line-height: 1.25rem;
+                font-size: 1rem;
+                font-weight: 500;
               }
-              
+              span.desc{
+                line-height: 1.25rem;
+                color: $color-secondary;
+                font-size: .95rem;
+              }
+              .formControl{
+                width: 260px;
+              }
+              .roundSwitchLabel{
+                input{
+                  &:checked{
+                    + .roundSwitch{
+                      background-color: $color-primary;
+                    }
+                  }
+                }
+              }
             }
           }
          
@@ -128,7 +157,7 @@
     .mpStyle .navy_blueButton, .mpStyle [class*="_navy_blueButton"] {
       background-color: $color-primary;
       color: $color-white;
-      padding: calc($spacing * 1.5);
+      padding: 1.5em;
       border: 2px solid $color-primary;
       &:hover{
         background-color: $color-white;
@@ -143,7 +172,7 @@
     .mpStyle .warningButton, .mpStyle [class*="_warningButton"] {
       background-color: $color-yellow;
       color: $color-white;
-      padding: calc($spacing * 1.5);
+      padding:1.5em;
       border: 2px solid $color-yellow;
       &:hover{
         background-color: $color-white;
@@ -170,13 +199,13 @@
     // settings page css==================
     .mp_settings_panel_header {
       background: $color-secondary;
-      padding: calc($spacing * 2) $spacing;
+      padding: 2em;
       color: $color-white;
       font-size: 20px;
       margin-top: 30px;
     }
     .mp_settings_panel{
-      padding-bottom: $spacing;
+      padding-bottom: .5em;
      .nav-tab-wrapper {
       background:$color-sky-light;
       border: 5px solid $color-sky-light;
@@ -184,8 +213,8 @@
         box-sizing: border-box;
         background:$color-white;
         color: $color-secondary;
-        margin-bottom: $spacing;
-        border-radius: $border-radius;
+        margin-bottom: .5em;
+        border-radius: .5em;
         &:hover{
           background: $color-primary;
           color: $color-white;
@@ -208,9 +237,9 @@
         border-bottom: 0px solid $color-white;
         font-size: 1.625rem;
         line-height: 1.4;
-        padding:$spacing 0;
+        padding:.5em 0;
         margin: 0;
-        font-weight: $font-weight-normal;
+        font-weight: normal;
         background:$color-sky-light;
         color: $color-primary !important;
       }
@@ -220,7 +249,7 @@
         // border: 2px solid $color-primary;
         margin: 0;
         background-color: $color-sky-light;
-        border-radius: $border-radius;
+        border-radius: .5em;
         tr:nth-child(2n) {
           background-color: $color-white;
         }
@@ -229,7 +258,7 @@
     p.submit input {
       font-size: 16px;
       padding: 5px 30px;
-      border-radius: $border-radius;
+      border-radius: .5em;
       background: $color-primary;
       border-color: $color-primary;
       transition: 0.2s;
@@ -241,7 +270,7 @@
   }
   #wpbody-content .metabox-holder {
     padding-top: 0px;
-    padding-bottom: $spacing;
+    padding-bottom: .5em;
   }
 }
 
@@ -253,7 +282,7 @@
     
   }
 }
-#{$main-selector}{
+#mp_meta_box_panel{
   h1{
     padding: 0;
     color: var(--mpl-secondary);
@@ -269,7 +298,7 @@
   .tab-content-ttbm_date_config_meta_boxs,.tab-content-ttbm_tax_meta_boxs{
     .description{
       margin: 0;
-      padding:calc($spacing * 1.5) 0;
+      padding:1.5em;
       font-size: 1rem;
     }
     table {
@@ -281,8 +310,8 @@
     }
     table.form-table tr th,table.form-table tr td{
       background-color: $color-white;
-      padding: calc($spacing*3);
-      margin-bottom: calc($spacing*3);
+      padding: 3em;
+      margin-bottom:3em;
       width:50%;
       border:1px solid $color-gray;
       p{
@@ -297,13 +326,13 @@
         text-align: right;
       }
       input{
-        border-radius:$border-radius;
+        border-radius:.5em;
       }
       input.select2-search__field{
         border: 0;
       }
       input#mep_disable_ticket_time{
-        margin-right: $spacing;
+        margin-right: .5em;
       }
     }
   }
@@ -318,17 +347,17 @@
     }
     .frmb { 
       li{
-        padding-bottom: calc($spacing * 3);
+        padding-bottom: .5em;
         border:1px dashed $color-gray;
         box-shadow: 0 0 0px $color-light;
         background-color: $color-light;
-        margin-bottom: $spacing;
+        margin-bottom: .5em;
         &.frmb-placeholder, &.ui-state-highlight{
-          padding:calc($spacing * 5);
+          padding: .5em;
           background:  $color-sky-light;
           border:1px dashed $color-primary;
           clip-path:none;  
-          margin-bottom: $spacing;
+          margin-bottom: .5em;
         }
         
         &:hover{
@@ -380,11 +409,11 @@ div > .ppof-metabox {
   border: 0px solid;
   box-shadow: none;
   background-color: $color-primary;
-  border-radius: $border-radius;
-  padding: $spacing calc($spacing * 1.5);
+  border-radius: .5em;
+  padding:.5em;
   color: $color-white;
-  font-size: $font-size;
-  transition: all $time ease-in-out;
+  font-size: .5em;
+  transition: all .5s ease-in-out;
   min-width: 100px;
 }
 
@@ -394,8 +423,8 @@ div > .ppof-metabox {
     flex-wrap: wrap;
     justify-content: start;
     align-items: stretch;
-    gap: $spacing;
-    margin-bottom: $spacing;
+    gap: .5em;
+    margin-bottom: .5em;
     div.mp_multi_image_item {
       width: calc(25% - 7px);
       img{
@@ -407,7 +436,7 @@ div > .ppof-metabox {
     
   }
   div.mpStyle .description{
-    font-size:$font-size !important;
+    font-size:1rem !important;
     color: var(--mpl-secondary);
   }
  
@@ -416,7 +445,7 @@ div > .ppof-metabox {
   }
   .mpStyle .customCheckboxLabel {
     cursor: pointer;
-    font-weight: $font-weight-normal;
+    font-weight: normal;
   }
   .mpStyle .customCheckbox::before {
     content: "";
@@ -445,7 +474,7 @@ div.mpStyle span.mp_remove_multi_image{
 .select2-container--default .select2-selection--multiple .select2-selection__choice{
   background-color: $color-gray;
   border: 5px solid $color-light;
-  border-radius:$border-radius;
+  border-radius:.5em;
   cursor: default;
   float: left;
   margin-right: 5px;
@@ -462,4 +491,16 @@ div.mpStyle span.mp_remove_multi_image{
   label{
     display: block;
   }
+}
+
+div.mp_global_settings label .info_text{
+  line-height: .9rem;
+}
+
+div.mp_global_settings .mpPanel .mpPanelBody .mpTabs .tabLists{
+  width: 25%;
+}
+
+#ui-datepicker-div{
+  width: auto;
 }
