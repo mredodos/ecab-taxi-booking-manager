@@ -13,12 +13,15 @@
   }
   
   /* Media query for medium screens */
-  @media only screen and (min-width: 769px) and (max-width: 1024px) {
+  @media only screen and (min-width: 769px) {
+    .mptbm_geo_fence_settings_map{
+      display: flex;
+      justify-content: center;
+    }
     .mptbm_geo_fence_settings_map .mptbm_map_area {
-      width: calc(50% - 10px); /* Adjust width and space between */
+      width: calc(50%); /* Adjust width and space between */
       float: left;
       margin-bottom: 20px; /* Adjust margin as needed */
-      margin-right: 20px; /* Add space between map areas */
     }
     
     /* Set the height of the map containers for medium screens */

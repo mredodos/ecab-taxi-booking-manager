@@ -24,7 +24,7 @@
 				?>
                 <input type="hidden" name="mptbm_post_id" value="<?php echo esc_attr($post_id); ?>"/>
                 <div class="mpStyle mptbm_settings">
-                    <div class="mpTabs leftTabs d-flex justify-content-between">
+                    <div class="mpTabs leftTabs">
                         <ul class="tabLists">
                             <li data-tabs-target="#mptbm_general_info">
                                 <span class="pe-1 fas fa-tools"></span><?php esc_html_e('General Info', 'ecab-taxi-booking-manager'); ?>
