@@ -387,7 +387,6 @@ $mptbm_passengers = max($mptbm_passengers);
 			<?php include MPTBM_Function::template_path("registration/summary.php"); ?>
 			<div class="mainSection ">
 				<div class="mp_sticky_depend_area fdColumn">
-
 				<!-- Filter area start -->
 				<?php if (MP_Global_Function::get_settings("mptbm_general_settings", "enable_filter_via_features") == "yes") { ?>
 				<div class="_dLayout_dFlex_fdColumn_btLight_2 mptbm-filter-feature">
