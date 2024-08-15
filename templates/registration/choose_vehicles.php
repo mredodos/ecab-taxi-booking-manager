@@ -396,7 +396,7 @@ $mptbm_passengers = max($mptbm_passengers);
                         <label>
 								<select id ="mptbm_passenger_number" class="formControl" name="mptbm_passenger_number">
 								<?php
-                                    for ($i = 1; $i <= $mptbm_passengers[0]; $i++) {
+                                    for ($i = 0; $i <= $mptbm_passengers[0]; $i++) {
                                         echo '<option value="' . esc_html($i) . '">' .  esc_html($i) . '</option>';
                                     }
                                 ?>
@@ -409,7 +409,7 @@ $mptbm_passengers = max($mptbm_passengers);
                         <label>
 								<select id ="mptbm_shopping_number" class="formControl" name="mptbm_shopping_number">
                                     <?php
-                                        for ($i = 1; $i <= $mptbm_bags[0]; $i++) {
+                                        for ($i = 0; $i <= $mptbm_bags[0]; $i++) {
                                             echo '<option value="' . esc_html($i) . '">' .  esc_html($i) . '</option>';
                                         }
                                     ?>

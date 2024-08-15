@@ -26,7 +26,7 @@
 				(
 					"billing" => array(
 						"billing_first_name" => array(
-							"label" => "First name",
+							"label" => "First names",
 							"required" => "1",
 							"class" => array(
 								"0" => "form-row-first"
