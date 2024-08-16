@@ -615,13 +615,13 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						<?php //do_action('woocommerce_ajax_checkout');
 						?>
                     </div>
-                    <div class="divider"></div>
+                    <!-- <div class="divider"></div>
                     <div class="justifyBetween">
                         <button type="button" class="_themeButton_min_200 mptbm_summary_prev">
                             <span>&larr; &nbsp;<?php esc_html_e('Previous', 'ecab-taxi-booking-manager'); ?></span>
                         </button>
                         <div></div>
-                    </div>
+                    </div> -->
 					<?php
 				}
 			}

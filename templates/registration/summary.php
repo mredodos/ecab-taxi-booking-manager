@@ -20,7 +20,7 @@
 	
 ?>
 	<div class="leftSidebar">
-		<div class="mp_sticky_area">
+		<div class="">
 			<div class="mp_sticky_on_scroll">
 				<div class="_dLayout_dFlex_fdColumn_btLight_2">
 					<h3><?php esc_html_e('SUMMARY', 'ecab-taxi-booking-manager'); ?></h3>
