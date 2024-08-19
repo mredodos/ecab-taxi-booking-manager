@@ -90,6 +90,8 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                         </button>
                     </div>
                 </div>
+                <!-- poro feature used this hook for showing driver's data -->
+                <?php do_action('mptbm_booking_item_after_feature',$post_id); ?>
             </div>
         </div>
 <?php
