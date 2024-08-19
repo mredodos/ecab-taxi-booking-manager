@@ -48,6 +48,9 @@
 									<?php
 								}
 							?>
+                            <li data-tabs-target="#wbtm_settings_tax">
+                                <span class="fas fa-hand-holding-usd"></span><?php esc_html_e('Tax Configure', 'ecab-taxi-booking-manager'); ?>
+                            </li>
                         </ul>
                         <div class="tabsContent">
 							<?php do_action('add_mptbm_settings_tab_content', $post_id); ?>
