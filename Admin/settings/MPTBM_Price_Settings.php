@@ -58,11 +58,13 @@ if (!class_exists('MPTBM_Price_Settings')) {
 					</label>
 				</section>
 				<section>
-					<div>
-						<label><?php esc_html_e('Minimum Price', 'ecab-taxi-booking-manager'); ?></label>
-						<span><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
-					</div>
-					<input class="formControl mp_price_validation" name="mptbm_min_price" value="<?php echo esc_attr($min_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					<label class="label">
+						<div>
+							<h6><?php esc_html_e('Minimum Price', 'ecab-taxi-booking-manager'); ?></h6>
+							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+						</div>
+						<input class="formControl mp_price_validation" name="mptbm_min_price" value="<?php echo esc_attr($min_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					</label>
 				</section>
 				<?php if ($waiting_time_check == 'enable') { ?>
 					<section class="<?php echo esc_attr($price_based == 'duration' || $price_based == 'distance' || $price_based == 'distance_duration' || $price_based == 'manual' ? 'mActive' : ''); ?>">
