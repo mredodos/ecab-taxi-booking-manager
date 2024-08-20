@@ -25,12 +25,12 @@
                         <div class="allCenter">
                             <span class="<?php echo esc_attr($icon); ?>" data-add-icon></span>
                         </div>
-                        <span class="fas fa-times mp_remove_icon mp_icon_remove" title="<?php esc_html_e('Remove Icon', 'bus-ticket-booking-with-seat-reservation'); ?>"></span>
+                        <span class="fas fa-times mp_remove_icon mp_icon_remove" title="<?php esc_html_e('Remove Icon', 'ecab-taxi-booking-manager'); ?>"></span>
                     </div>
                     <div class="mp_add_icon_image_button_area <?php echo esc_attr($button_active_class); ?>">
                         <div class="flexEqual">
                         <button class="_mpBtn_xs mp_icon_add" type="button" data-target-popup="#mp_add_icon_popup">
-                            <span class="fas fa-plus"></span><?php esc_html_e('Icon', 'bus-ticket-booking-with-seat-reservation'); ?></button>
+                            <span class="fas fa-plus"></span><?php esc_html_e('Icon', 'ecab-taxi-booking-manager'); ?></button>
                         </div>
                     </div>
                 </div>
@@ -44,9 +44,9 @@
                     <div class="mp_add_icon_popup mpPopup mpStyle" data-popup="#mp_add_icon_popup">
                         <div class="popupMainArea fullWidth">
                             <div class="popupHeader allCenter">
-                                <h2 class="_mR"><?php esc_html_e('Select Icon', 'bus-ticket-booking-with-seat-reservation'); ?></h2>
+                                <h2 class="_mR"><?php esc_html_e('Select Icon', 'ecab-taxi-booking-manager'); ?></h2>
                                 <label class="min_300">
-                                    <input type="text" class="formControl mp_name_validation" name="mp_select_icon_name" placeholder="<?php esc_attr_e('Icon/class name....', 'bus-ticket-booking-with-seat-reservation'); ?>" />
+                                    <input type="text" class="formControl mp_name_validation" name="mp_select_icon_name" placeholder="<?php esc_attr_e('Icon/class name....', 'ecab-taxi-booking-manager'); ?>" />
                                 </label>
                                 <span class="fas fa-times popupClose"></span>
                             </div>
@@ -62,7 +62,7 @@
                                         <div class="dFlex">
                                             <ul class="popupIconMenu">
                                                 <li class="active" data-icon-menu="all_item" data-icon-title="all_item">
-													<?php esc_html_e('All Icon', 'bus-ticket-booking-with-seat-reservation'); ?>&nbsp;(
+													<?php esc_html_e('All Icon', 'ecab-taxi-booking-manager'); ?>&nbsp;(
                                                     <strong><?php echo esc_html($total_icon); ?></strong>
                                                     )
                                                 </li>
@@ -107,7 +107,7 @@
                         </div>
 					<?php } ?>
                     <button type="button" class="_dButton_xs_bgColor_1_fullWidth <?php echo esc_attr($image_id ? 'dNone' : ''); ?>">
-                        <span class="fas fa-images mR_xs"></span><?php esc_html_e('Image', 'bus-ticket-booking-with-seat-reservation'); ?>
+                        <span class="fas fa-images mR_xs"></span><?php esc_html_e('Image', 'ecab-taxi-booking-manager'); ?>
                     </button>
                 </div>
 				<?php
@@ -133,7 +133,7 @@
 						?>
                     </div>
                     <button type="button" class="_dButton_bgColor_1 add_multi_image">
-                        <span class="fas fa-images mR_xs"></span><?php esc_html_e('Image', 'bus-ticket-booking-with-seat-reservation'); ?>
+                        <span class="fas fa-images mR_xs"></span><?php esc_html_e('Image', 'ecab-taxi-booking-manager'); ?>
                     </button>
                 </div>
 				<?php
@@ -151,18 +151,18 @@
                         <div class="allCenter">
                             <span class="<?php echo esc_attr($icon); ?>" data-add-icon></span>
                         </div>
-                        <span class="fas fa-times mp_remove_icon mp_icon_remove" title="<?php esc_html_e('Remove Icon', 'bus-ticket-booking-with-seat-reservation'); ?>"></span>
+                        <span class="fas fa-times mp_remove_icon mp_icon_remove" title="<?php esc_html_e('Remove Icon', 'ecab-taxi-booking-manager'); ?>"></span>
                     </div>
                     <div class="mp_image_item <?php echo esc_attr($image_class); ?>">
                         <img class="" src="<?php echo esc_attr(MP_Global_Function::get_image_url('', $image, 'medium')); ?>" alt="">
-                        <span class="fas fa-times mp_remove_icon mp_image_remove" title="<?php esc_html_e('Remove Image', 'bus-ticket-booking-with-seat-reservation'); ?>"></span>
+                        <span class="fas fa-times mp_remove_icon mp_image_remove" title="<?php esc_html_e('Remove Image', 'ecab-taxi-booking-manager'); ?>"></span>
                     </div>
                     <div class="mp_add_icon_image_button_area <?php echo esc_attr($button_active_class); ?>">
                         <div class="flexEqual">
                             <button class="_mpBtn_xs mp_image_add" type="button">
-                                <span class="fas fa-images"></span><?php esc_html_e('Image', 'bus-ticket-booking-with-seat-reservation'); ?></button>
+                                <span class="fas fa-images"></span><?php esc_html_e('Image', 'ecab-taxi-booking-manager'); ?></button>
                             <button class="_mpBtn_xs mp_icon_add" type="button" data-target-popup="#mp_add_icon_popup">
-                                <span class="fas fa-plus"></span><?php esc_html_e('Icon', 'bus-ticket-booking-with-seat-reservation'); ?></button>
+                                <span class="fas fa-plus"></span><?php esc_html_e('Icon', 'ecab-taxi-booking-manager'); ?></button>
                         </div>
                     </div>
                 </div>
