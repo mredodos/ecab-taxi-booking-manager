@@ -55,7 +55,6 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$cart_item_data['mptbm_tp'] = $total_price;
 				$cart_item_data['line_total'] = $total_price;
 				$cart_item_data['line_subtotal'] = $total_price;
-				// $cart_item_data['mptbm_selected_driver'] = get_post_meta($post_id,'mptbm_selected_driver',true);
 				if ($return > 1 && MP_Global_Function::get_settings('mptbm_general_settings', 'enable_return_in_different_date') == 'yes') {
 					$return_target_date = isset($_POST['mptbm_return_date']) ? sanitize_text_field($_POST['mptbm_return_date']) : '';
 					$return_target_time = isset($_POST['mptbm_return_time']) ? sanitize_text_field($_POST['mptbm_return_time']) : '';
@@ -337,7 +336,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			$waiting_time = array_key_exists('mptbm_waiting_time', $cart_item) ? $cart_item['mptbm_waiting_time'] : '';
 			$fixed_time = array_key_exists('mptbm_fixed_hours', $cart_item) ? $cart_item['mptbm_fixed_hours'] : '';
 			$extra_service = array_key_exists('mptbm_extra_service_info', $cart_item) ? $cart_item['mptbm_extra_service_info'] : [];
-?>
+			
+?>	
 			<div class="mpStyle">
 				<?php do_action('mptbm_before_cart_item_display', $cart_item, $post_id); ?>
 				<div class="dLayout_xs">
@@ -347,6 +347,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							<h6 class="_mR_xs"><?php esc_html_e('Pickup Location', 'ecab-taxi-booking-manager'); ?> :</h6>
 							<span><?php echo esc_html($start_location); ?></span>
 						</li>
+						
 						<li>
 							<span class="fas fa-map-marker-alt"></span>
 							<h6 class="_mR_xs"><?php esc_html_e('Drop-Off Location', 'ecab-taxi-booking-manager'); ?> :</h6>
@@ -448,6 +449,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							<h6 class="_mR_xs"><?php esc_html_e('Base Price : ', 'ecab-taxi-booking-manager'); ?></h6>
 							<span><?php echo wp_kses_post(wc_price($base_price)); ?></span>
 						</li>
+						<?php do_action('mptbm_cart_item_display', $cart_item, $post_id); ?>
 					</ul>
 				</div>
 				<?php if (sizeof($extra_service) > 0) { ?>
