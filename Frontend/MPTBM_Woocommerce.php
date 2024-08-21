@@ -447,6 +447,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							<h6 class="_mR_xs"><?php esc_html_e('Base Price : ', 'ecab-taxi-booking-manager'); ?></h6>
 							<span><?php echo wp_kses_post(wc_price($base_price)); ?></span>
 						</li>
+						<?php do_action('mptbm_cart_item_display',$cart_item, $post_id); ?>
 					</ul>
 				</div>
 				<?php if (sizeof($extra_service) > 0) { ?>
