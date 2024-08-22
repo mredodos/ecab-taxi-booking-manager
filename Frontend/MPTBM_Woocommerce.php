@@ -9,8 +9,10 @@ if (!defined('ABSPATH')) {
 if (!class_exists('MPTBM_Woocommerce')) {
 	class MPTBM_Woocommerce
 	{
+		private $custom_order_data = array(); // Property to store the data
 		public function __construct()
 		{
+			add_action('woocommerce_checkout_update_order_meta', array($this, 'product_custom_field_to_custom_order_notes'), 100, 2);
 			add_filter('woocommerce_add_cart_item_data', array($this, 'add_cart_item_data'), 90, 3);
 			add_action('woocommerce_before_calculate_totals', array($this, 'before_calculate_totals'), 90);
 			add_filter('woocommerce_cart_item_thumbnail', array($this, 'cart_item_thumbnail'), 90, 3);
@@ -23,6 +25,14 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			/*****************************/
 			add_action('wp_ajax_mptbm_add_to_cart', [$this, 'mptbm_add_to_cart']);
 			add_action('wp_ajax_nopriv_mptbm_add_to_cart', [$this, 'mptbm_add_to_cart']);
+		}
+		public function product_custom_field_to_custom_order_notes($order_id, $data)
+		{
+			foreach ($data as $key => $value) {
+				if (strpos($key, 'order') === 0) {
+					$this->custom_order_data[$key] = $value;
+				}
+			}
 		}
 		public function add_cart_item_data($cart_item_data, $product_id)
 		{
@@ -69,6 +79,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function before_calculate_totals($cart_object)
 		{
+
 			foreach ($cart_object->cart_contents as $value) {
 				$post_id = array_key_exists('mptbm_id', $value) ? $value['mptbm_id'] : 0;
 				if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
@@ -123,6 +134,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function checkout_create_order_line_item($item, $cart_item_key, $values)
 		{
+
 			$post_id = array_key_exists('mptbm_id', $values) ? $values['mptbm_id'] : 0;
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
 				$date = $values['mptbm_date'] ?? '';
@@ -229,14 +241,38 @@ if (!class_exists('MPTBM_Woocommerce')) {
 
 				$order = wc_get_order($order_id);
 
+				// Get all meta data
+				$meta_data = $order->get_meta_data();
 
+				// Initialize an associative array to store meta keys and values
+				$meta_array = [];
+
+				foreach ($meta_data as $meta) {
+					// Get the meta key and value
+					$meta_key = $meta->get_data()['key'];
+					$meta_value = $meta->get_data()['value'];
+
+					// Store the key-value pair in the associative array
+					$meta_array[$meta_key] = $meta_value;
+				}
+
+
+				// Unset any meta keys you don't want to include
+				unset($meta_array['_billing_address_index']);
+				unset($meta_array['_shipping_address_index']);
+				unset($meta_array['is_vat_exempt']);
+				// Add the filtered custom order data to the meta array
+				if (!empty($this->custom_order_data)) {
+					foreach ($this->custom_order_data as $key => $value) {
+						$meta_array[$key] = $value;
+					}
+				}
 				$order_status = $order->get_status();
 				$order_meta = get_post_meta($order_id);
 				$payment_method = $order_meta['_payment_method_title'][0] ?? '';
 				$user_id = $order_meta['_customer_user'][0] ?? '';
-				if ($order_status != 'failed') {
 
-					//$item_id = current( array_keys( $order->get_items() ) );
+				if ($order_status != 'failed') {
 					foreach ($order->get_items() as $item_id => $item) {
 						$post_id = MP_Global_Function::get_order_item_meta($item_id, '_mptbm_id');
 						if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
@@ -268,40 +304,47 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							$service_info = $service ? MP_Global_Function::data_sanitize($service) : [];
 							$price = MP_Global_Function::get_order_item_meta($item_id, '_mptbm_tp');
 							$price = $price ? MP_Global_Function::data_sanitize($price) : [];
-							$data['mptbm_id'] = $post_id;
-							$data['mptbm_date'] = $date;
-							$data['mptbm_start_place'] = $start_place;
-							$data['mptbm_end_place'] = $end_place;
-							$data['mptbm_waiting_time'] = $waiting_time;
-							$data['mptbm_taxi_return'] = $return;
-							$data['mptbm_fixed_hours'] = $fixed_time;
-							$data['mptbm_distance'] = $distance;
-							$data['mptbm_duration'] = $duration;
-							$data['mptbm_base_price'] = $base_price;
-							$data['mptbm_order_id'] = $order_id;
-							$data['mptbm_order_status'] = $order_status;
-							$data['mptbm_payment_method'] = $order->get_payment_method_title();
-							$data['mptbm_user_id'] = $user_id;
-							$data['mptbm_tp'] = $price;
-							$data['mptbm_service_info'] = $service_info;
-							$data['mptbm_billing_name'] = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
-							$data['mptbm_billing_email'] = $order->get_billing_email();
-							$data['mptbm_billing_phone'] = $order->get_billing_phone();
-							$data['mptbm_target_pickup_interval_time'] =  MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30');
-							// $data['mptbm_billing_address'] = $order->get_billing_address();
+
+							// Add meta array data to the $data array
+							$data = array_merge($meta_array, [
+								'mptbm_id' => $post_id,
+								'mptbm_date' => $date,
+								'mptbm_start_place' => $start_place,
+								'mptbm_end_place' => $end_place,
+								'mptbm_waiting_time' => $waiting_time,
+								'mptbm_taxi_return' => $return,
+								'mptbm_fixed_hours' => $fixed_time,
+								'mptbm_distance' => $distance,
+								'mptbm_duration' => $duration,
+								'mptbm_base_price' => $base_price,
+								'mptbm_order_id' => $order_id,
+								'mptbm_order_status' => $order_status,
+								'mptbm_payment_method' => $order->get_payment_method_title(),
+								'mptbm_user_id' => $user_id,
+								'mptbm_tp' => $price,
+								'mptbm_service_info' => $service_info,
+								'mptbm_billing_name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+								'mptbm_billing_email' => $order->get_billing_email(),
+								'mptbm_billing_phone' => $order->get_billing_phone(),
+								'mptbm_target_pickup_interval_time' => MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30')
+							]);
+
 							$booking_data = apply_filters('add_mptbm_booking_data', $data, $post_id);
 							self::add_cpt_data('mptbm_booking', $booking_data['mptbm_billing_name'], $booking_data);
+
 							if (sizeof($service_info) > 0) {
 								foreach ($service_info as $service) {
-									$ex_data['mptbm_id'] = $post_id;
-									$ex_data['mptbm_date'] = $date;
-									$ex_data['mptbm_order_id'] = $order_id;
-									$ex_data['mptbm_order_status'] = $order_status;
-									$ex_data['mptbm_service_name'] = $service['service_name'];
-									$ex_data['mptbm_service_quantity'] = $service['service_quantity'];
-									$ex_data['mptbm_service_price'] = $service['service_price'];
-									$ex_data['mptbm_payment_method'] = $payment_method;
-									$ex_data['mptbm_user_id'] = $user_id;
+									$ex_data = [
+										'mptbm_id' => $post_id,
+										'mptbm_date' => $date,
+										'mptbm_order_id' => $order_id,
+										'mptbm_order_status' => $order_status,
+										'mptbm_service_name' => $service['service_name'],
+										'mptbm_service_quantity' => $service['service_quantity'],
+										'mptbm_service_price' => $service['service_price'],
+										'mptbm_payment_method' => $payment_method,
+										'mptbm_user_id' => $user_id
+									];
 									self::add_cpt_data('mptbm_service_booking', '#' . $order_id . $ex_data['mptbm_service_name'], $ex_data);
 								}
 							}
@@ -596,7 +639,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			}
 		}
 		/****************************/
-		public function mptbm_add_to_cart() {
+		public function mptbm_add_to_cart()
+		{
 			$link_id = absint($_POST['link_id']);
 			$product_id = apply_filters('woocommerce_add_to_cart_product_id', $link_id);
 			$quantity = 1;
@@ -609,20 +653,20 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				if ($checkout_system == 'yes') {
 					echo wc_get_checkout_url();
 				} else {
-					?>
-                    <div class="dLayout woocommerce-page">
+			?>
+					<div class="dLayout woocommerce-page">
 						<?php echo do_shortcode('[woocommerce_checkout]'); ?>
 						<?php //do_action('woocommerce_ajax_checkout');
 						?>
-                    </div>
-                    <!-- <div class="divider"></div>
+					</div>
+					<!-- <div class="divider"></div>
                     <div class="justifyBetween">
                         <button type="button" class="_themeButton_min_200 mptbm_summary_prev">
                             <span>&larr; &nbsp;<?php esc_html_e('Previous', 'ecab-taxi-booking-manager'); ?></span>
                         </button>
                         <div></div>
                     </div> -->
-					<?php
+<?php
 				}
 			}
 			echo ob_get_clean();
