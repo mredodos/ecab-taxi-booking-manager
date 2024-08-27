@@ -22,49 +22,39 @@
 						$tax_class = MP_Global_Function::get_post_info($post_id, '_tax_class');
 						$all_tax_class = MP_Global_Function::all_tax_list();
 					?>
-					<div class="_dLayout_padding_bgLight">
-						<div class="col_6 _dFlex_fdColumn">
-							<label>
-								<?php esc_html_e('Tax Settings Information', 'ecab-taxi-booking-manager'); ?> 
-							</label>
-							<span><?php esc_html_e('Here you can configure tax settings.', 'ecab-taxi-booking-manager'); ?></span>
-						</div>
-					</div>
+					<section class="bg-light">
+						<h6><?php esc_html_e('Tax Settings Information', 'ecab-taxi-booking-manager'); ?></h6>
+						<span ><?php esc_html_e('Here you can On/Off feature list and create new feature.', 'ecab-taxi-booking-manager'); ?></span>
+					</section>
 					<?php if (get_option('woocommerce_calc_taxes') == 'yes') { ?>
 						<div class="">
-							<div class="_dLayout_dFlex_justifyBetween_alignCenter">
-								<div class="col_6 _dFlex_fdColumn">
-									<label>
-										<?php esc_html_e('Tax status', 'ecab-taxi-booking-manager'); ?>
-									</label>
-									<span>
-										<?php esc_html_e('Select tax status type.', 'ecab-taxi-booking-manager'); ?>
-									</span>
-								</div>
-								<div class="col_6 textRight">
+							<section>
+								<label class="label">
+									<div>
+										<h6><?php esc_html_e('Tax status', 'ecab-taxi-booking-manager'); ?></h6>
+										<span class="desc"><?php esc_html_e('Select tax status type.', 'ecab-taxi-booking-manager'); ?></span>
+									</div>
 									<select class="formControl max_300" name="_tax_status">
-											<option disabled selected><?php esc_html_e('Please Select', 'bus-ticket-booking-with-seat-reservation');  ?></option>
-											<option value="taxable" <?php echo esc_attr($tax_status == 'taxable' ? 'selected' : ''); ?>>
-												<?php esc_html_e('Taxable', 'ecab-taxi-booking-manager'); ?>
-											</option>
-											<option value="shipping" <?php echo esc_attr($tax_status == 'shipping' ? 'selected' : ''); ?>>
-												<?php esc_html_e('Shipping only', 'ecab-taxi-booking-manager'); ?>
-											</option>
-											<option value="none" <?php echo esc_attr($tax_status == 'none' ? 'selected' : ''); ?>>
-												<?php esc_html_e('None', 'ecab-taxi-booking-manager'); ?>
-											</option>
-										</select>
-								</div>
-							</div>
+										<option disabled selected><?php esc_html_e('Please Select', 'bus-ticket-booking-with-seat-reservation');  ?></option>
+										<option value="taxable" <?php echo esc_attr($tax_status == 'taxable' ? 'selected' : ''); ?>>
+											<?php esc_html_e('Taxable', 'ecab-taxi-booking-manager'); ?>
+										</option>
+										<option value="shipping" <?php echo esc_attr($tax_status == 'shipping' ? 'selected' : ''); ?>>
+											<?php esc_html_e('Shipping only', 'ecab-taxi-booking-manager'); ?>
+										</option>
+										<option value="none" <?php echo esc_attr($tax_status == 'none' ? 'selected' : ''); ?>>
+											<?php esc_html_e('None', 'ecab-taxi-booking-manager'); ?>
+										</option>
+									</select>
+								</label>
+							</section>
 
-							<div class="_dLayout_dFlex_justifyBetween_alignCenter">
-								<div class="col_6 _dFlex_fdColumn">
-									<label>
-										<?php esc_html_e('Tax class', 'ecab-taxi-booking-manager'); ?>
-									</label>
-									<?php MPTBM_Settings::info_text('tax_class'); ?>
-								</div>
-								<div class="col_6 textRight">
+							<section>
+								<label class="label">
+									<div>
+										<h6><?php esc_html_e('Tax class', 'ecab-taxi-booking-manager'); ?></h6>
+										<span class="desc"><?php esc_html_e('Select tax class.', 'ecab-taxi-booking-manager'); ?></span>
+									</div>
 									<select class="formControl max_300" name="_tax_class">
 										<option disabled selected><?php esc_html_e('Please Select', 'bus-ticket-booking-with-seat-reservation');  ?></option>
 										<option value="standard" <?php echo esc_attr($tax_class == 'standard' ? 'selected' : ''); ?>>
@@ -78,8 +68,8 @@
 											<?php } ?>
 										<?php } ?>
 									</select>
-								</div>
-							</div>
+								</label>
+							</section>
 						</div>
 					<?php }else{ ?>
 						<div class="_dLayout_dFlex_justifyCenter">
