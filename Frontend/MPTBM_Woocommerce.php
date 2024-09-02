@@ -10,6 +10,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 	class MPTBM_Woocommerce
 	{
 		private $custom_order_data = array(); // Property to store the data
+		private $ordered_item_name;
 		public function __construct()
 		{
 			add_action('woocommerce_checkout_update_order_meta', array($this, 'product_custom_field_to_custom_order_notes'), 100, 2);
@@ -134,6 +135,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function checkout_create_order_line_item($item, $cart_item_key, $values)
 		{
+			$this->ordered_item_name = $item->get_name();
 
 			$post_id = array_key_exists('mptbm_id', $values) ? $values['mptbm_id'] : 0;
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
@@ -231,6 +233,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$item->add_meta_data('_mptbm_base_price', $base_price);
 				$item->add_meta_data('_mptbm_tp', $price);
 				$item->add_meta_data('_mptbm_service_info', $extra_service);
+				
 				do_action('mptbm_checkout_create_order_line_item', $item, $values);
 			}
 		}
@@ -240,10 +243,10 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			if ($order_id) {
 
 				$order = wc_get_order($order_id);
-
+				
 				// Get all meta data
 				$meta_data = $order->get_meta_data();
-
+				
 				// Initialize an associative array to store meta keys and values
 				$meta_array = [];
 
@@ -351,6 +354,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						}
 					}
 				}
+				$data['mptbm_item_name'] = $this->ordered_item_name;
+				do_action('mptbm_checkout_order_processed', $data);
 			}
 		}
 		public function order_status_changed($order_id)
