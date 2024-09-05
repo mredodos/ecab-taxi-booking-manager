@@ -281,11 +281,20 @@ $start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_ti
 
 if ($start_time !== "") {
     if ($start_time !== "0") {
+        
         // Convert start time to hours and minutes
         list($hours, $decimal_part) = explode('.', $start_time);
         $interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time');
+        
         if ($interval_time == "5" || $interval_time == "15") {
-            $minutes = isset($decimal_part) ? (int) $decimal_part * 1 : 0; // Multiply by 1 to convert to minutes
+                if($decimal_part != 3){
+                    $minutes = isset($decimal_part) ? (int) $decimal_part * 1 : 0; // Multiply by 1 to convert to minutes
+                }else{
+                    $minutes = isset($decimal_part) ? (int) $decimal_part * 10 : 0; // Multiply by 1 to convert to minutes
+                }
+                
+                
+            
         }else {
             $minutes = isset($decimal_part) ? (int) $decimal_part * 10 : 0; // Multiply by 10 to convert to minutes
         }
