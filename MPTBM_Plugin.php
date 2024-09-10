@@ -138,8 +138,8 @@ if (!class_exists('MPTBM_Plugin')) {
 
         public function mptbm_change_page_template($template)
         {
-            global $post, $wp_query, $wpdb;
-            $page_temp_slug = get_page_template_slug($post->ID);
+            global $wp_query, $wpdb;
+            $page_temp_slug = get_page_template_slug(get_the_ID());
             $template_path = 'transport_result.php';
             $page_templates[$template_path] = 'Transport Result';
             if (isset($page_templates[$page_temp_slug])) {

@@ -75,7 +75,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$cart_item_data = apply_filters('mptbm_add_cart_item', $cart_item_data, $post_id);
 			}
 			$cart_item_data['mptbm_id'] = $post_id;
-			//echo '<pre>';print_r($cart_item_data);echo '</pre>';die();
+			// echo '<pre>';print_r($cart_item_data);echo '</pre>';
 			return $cart_item_data;
 		}
 		public function before_calculate_totals($cart_object)
@@ -152,6 +152,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$fixed_time = $values['mptbm_fixed_hours'] ?? 0;
 				$extra_service = $values['mptbm_extra_service_info'] ?? [];
 				$price = $values['mptbm_tp'] ?? '';
+				
 				$item->add_meta_data(esc_html__('Pickup Location ', 'ecab-taxi-booking-manager'), $start_location);
 				$item->add_meta_data(esc_html__('Drop-Off Location ', 'ecab-taxi-booking-manager'), $end_location);
 				$price_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
@@ -494,6 +495,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							<h6 class="_mR_xs"><?php esc_html_e('Base Price : ', 'ecab-taxi-booking-manager'); ?></h6>
 							<span><?php echo wp_kses_post(wc_price($base_price)); ?></span>
 						</li>
+						<?php do_action('mptbm_cart_item_display',$cart_item, $post_id); ?>
 					</ul>
 				</div>
 				<?php if (sizeof($extra_service) > 0) { ?>
