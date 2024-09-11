@@ -243,12 +243,30 @@ if (!class_exists('MPTBM_Woocommerce')) {
 					$end_date_time = clone $start_date_time;
 					$end_date_time->modify('+2  hour'); // Set the end time to 1 hour later
 					$formatted_end_time = $end_date_time->format('Ymd\THis\Z'); // End time in Google Calendar format
+					$driver_id = get_post_meta($post_id, 'mptbm_selected_driver', true);
+					if ($driver_id) {
+						$driver_info = get_userdata($driver_id);
+						$driver_name = $driver_info->display_name;
+						$driver_email = $driver_info->user_email;
+					} else {
+						$driver_name = '';
+						$driver_email = '';
+					}
+
+					// Build the details string conditionally
+					$details = "Transport service from " . $start_location . " to " . $end_location;
+					if ($driver_email) {
+						$details .= ". Driver email: " . $driver_email;
+					}
+					if ($driver_name) {
+						$details .= ". Driver name: " . $driver_name;
+					}
 
 					// Create Google Calendar link
 					$google_calendar_link = "https://www.google.com/calendar/render?action=TEMPLATE&text="
 						. urlencode($this->ordered_item_name) // Event title
 						. "&dates=" . $formatted_date_time . "/" . $formatted_end_time // Start and end times
-						. "&details=" . urlencode("Transport service from " . $start_location . " to " . $end_location)
+						. "&details=" . urlencode($details)
 						. "&location=" . urlencode($start_location)
 						. "&sf=true&output=xml";
 
@@ -394,6 +412,15 @@ if (!class_exists('MPTBM_Woocommerce')) {
 					}
 				}
 				$data['mptbm_item_name'] = $this->ordered_item_name;
+
+				$driver_id = get_post_meta($post_id, 'mptbm_selected_driver', true);
+				if ($driver_id) {
+					$driver_info = get_userdata($driver_id);
+					$data['mptbm_item_driver_name'] = $driver_info->display_name;
+					$data['mptbm_item_driver_email'] = $driver_info->user_email;
+				}
+
+
 				do_action('mptbm_checkout_order_processed', $data);
 			}
 		}
