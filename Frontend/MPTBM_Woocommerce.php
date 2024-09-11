@@ -152,7 +152,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$fixed_time = $values['mptbm_fixed_hours'] ?? 0;
 				$extra_service = $values['mptbm_extra_service_info'] ?? [];
 				$price = $values['mptbm_tp'] ?? '';
-				
+
 				$item->add_meta_data(esc_html__('Pickup Location ', 'ecab-taxi-booking-manager'), $start_location);
 				$item->add_meta_data(esc_html__('Drop-Off Location ', 'ecab-taxi-booking-manager'), $end_location);
 				$price_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
@@ -220,6 +220,44 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						$item->add_meta_data(esc_html__('Price ', 'ecab-taxi-booking-manager'), esc_html(' ( ') . wp_kses_post(wc_price($service['service_price'])) . esc_html(' X ') . esc_html($service['service_quantity']) . esc_html(') = ') . wp_kses_post(wc_price($service['service_price'] * $service['service_quantity'])));
 					}
 				}
+				if (class_exists('MPTBM_Plugin_Ecab_Calendar_Addon')) {
+					// Prepare date and time for Google Calendar format
+					$formatted_date = MP_Global_Function::date_format($date);
+					$formatted_time = MP_Global_Function::date_format($date, 'time');
+					// Combine the provided formatted date and time
+					$date_time_string = $formatted_date . ' ' . $formatted_time; // Combine date and time as a single string
+
+					// Get the WordPress time zone
+					$timezone = new DateTimeZone(wp_timezone_string());
+
+					// Create DateTime object with the combined date and time, and apply WordPress time zone
+					$start_date_time = new DateTime($date_time_string, $timezone);
+
+					// Convert to UTC (Google Calendar requires UTC time format)
+					$start_date_time->setTimezone(new DateTimeZone('UTC'));
+
+					// Format date and time for Google Calendar
+					$formatted_date_time = $start_date_time->format('Ymd\THis\Z'); // Start time in Google Calendar format
+
+					// For the event end time (assuming 1 hour duration)
+					$end_date_time = clone $start_date_time;
+					$end_date_time->modify('+2  hour'); // Set the end time to 1 hour later
+					$formatted_end_time = $end_date_time->format('Ymd\THis\Z'); // End time in Google Calendar format
+
+					// Create Google Calendar link
+					$google_calendar_link = "https://www.google.com/calendar/render?action=TEMPLATE&text="
+						. urlencode($this->ordered_item_name) // Event title
+						. "&dates=" . $formatted_date_time . "/" . $formatted_end_time // Start and end times
+						. "&details=" . urlencode("Transport service from " . $start_location . " to " . $end_location)
+						. "&location=" . urlencode($start_location)
+						. "&sf=true&output=xml";
+
+					// Add Google Calendar link as meta data
+					$item->add_meta_data(
+						esc_html__('Add this event to your Google Calendar', 'ecab-taxi-booking-manager'),
+						'<a href="' . esc_url($google_calendar_link) . '" target="_blank">' . esc_html__('Add this event to your Google Calendar', 'ecab-taxi-booking-manager') . '</a>'
+					);
+				}
 				$item->add_meta_data('_mptbm_id', $post_id);
 				$item->add_meta_data('_mptbm_date', $date);
 				$item->add_meta_data('_mptbm_start_place', $start_location);
@@ -234,7 +272,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$item->add_meta_data('_mptbm_base_price', $base_price);
 				$item->add_meta_data('_mptbm_tp', $price);
 				$item->add_meta_data('_mptbm_service_info', $extra_service);
-				
+
 				do_action('mptbm_checkout_create_order_line_item', $item, $values);
 			}
 		}
@@ -244,10 +282,10 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			if ($order_id) {
 
 				$order = wc_get_order($order_id);
-				
+
 				// Get all meta data
 				$meta_data = $order->get_meta_data();
-				
+
 				// Initialize an associative array to store meta keys and values
 				$meta_array = [];
 
@@ -495,7 +533,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							<h6 class="_mR_xs"><?php esc_html_e('Base Price : ', 'ecab-taxi-booking-manager'); ?></h6>
 							<span><?php echo wp_kses_post(wc_price($base_price)); ?></span>
 						</li>
-						<?php do_action('mptbm_cart_item_display',$cart_item, $post_id); ?>
+						<?php do_action('mptbm_cart_item_display', $cart_item, $post_id); ?>
 					</ul>
 				</div>
 				<?php if (sizeof($extra_service) > 0) { ?>
