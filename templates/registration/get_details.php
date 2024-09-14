@@ -335,7 +335,7 @@ if (sizeof($all_dates) > 0) {
 
 				// Translators comment to explain the placeholder
 				/* translators: %s: transportation label */
-				$translated_string = __("No %s configured for this price setting", 'your-text-domain');
+				$translated_string = __("No %s configured for this price setting", 'ecab-taxi-booking-manager');
 				
 				$formatted_string = sprintf($translated_string, $transportaion_label);
 				echo esc_html($formatted_string);
