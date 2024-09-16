@@ -418,6 +418,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 					$driver_info = get_userdata($driver_id);
 					$data['mptbm_item_driver_name'] = $driver_info->display_name;
 					$data['mptbm_item_driver_email'] = $driver_info->user_email;
+					$data['mptbm_item_driver_phone'] = get_user_meta($driver_id, 'user_phone', true);
 				}
 
 
