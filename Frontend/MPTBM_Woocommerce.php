@@ -112,6 +112,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function get_item_data($item_data, $cart_item)
 		{
+
 			$post_id = array_key_exists('mptbm_id', $cart_item) ? $cart_item['mptbm_id'] : 0;
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
 				ob_start();
