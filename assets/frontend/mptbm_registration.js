@@ -27,7 +27,7 @@ function mptbm_set_cookie_distance_duration(start_place = "", end_place = "") {
                 let distance_text = result.routes[0].legs[0].distance.text;
                 let duration = result.routes[0].legs[0].duration.value;
                 var duration_text = result.routes[0].legs[0].duration.text;
-                if (kmOrMile == 'mile') {
+if(kmOrMile == 'mile'){
                     // Convert distance from kilometers to miles
                     var distanceInKilometers = distance / 1000;
                     var distanceInMiles = distanceInKilometers * 0.621371;
@@ -169,7 +169,7 @@ function mptbmCreateMarker(place) {
         let start_date = target_date.val();
         let return_date;
         let return_time;
-
+        
         if (mptbm_enable_return_in_different_date == 'yes' && two_way != 1 && price_based != 'fixed_hourly') {
             return_date = return_target_date.val();
             return_time = return_target_time.val();
@@ -212,7 +212,7 @@ function mptbmCreateMarker(place) {
             function getGeometryLocation(address, callback) {
                 var geocoder = new google.maps.Geocoder();
                 var coordinatesOfPlace = {};
-                geocoder.geocode({ address: address }, function (results, status) {
+                geocoder.geocode({address: address}, function (results, status) {
                     if (status === "OK") {
                         var latitude = results[0].geometry.location.lat();
                         var longitude = results[0].geometry.location.lng();
@@ -238,7 +238,7 @@ function mptbmCreateMarker(place) {
                 return deferred.promise();
             }
             if (price_based !== 'manual') {
-
+                
                 $.when(
                     getCoordinatesAsync(start_place.value),
                     getCoordinatesAsync(end_place.value)
@@ -317,9 +317,9 @@ function mptbmCreateMarker(place) {
                     }
                 });
             } else {
-
+                
                 if (start_place.value && end_place.value && start_date && start_time && return_date && return_time) {
-
+                    
                     let actionValue;
                     if (!mptbm_enable_view_search_result_page) {
                         actionValue = "get_mptbm_map_search_result";
@@ -415,16 +415,16 @@ function mptbmCreateMarker(place) {
             $('#mptbm_map_return_time').siblings('.mp_input_select_list').empty();
             // Populate options for return time
             $('.mp_input_select_list li').each(function () {
-                var timeValue = parseFloat($(this).attr('data-value'));
+                var timeValue = parseFloat($(this).attr('data-value')); 
                 if (timeValue > selectedTime && selectedDate == dateValue) {
                     $('#mptbm_map_return_time').siblings('.mp_input_select_list').append($(this).clone());
                 }
             });
             if ($('#mptbm_map_return_time').siblings('.mp_input_select_list').children().length === 0) {
-                $('.mp_input_select_list li').each(function () {
-                    $('#mptbm_map_return_time').siblings('.mp_input_select_list').append($(this).clone());
-                });
-            }
+            $('.mp_input_select_list li').each(function () {
+                $('#mptbm_map_return_time').siblings('.mp_input_select_list').append($(this).clone());
+            });
+        }
         }
         let parent = $(this).closest(".mptbm_transport_search_area");
         mptbm_content_refresh(parent);
@@ -489,27 +489,27 @@ function mptbmCreateMarker(place) {
         mptbm_content_refresh(parent);
     });
     $(document).on("change", "#mptbm_map_start_place,#mptbm_map_end_place", function () {
-        let parent = $(this).closest(".mptbm_transport_search_area");
-        mptbm_content_refresh(parent);
-        let start_place = parent.find("#mptbm_map_start_place").val();
-        let end_place = parent.find("#mptbm_map_end_place").val();
-        if (start_place || end_place) {
-            if (start_place) {
-                mptbm_set_cookie_distance_duration(start_place);
-                parent.find("#mptbm_map_end_place").focus();
+            let parent = $(this).closest(".mptbm_transport_search_area");
+            mptbm_content_refresh(parent);
+            let start_place = parent.find("#mptbm_map_start_place").val();
+            let end_place = parent.find("#mptbm_map_end_place").val();
+            if (start_place || end_place) {
+                if (start_place) {
+                    mptbm_set_cookie_distance_duration(start_place);
+                    parent.find("#mptbm_map_end_place").focus();
+                } else {
+                    mptbm_set_cookie_distance_duration(end_place);
+                    parent.find("#mptbm_map_start_place").focus();
+                }
             } else {
-                mptbm_set_cookie_distance_duration(end_place);
                 parent.find("#mptbm_map_start_place").focus();
             }
-        } else {
-            parent.find("#mptbm_map_start_place").focus();
         }
-    }
     );
     $(document).on("change", ".mptbm_transport_search_area [name='mptbm_taxi_return']", function () {
-        let parent = $(this).closest(".mptbm_transport_search_area");
-        mptbm_content_refresh(parent);
-    }
+            let parent = $(this).closest(".mptbm_transport_search_area");
+            mptbm_content_refresh(parent);
+        }
     );
     $(document).on(
         "change",
@@ -609,13 +609,13 @@ function mptbm_price_calculation(parent) {
                         },
                         success: function (data) {
                             target_extra_service_summary.html(data).promise().done(function () {
-                                target_summary.slideDown(400);
-                                target_extra_service.slideDown(400);
-                                target_extra_service_summary.slideDown(400);
-                                pageScrollTo(target_extra_service);
-                                $('html, body , mptbm_book_now').animate({
-                                    scrollTop: target_extra_service.offset().top + target_extra_service.outerHeight() - $(window).height()
-                                }, 1000);
+                                // Check if there are extra services before scrolling
+                                if (target_extra_service.find('[name="mptbm_extra_service[]"]').length > 0) {
+                                    target_summary.slideDown(400);
+                                    target_extra_service.slideDown(400);
+                                    target_extra_service_summary.slideDown(400);
+                                    pageScrollTo(target_extra_service);
+                                }
                                 dLoaderRemove(parent.find('.tabsContentNext'));
                                 if (!target_extra_service.find('[name="mptbm_extra_service[]"]').length) {
                                     parent.find('.mptbm_book_now[type="button"]').trigger('click');
@@ -657,15 +657,19 @@ function mptbm_price_calculation(parent) {
     });
 
     function checkAndToggleBookNowButton(parent) {
-        let extraServicesSelected = parent.find('[name="mptbm_extra_service[]"]').filter(function () {
-            return $(this).is(':checked') || $(this).val() !== '';
-        }).length > 0;
-        if (extraServicesSelected) {
-            parent.find('.mptbm_book_now[type="button"]').show();
-        } else {
-            parent.find('.mptbm_book_now[type="button"]').hide();
-        }
+    // Check if there are any extra services present
+    let extraServicesAvailable = parent.find('[name="mptbm_extra_service[]"]').length > 0;
+    
+    if (extraServicesAvailable) {
+        parent.find('.mptbm_book_now[type="button"]').show(); 
+    } else {
+        parent.find('.mptbm_book_now[type="button"]').hide(); 
     }
+}
+
+    
+    
+    //===========================//
     $(document).on('click', '.mptbm_transport_search_area .mptbm_get_vehicle_prev', function () {
         var mptbmTemplateExists = $(".mptbm-show-search-result").length;
         if (mptbmTemplateExists) {
@@ -761,7 +765,7 @@ function mptbm_price_calculation(parent) {
                     dLoader(parent.find('.tabsContentNext'));
                 },
                 success: function (data) {
-                    if ($('<div />', { html: data }).find("div").length > 0) {
+                    if ($('<div />', {html: data}).find("div").length > 0) {
                         var mptbmTemplateExists = $(".mptbm-show-search-result").length;
                         if (mptbmTemplateExists) {
                             $(".mptbm_map_search_result").css("display", "none");
