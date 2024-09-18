@@ -278,6 +278,7 @@ function mptbmCreateMarker(place) {
                                         });
                                 },
                                 error: function (response) {
+                                    console.log('jumpa');
                                     console.log(response);
                                 },
                             });
