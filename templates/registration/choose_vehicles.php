@@ -432,6 +432,7 @@ $mptbm_passengers = max($mptbm_passengers);
 					<?php
 
 $all_posts = MPTBM_Query::query_transport_list($price_based);
+ 
 if ($all_posts->found_posts > 0) {
     $posts = $all_posts->posts;
     $vehicle_item_count = 0;
