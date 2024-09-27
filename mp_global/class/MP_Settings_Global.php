@@ -244,6 +244,7 @@
 				<?php
 			}
 			public function licence_area(){
+				do_action('ecab_before_global_setting_page');
 				?>
 				<table>
 					<thead>
@@ -261,7 +262,8 @@
 					<?php do_action('mp_license_page_plugin_list'); ?>
 					</tbody>
 				</table>
-				<?php
+				<?PHP
+				do_action('ecab_after_global_setting_page');
 			}
 		}
 		new MP_Settings_Global();
