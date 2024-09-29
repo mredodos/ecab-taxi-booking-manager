@@ -503,6 +503,52 @@ function mp_sticky_management() {
 //======================================================================Collapse=================//
 (function ($) {
 	"use strict";
+
+	function initializeCollapse() {
+		$('select[data-collapse-target]').each(function () {
+			let currentTarget = $(this);
+			let value = currentTarget.val();
+			currentTarget.find('option').each(function () {
+				if ($(this).attr('data-option-target-multi')) {
+					let target_ids = $(this).data('option-target-multi');
+					target_ids = target_ids.toString().split(" ");
+					target_ids.forEach(function (target_id) {
+						let target = $('[data-collapse="' + target_id + '"]');
+						target.slideUp(350).removeClass('mActive');
+					});
+				} else {
+					let target_id = $(this).data('option-target');
+					let target = $('[data-collapse="' + target_id + '"]');
+					target.slideUp('fast').removeClass('mActive');
+				}
+			}).promise().done(function () {
+				currentTarget.find('option').each(function () {
+					let current_value = $(this).val();
+					if (current_value === value) {
+						if ($(this).attr('data-option-target-multi')) {
+							let target_ids = $(this).data('option-target-multi');
+							target_ids = target_ids.toString().split(" ");
+							target_ids.forEach(function (target_id) {
+								let target = $('[data-collapse="' + target_id + '"]');
+								target.slideDown(350).addClass('mActive');
+							});
+						} else {
+							let target_id = $(this).data('option-target');
+							let target = $('[data-collapse="' + target_id + '"]');
+							target.slideDown(350).addClass('mActive');
+						}
+					}
+				});
+			});
+		});
+	}
+
+	// Initialize collapse on page load
+	$(document).ready(function () {
+		initializeCollapse();
+	});
+
+	// Handle click event for collapse target
 	$(document).on('click', '[data-collapse-target]', function () {
 		let currentTarget = $(this);
 		let target_id = currentTarget.data('collapse-target');
@@ -512,46 +558,17 @@ function mp_sticky_management() {
 			mp_all_content_change(currentTarget);
 		}
 	});
+
+	// Handle change event for select inputs
 	$(document).on('change', 'select[data-collapse-target]', function () {
-		let currentTarget = $(this);
-		let value = currentTarget.val();
-		currentTarget.find('option').each(function () {
-			if ($(this).attr('data-option-target-multi')) {
-				let target_ids = $(this).data('option-target-multi');
-				target_ids = target_ids.toString().split(" ");
-				target_ids.forEach(function (target_id) {
-					let target = $('[data-collapse="' + target_id + '"]');
-					target.slideUp(350).removeClass('mActive');
-				});
-			} else {
-				let target_id = $(this).data('option-target');
-				let target = $('[data-collapse="' + target_id + '"]');
-				target.slideUp('fast').removeClass('mActive');
-			}
-		}).promise().done(function () {
-			currentTarget.find('option').each(function () {
-				let current_value = $(this).val();
-				if (current_value === value) {
-					if ($(this).attr('data-option-target-multi')) {
-						let target_ids = $(this).data('option-target-multi');
-						target_ids = target_ids.toString().split(" ");
-						target_ids.forEach(function (target_id) {
-							let target = $('[data-collapse="' + target_id + '"]');
-							target.slideDown(350).removeClass('mActive');
-						});
-					} else {
-						let target_id = $(this).data('option-target');
-						let target = $('[data-collapse="' + target_id + '"]');
-						target.slideDown(350).removeClass('mActive');
-					}
-				}
-			});
-		});
+		initializeCollapse();
 	});
+
 	function target_close(close_id, target_id) {
 		$('body').find('[data-close="' + close_id + '"]:not([data-collapse="' + target_id + '"])').slideUp(250);
 		return true;
 	}
+
 	function target_collapse(target, $this) {
 		if ($this.is('[type="radio"]')) {
 			target.slideDown(250);
@@ -562,6 +579,7 @@ function mp_sticky_management() {
 		}
 		return true;
 	}
+
 	function collapse_close_inside(currentTarget) {
 		let parent_target_close = currentTarget.data('collapse-close-inside');
 		if (parent_target_close) {
@@ -579,7 +597,7 @@ function mp_sticky_management() {
 						content_icon_change(target_collapse);
 					}
 				}
-			})
+			});
 		}
 		return true;
 	}
