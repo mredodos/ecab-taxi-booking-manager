@@ -112,6 +112,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function get_item_data($item_data, $cart_item)
 		{
+
 			$post_id = array_key_exists('mptbm_id', $cart_item) ? $cart_item['mptbm_id'] : 0;
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
 				ob_start();
@@ -297,6 +298,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		public function checkout_order_processed($order_id)
 		{
 
+			
 			if ($order_id) {
 
 				$order = wc_get_order($order_id);
@@ -388,8 +390,11 @@ if (!class_exists('MPTBM_Woocommerce')) {
 								'mptbm_billing_phone' => $order->get_billing_phone(),
 								'mptbm_target_pickup_interval_time' => MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30')
 							]);
-
+							
+							
 							$booking_data = apply_filters('add_mptbm_booking_data', $data, $post_id);
+							
+							
 							self::add_cpt_data('mptbm_booking', $booking_data['mptbm_billing_name'], $booking_data);
 
 							if (sizeof($service_info) > 0) {
@@ -420,8 +425,6 @@ if (!class_exists('MPTBM_Woocommerce')) {
 					$data['mptbm_item_driver_email'] = $driver_info->user_email;
 					$data['mptbm_item_driver_phone'] = get_user_meta($driver_id, 'user_phone', true);
 				}
-
-
 				do_action('mptbm_checkout_order_processed', $data);
 			}
 		}
@@ -700,6 +703,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				'post_status' => $status,
 				'post_type' => $cpt_name
 			);
+			
 			$post_id = wp_insert_post($new_post);
 			if (sizeof($meta_data) > 0) {
 				foreach ($meta_data as $key => $value) {

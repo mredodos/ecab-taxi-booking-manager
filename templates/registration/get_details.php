@@ -6,8 +6,11 @@
 if (!defined('ABSPATH')) {
 	die;
 } // Cannot access pages directly
+delete_transient('original_price_based');
 $km_or_mile = MP_Global_Function::get_settings('mp_global_settings', 'km_or_mile', 'km');
 $price_based = $price_based ?? '';
+set_transient('original_price_based',$price_based);
+
 $map = $map ?? 'yes';
 $all_dates = MPTBM_Function::get_all_dates($price_based);
 $form_style = $form_style ?? 'horizontal';
