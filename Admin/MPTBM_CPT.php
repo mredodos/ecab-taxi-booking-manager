@@ -29,37 +29,70 @@ if (!class_exists('MPTBM_CPT')) {
 			return $columns;
 		}
 
-		public function mptbm_rent_custom_column($columns, $post_id)
+		public function update_service_status()
 		{
-			switch ($columns) {
-				case 'mptbm_price_based':
-					$mptbm_price_based = esc_html__(get_post_meta($post_id, 'mptbm_price_based', true));
-
-					$item_price_based = [
-						'inclusive' => 'Inclusive',
-						'distance' => 'Distance as google map',
-						'duration' => 'Duration/Time as google map',
-						'distance_duration' => 'Distance + Duration as google map',
-						'manual' => 'Manual as fixed Location',
-						'fixed_hourly' => 'Fixed Hourly',
-					];
-					foreach ($item_price_based as $kay => $value):
-						echo esc_html(($kay == $mptbm_price_based) ? $value : '');
-					endforeach;
-					break;
-				case 'mptbm_km_price':
-					$mptbm_km_price = get_post_meta($post_id, 'mptbm_km_price', true);
-					echo esc_html($mptbm_km_price ? $mptbm_km_price : '');
-					break;
-				case 'mptbm_hour_price':
-					$mptbm_hour_price = get_post_meta($post_id, 'mptbm_hour_price', true);
-					echo esc_html($mptbm_hour_price ? $mptbm_hour_price : '');
-					break;
-				case 'mptbm_waiting_price':
-					$mptbm_waiting_price = get_post_meta($post_id, 'mptbm_waiting_price', true);
-					echo esc_html($mptbm_waiting_price ? $mptbm_waiting_price : '');
-					break;
+			// Debug the $_POST data
+			if (!isset($_POST['post_id']) || !isset($_POST['mptbm_service_status'])) {
+				wp_send_json_error(__('Post data is missing', 'mptbm_plugin_pro'));
+				wp_die();
 			}
+
+			// Validate the post ID and service status
+			$post_id = intval($_POST['post_id']);
+			$meta_value = sanitize_text_field($_POST['mptbm_service_status']);
+
+			if (!get_post($post_id)) {
+				wp_send_json_error(__('Invalid post ID', 'mptbm_plugin_pro'));
+				wp_die();
+			}
+
+			// Debug the current post meta before updating
+			$meta_key = 'mptbm_service_status';
+			$prev_value = get_post_meta($post_id, $meta_key, true);
+			$reference_id = get_post_meta($post_id, 'mptbm_pin', true);
+			$service_status_default = MP_Global_Function::get_settings('mptbm_driver_settings', 'default_ride_status', 'Pending');
+
+			if (empty($prev_value)) {
+				$prev_value = $service_status_default;
+			}
+
+			// Debug previous and new values
+			error_log("Previous value: " . $prev_value);
+			error_log("New value: " . $meta_value);
+
+			// Check if meta is being updated
+			if (update_post_meta($post_id, $meta_key, $meta_value)) {
+				error_log("Meta updated successfully");
+
+				// Continue with the email logic
+				$from_email = get_option('woocommerce_email_from_address');
+				$from_name = get_option('woocommerce_email_from_name');
+				$driver_admin_email = MP_Global_Function::get_settings('mptbm_driver_settings', 'driver_admin_email');
+
+				$placeholders = [
+					'{order_reference}' => $reference_id,
+					'{service_status}' => $meta_value,
+					'{old_service_status}' => $prev_value,
+				];
+
+				$subject = MP_Global_Function::get_settings('mptbm_driver_settings', 'status_change_subject', 'Order status has been changed');
+				$content = MP_Global_Function::get_settings('mptbm_driver_settings', 'service_status_content', 'Order status has been changed');
+				$content = str_replace(array_keys($placeholders), array_values($placeholders), $content);
+
+				$headers = array(
+					'Content-Type: text/html; charset=UTF-8',
+					sprintf("From: %s <%s>", $from_name, $from_email),
+				);
+
+				// Send the email
+				wp_mail($driver_admin_email, $subject, $content, $headers);
+				wp_send_json_success(__('success', 'mptbm_plugin_pro'));
+			} else {
+				error_log("Meta update failed or value did not change");
+				wp_send_json_error(__('Meta update failed', 'mptbm_plugin_pro'));
+			}
+
+			wp_die();
 		}
 
 		public function mptbm_rent_sortable_columns($columns)
