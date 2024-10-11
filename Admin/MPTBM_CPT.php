@@ -17,6 +17,38 @@ if (!class_exists('MPTBM_CPT')) {
 			add_filter('manage_edit-mptbm_rent_sortable_columns', array($this, 'mptbm_rent_sortable_columns'));
 		}
 
+		public function mptbm_rent_custom_column($columns,$post_id){
+			switch($columns){
+				case 'mptbm_price_based':
+					$mptbm_price_based = esc_html__(get_post_meta($post_id,'mptbm_price_based',true));
+				
+					$item_price_based = [
+						'inclusive' => 'Inclusive',
+						'distance' => 'Distance as google map',
+						'duration' => 'Duration/Time as google map',
+						'distance_duration' => 'Distance + Duration as google map',
+						'manual' => 'Manual as fixed Location',
+						'fixed_hourly' => 'Fixed Hourly',
+					];
+					foreach($item_price_based as $kay => $value):
+						echo esc_html(($kay==$mptbm_price_based)?$value:'');
+					endforeach;
+				break;
+				case 'mptbm_km_price':
+					$mptbm_km_price = get_post_meta($post_id,'mptbm_km_price',true);
+					echo esc_html($mptbm_km_price?$mptbm_km_price:'');
+				break;
+				case 'mptbm_hour_price':
+					$mptbm_hour_price = get_post_meta($post_id,'mptbm_hour_price',true);
+					echo esc_html($mptbm_hour_price?$mptbm_hour_price:'');
+				break;
+				case 'mptbm_waiting_price':
+					$mptbm_waiting_price = get_post_meta($post_id,'mptbm_waiting_price',true);
+					echo esc_html($mptbm_waiting_price?$mptbm_waiting_price:'');
+				break;
+			}
+		}
+
 		public function mptbm_rent_columns($columns)
 		{
 			unset($columns['date']);

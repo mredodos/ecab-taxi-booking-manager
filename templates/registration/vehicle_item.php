@@ -45,6 +45,7 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
         if(!$price || $price == 0){
             return false;
         }
+        
         $wc_price = MP_Global_Function::wc_price($post_id, $price);
         $raw_price = MP_Global_Function::price_convert_raw($wc_price);
         $display_features = MP_Global_Function::get_post_info($post_id, 'display_mptbm_features', 'on');
