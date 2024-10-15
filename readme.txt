@@ -86,7 +86,13 @@ Automatically generate PDF tickets or invoices after bookings, providing custome
 Set fixed area for transport by using  google map
 
 **🏬 Establish GEO FENCE Boundaries and Pricing**
-Utilize Google Maps to delineate both intercity and intracity zones, along with corresponding pricing 
+Utilize Google Maps to delineate both intercity and intracity zones, along with corresponding pricing
+
+**🧢 Driver Panel to track service status**
+Driver panel feature enables administrators to assign transportation vehicles to drivers. Additionally, email notifications are automatically sent to relevant parties whenever there is a change in the service status of an order 
+
+**📆 Google Calendar Integration**
+Get google calendar event creation on every new order and customer can set thier event also in google calendar 
 
 **≣ Comprehensive Order List Section
 View and manage all bookings in a detailed order list
