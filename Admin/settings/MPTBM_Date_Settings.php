@@ -108,7 +108,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Date Type', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span class="desc"><?php _e('Here you can configure general date', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php _e('Specifies the date type: "Repeated" for recurring dates, or "Particular" for a specific date', "ecab-taxi-booking-manager"); ?></span>
 							</div>
 							<select class="formControl" name="mptbm_date_type" data-collapse-target required>
 								<option disabled selected><?php esc_html_e('Please select ...', 'ecab-taxi-booking-manager'); ?></option>
@@ -161,7 +161,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Repeated Start Date', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span class="desc"><?php esc_html_e('Repeated Start Date', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Sets the start date for recurring services', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<div >
 								<input type="hidden" name="mptbm_repeated_start_date" value="<?php echo esc_attr($hidden_repeated_start_date); ?>" required/>
@@ -174,7 +174,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Repeated after', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span class="desc"><?php esc_html_e('Repeated after', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Defines the number of days after which the service or event will repeat', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<input type="text" name="mptbm_repeated_after" class="formControl mp_number_validation" value="<?php echo esc_attr($repeated_after); ?>"/>
 						</label>
@@ -184,7 +184,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Maximum Advanced Day Booking', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span class="desc"><?php esc_html_e('Maximum Advanced Day Booking', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Sets the maximum number of days in advance a booking can be made', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<input type="text" name="mptbm_active_days" class="formControl mp_number_validation" value="<?php echo esc_attr($active_days); ?>"/>
 						</label>

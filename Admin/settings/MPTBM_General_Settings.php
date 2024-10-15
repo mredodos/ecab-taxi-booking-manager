@@ -61,7 +61,7 @@
 							<label class="label">
 								<div>
 									<h6><?php esc_html_e('Maximum Passenger', 'ecab-taxi-booking-manager'); ?></h6>
-									<span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+									<span class="desc"><?php MPTBM_Settings::info_text('mptbm_maximum_passenger'); ?></span>
 								</div>
 								<input class="formControl mp_price_validation" name="mptbm_maximum_passenger" value="<?php echo esc_attr($max_passenger); ?>" type="text" placeholder="<?php esc_html_e('EX:4', 'ecab-taxi-booking-manager'); ?>" />
 							</label>
@@ -70,7 +70,7 @@
 							<label class="label">
 								<div>
 									<h6><?php esc_html_e('Maximum Bag', 'ecab-taxi-booking-manager'); ?></h6>
-									<span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+									<span class="desc"><?php MPTBM_Settings::info_text('mptbm_maximum_bag'); ?></span>
 								</div>
 								<input class="formControl mp_price_validation" name="mptbm_maximum_bag" value="<?php echo esc_attr($max_bag); ?>" type="text" placeholder="<?php esc_html_e('EX:4', 'ecab-taxi-booking-manager'); ?>" />
 							</label>

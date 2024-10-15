@@ -61,7 +61,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 					<label class="label">
 						<div>
 							<h6><?php esc_html_e('Minimum Price', 'ecab-taxi-booking-manager'); ?></h6>
-							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_minimum_price'); ?></span>
 						</div>
 						<input class="formControl mp_price_validation" name="mptbm_min_price" value="<?php echo esc_attr($min_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 					</label>

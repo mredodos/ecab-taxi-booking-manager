@@ -222,48 +222,39 @@ if (!class_exists('MPTBM_Function')) {
 		//*************Price*********************************//
 		public static function get_price($post_id, $distance = 1000, $duration = 3600, $start_place = '', $destination_place = '', $waiting_time = 0, $two_way = 1, $fixed_time = 0)
 		{
-
-			$price = '';
+			$price = 0.0;  // Initialize price as a float
 			// Check if the session is active
 			if (session_status() !== PHP_SESSION_ACTIVE) {
 				// Start the session if it's not active
 				session_start();
 			}
-			$initial_price = MP_Global_Function::get_post_info($post_id, 'mptbm_initial_price');
-			$min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price');
+			$initial_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_initial_price');
+			$min_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_min_price');
 			$price_based = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
 			$original_price_based = get_transient('original_price_based');
+			
+			$waiting_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_waiting_price', 0) * (float) $waiting_time;
 
-			$waiting_price = MP_Global_Function::get_post_info($post_id, 'mptbm_waiting_price', 0) * $waiting_time;
 			if ($price_based == 'inclusive' && $original_price_based == 'dynamic') {
-
-				$hour_price = (float) (MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price') ?? 0);
-				$km_price = (float) (MP_Global_Function::get_post_info($post_id, 'mptbm_km_price') ?? 0);
-				$duration = (float) ($duration ?? 0);
-				$distance = (float) ($distance ?? 0);
-				$price = $hour_price * $duration / 3600 + $km_price * $distance / 1000;
+				$hour_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price');
+				$km_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_km_price');
+				$price = $hour_price * ((float) $duration / 3600) + $km_price * ((float) $distance / 1000);
 			} elseif ($price_based == 'distance' && $original_price_based == 'dynamic') {
-
-				$km_price = (float) (MP_Global_Function::get_post_info($post_id, 'mptbm_km_price') ?? 0);
-				$price = $km_price * ((float) ($distance ?? 0)) / 1000;
-			} elseif ($price_based == 'duration' && $original_price_based == 'fixed_hourly' || $original_price_based == 'dynamic') {
-
-				$hour_price = (float) (MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price') ?? 0);
-				$price = $hour_price * ((float) ($duration ?? 0)) / 3600;
+				$km_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_km_price');
+				$price = $km_price * ((float) $distance / 1000);
+			} elseif ($price_based == 'duration' && ($original_price_based == 'fixed_hourly' || $original_price_based == 'dynamic')) {
+				$hour_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price');
+				$price = $hour_price * ((float) $duration / 3600);
 			} elseif ($price_based == 'distance_duration' && $original_price_based == 'dynamic') {
-
-				$hour_price = (float) (MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price') ?? 0);
-				$km_price = (float) (MP_Global_Function::get_post_info($post_id, 'mptbm_km_price') ?? 0);
-				$price = $hour_price * ((float) ($duration ?? 0)) / 3600 + $km_price * ((float) ($distance ?? 0)) / 1000;
-			} elseif ($price_based == 'inclusive' ||  $price_based == 'fixed_hourly' && $original_price_based == 'fixed_hourly') {
-
-				$hour_price = (float) (MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price') ?? 0);
-				$price = $hour_price * ((float) ($fixed_time ?? 0));
-			} elseif ($price_based == 'inclusive' || $price_based == 'manual'  && $original_price_based == 'manual') {
-
+				$hour_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price');
+				$km_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_km_price');
+				$price = $hour_price * ((float) $duration / 3600) + $km_price * ((float) $distance / 1000);
+			} elseif ($price_based == 'inclusive' || $price_based == 'fixed_hourly' && $original_price_based == 'fixed_hourly') {
+				$hour_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price');
+				$price = $hour_price * (float) $fixed_time;
+			} elseif ($price_based == 'inclusive' || $price_based == 'manual' && $original_price_based == 'manual') {
 				$manual_prices = MP_Global_Function::get_post_info($post_id, 'mptbm_manual_price_info', []);
 				$term_prices = MP_Global_Function::get_post_info($post_id, 'mptbm_terms_price_info', []);
-
 				$manual_prices = array_merge($manual_prices, $term_prices);
 
 				if (sizeof($manual_prices) > 0) {
@@ -271,45 +262,43 @@ if (!class_exists('MPTBM_Function')) {
 						$start_location = array_key_exists('start_location', $manual_price) ? $manual_price['start_location'] : '';
 						$end_location = array_key_exists('end_location', $manual_price) ? $manual_price['end_location'] : '';
 						if ($start_place == $start_location && $destination_place == $end_location) {
-							$price = array_key_exists('price', $manual_price) ? $manual_price['price'] : '';
+							$price = (float) ($manual_price['price'] ?? 0);
 						}
 					}
 				}
 			}
-			if ($two_way > 1) {
-				$price = $price * 2;
-			}
-			if ($waiting_time > 0) {
-				$price = $price + $waiting_price;
-			}
-			if ($initial_price > 0) {
-				$price = $price + $initial_price;
-			}
-			if ($min_price > 0 && $min_price > $price) {
 
+			if ($two_way > 1) {
+				$price *= 2;
+			}
+
+			if ($waiting_time > 0) {
+				$price += $waiting_price;
+			}
+
+			if ($initial_price > 0) {
+				$price += $initial_price;
+			}
+
+			if ($min_price > 0 && $min_price > $price) {
 				$price = $min_price;
 			}
 
 			// Check if session key exists for the specific post_id
-			session_start();
 			if (isset($_SESSION['geo_fence_post_' . $post_id])) {
-				// Extract amount from session
 				$session_data = $_SESSION['geo_fence_post_' . $post_id];
-				// Check if session data contains the amount
 				if (isset($session_data[0])) {
-					// Add the amount to the price
 					if (isset($session_data[1]) && $session_data[1] == 'geo-fence-fixed-price') {
-						$price += (float)$session_data[0];
+						$price += (float) $session_data[0];
 					} else {
-						$price += ((float)$session_data[0] / 100) * $price;
+						$price += ((float) $session_data[0] / 100) * $price;
 					}
 				}
-				session_write_close();
 			}
 
-			if ($price) {
-				return $price;
-			}
+			session_write_close();
+
+			return $price ? (float) $price : 0.0;  // Ensure price is returned as a float
 		}
 		public static function get_extra_service_price_by_name($post_id, $service_name)
 		{
