@@ -231,8 +231,8 @@ if (!class_exists('MPTBM_Function')) {
 			$initial_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_initial_price');
 			$min_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_min_price');
 			$price_based = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
-			$original_price_based = get_transient('original_price_based');
 			
+			$original_price_based = get_transient('original_price_based');
 			$waiting_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_waiting_price', 0) * (float) $waiting_time;
 
 			if ($price_based == 'inclusive' && $original_price_based == 'dynamic') {
@@ -249,10 +249,10 @@ if (!class_exists('MPTBM_Function')) {
 				$hour_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price');
 				$km_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_km_price');
 				$price = $hour_price * ((float) $duration / 3600) + $km_price * ((float) $distance / 1000);
-			} elseif ($price_based == 'inclusive' || $price_based == 'fixed_hourly' && $original_price_based == 'fixed_hourly') {
+			} elseif (($price_based == 'inclusive' || $price_based == 'fixed_hourly') && $original_price_based == 'fixed_hourly') {
 				$hour_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price');
 				$price = $hour_price * (float) $fixed_time;
-			} elseif ($price_based == 'inclusive' || $price_based == 'manual' && $original_price_based == 'manual') {
+			} elseif ((trim($price_based) == 'inclusive' || trim($price_based) == 'manual') && trim($original_price_based) == 'manual') {
 				$manual_prices = MP_Global_Function::get_post_info($post_id, 'mptbm_manual_price_info', []);
 				$term_prices = MP_Global_Function::get_post_info($post_id, 'mptbm_terms_price_info', []);
 				$manual_prices = array_merge($manual_prices, $term_prices);
@@ -297,7 +297,7 @@ if (!class_exists('MPTBM_Function')) {
 			}
 
 			session_write_close();
-
+			//delete_transient('original_price_based');
 			return $price ? (float) $price : 0.0;  // Ensure price is returned as a float
 		}
 		public static function get_extra_service_price_by_name($post_id, $service_name)
