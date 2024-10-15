@@ -91,7 +91,9 @@ Utilize Google Maps to delineate both intercity and intracity zones, along with 
 **🧢 Driver Panel to track service status**
 Driver panel feature enables administrators to assign transportation vehicles to drivers. Additionally, email notifications are automatically sent to relevant parties whenever there is a change in the service status of an order 
 
-**📆 Google Calendar Integration**
+## Available Addons:
+
+**📆 Google Calendar Addon**
 Get google calendar event creation on every new order and customer can set thier event also in google calendar 
 
 **≣ Comprehensive Order List Section
