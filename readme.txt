@@ -20,12 +20,12 @@ A comprehensive solution for effective management of taxi bookings and fare calc
 👉 [Plugin Documentation](https://docs.mage-people.com/ecab-taxi-booking-manager/)
 
 ## Taxi Booking Solution that Changes the Game
-Since the taxi business has evolved in different shapes with time, online taxi booking has become increasingly popular. Ecab has taken your taxi booking hassle creating the taxi booking manager plugin solution for your WordPress website. It is powered by WooCommerce and known by WordPress user as taxi booking manager for WooCommerce.
+Since the taxi business has evolved in different shapes with time, online taxi booking has become increasingly popular. Ecab has taken your taxi booking hassle creating the taxi booking manager plugin solution for your WordPress website. It is powered by WooCommerce and known by WordPress users as a taxi booking manager for WooCommerce.
  
-As a result of our efforts, we have successfully replaced a large number of manual taxi booking systems with the digital data-driven, fastest, most effective, and [easy-to-use digital solution](https://mage-people.com/product/wordpress-taxi-cab-booking-plugin-for-woocommerce/). That's why it is one the best taxi booking plugin in WordPress.
+As a result of our efforts, we have successfully replaced a large number of manual taxi booking systems with the digital data-driven, fastest, most effective, and [easy-to-use digital solution](https://mage-people.com/product/wordpress-taxi-cab-booking-plugin-for-woocommerce/). That's why it is one of the best taxi booking plugins in WordPress.
 
 
-Let's take a look at the key features that make the plugin more acceptable in its category.
+Let's look at the key features that make the plugin more acceptable in its category.
 
 ## Key Features:
 
@@ -83,18 +83,18 @@ Create unique checkout experiences for customers, offering payment methods, orde
 Automatically generate PDF tickets or invoices after bookings, providing customers with convenient and secure invoices for accounting purposes.
 
 **🚩 Designating Transport Operation Areas**
-Set fixed area for transport by using  google map
+Set a fixed area for transport by using  Google map
 
 **🏬 Establish GEO FENCE Boundaries and Pricing**
 Utilize Google Maps to delineate both intercity and intracity zones, along with corresponding pricing
 
 **🧢 Driver Panel to track service status**
-Driver panel feature enables administrators to assign transportation vehicles to drivers. Additionally, email notifications are automatically sent to relevant parties whenever there is a change in the service status of an order 
+Driver panel feature enables administrators to assign vehicles to drivers. Additionally, email notifications are automatically sent to relevant parties whenever there is a change in the service status of an order 
 
 ## Available Addons:
 
-**📆 Google Calendar Addon**
-Get google calendar event creation on every new order and customer can set thier event also in google calendar 
+**📆 [Google Calendar Addon](https://mage-people.com/product/google-calendar-for-ecab-taxi-booking-addon/)**
+Get Google Calendar event creation on every new order and customers can set their event also in Google Calendar 
 
 **≣ Comprehensive Order List Section
 View and manage all bookings in a detailed order list
@@ -124,10 +124,10 @@ Once installed, click "Activate" to enable the Ecab Taxi Booking Manager WordPre
 
 == Frequently Asked Questions ==
 
-= Q.Is an API key required? =
+= Is an API key required? =
 Yes, you need to obtain a Google Maps API key. Follow the instructions in the plugin settings to set up and enter your API key.
 
-= Q.How do I get a Google Maps API key? =
+= How do I get a Google Maps API key? =
 Visit the [Google Cloud Console](https://console.cloud.google.com/), create a project, enable the Google Maps JavaScript API, and generate an API key.
 
 = Is Ecab Taxi Manager for WooCommerce Free? =
@@ -163,5 +163,5 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 4. Transport Schedule added
 5. Initial Price added 
 6. Location taxonomy added for manual pricing 
-7.Manual Pricing Slug issue fixed
+7. Manual Pricing Slug issue fixed
 8. Fixed Hourly Responsive issue Fixed
