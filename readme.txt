@@ -9,7 +9,7 @@ Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 	
-A comprehensive solution for effective management of taxi bookings and fare calculations. It is integrated with WooCommerce and the benefit of automation.
+A comprehensive taxi and chauffeur booking solution with fare calculations, integrated with WooCommerce, offering automation for seamless management.
 
 == Description ==
 
@@ -22,7 +22,7 @@ A comprehensive solution for effective management of taxi bookings and fare calc
 ## Taxi and Chauffeur Booking Solution that Changes the Game
 Since the taxi business has evolved in different shapes with time, online taxi booking has become increasingly popular. Ecab has taken your taxi booking hassle creating the taxi booking manager plugin solution for your WordPress website. It is powered by WooCommerce and known by WordPress users as a taxi booking manager for WooCommerce.
  
-As a result of our efforts, we have successfully replaced a large number of manual taxi booking systems with the digital data-driven, fastest, most effective, and [easy-to-use Chauffeur booking solution](https://mage-people.com/product/wordpress-taxi-cab-booking-plugin-for-woocommerce/). That's why it is one of the best taxi booking plugins in WordPress.
+As a result of our efforts, we have successfully replaced a large number of manual taxi booking systems with the digital data-driven, fastest, most effective, and [easy-to-use for Chauffeur booking solution](https://mage-people.com/product/wordpress-taxi-cab-booking-plugin-for-woocommerce/). That's why it is one of the best taxi booking plugins in WordPress.
 
 
 Let's look at the key features that make the plugin more acceptable in its category.
