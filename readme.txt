@@ -1,7 +1,7 @@
 === Taxi Booking Manager for WooCommerce - WordPress plugin | Ecab ===
 Contributors: magepeopleteam, hamidxazad, aamahin
 Author URI : https://mage-people.com
-Tags: Taxi, Chauffeur Service, Taxi Booking
+Tags: Taxi, Chauffeur, Taxi Booking
 Requires at least: 5.3
 Stable tag: trunk
 Tested up to: 6.5.4
