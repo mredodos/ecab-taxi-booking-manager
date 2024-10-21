@@ -298,43 +298,37 @@ if (sizeof($all_dates) > 0) {
 				<?php } ?>
 			</div>
 		</div>
-		<?php
-		// Assuming $map is set to either 'yes' or 'no'
-		$display_style = ($map === 'yes') ? 'block' : 'none';
-
-		if ($price_based != 'manual') { ?>
-			<div class="mptbm_map_area fdColumn" style="display: <?php echo esc_attr($display_style); ?>;">
-				<div class="fullHeight">
-					<div id="mptbm_map_area"></div>
-				</div>
-				<div class="_dLayout mptbm_distance_time">
-					<div class="_equalChild_separatorRight">
-						<div class="_dFlex_pR_xs">
-							<h1 class="_mR">
-								<span class="fas fa-route textTheme"></span>
-							</h1>
-							<div class="fdColumn">
-								<h6><?php esc_html_e('TOTAL DISTANCE', 'ecab-taxi-booking-manager'); ?></h6>
-								<?php if ($km_or_mile != 'km') { ?>
-									<strong class="mptbm_total_distance"><?php esc_html_e(' 0 MILE', 'ecab-taxi-booking-manager'); ?></strong>
-								<?php } else { ?>
-									<strong class="mptbm_total_distance"><?php esc_html_e(' 0 KM', 'ecab-taxi-booking-manager'); ?></strong>
-								<?php } ?>
-							</div>
+		<div class="mptbm_map_area fdColumn" style="display: <?php echo ($price_based != 'manual' && $map == 'yes') ? '' : 'none'; ?>;">
+			<div class="fullHeight">
+				<div id="mptbm_map_area"></div>
+			</div>
+			<div class="_dLayout mptbm_distance_time">
+				<div class="_equalChild_separatorRight">
+					<div class="_dFlex_pR_xs">
+						<h1 class="_mR">
+							<span class="fas fa-route textTheme"></span>
+						</h1>
+						<div class="fdColumn">
+							<h6><?php esc_html_e('TOTAL DISTANCE', 'ecab-taxi-booking-manager'); ?></h6>
+							<?php if ($km_or_mile != 'km') { ?>
+								<strong class="mptbm_total_distance"><?php esc_html_e(' 0 MILE', 'ecab-taxi-booking-manager'); ?></strong>
+							<?php } else { ?>
+								<strong class="mptbm_total_distance"><?php esc_html_e(' 0 KM', 'ecab-taxi-booking-manager'); ?></strong>
+							<?php } ?>
 						</div>
-						<div class="dFlex">
-							<h1 class="_mLR">
-								<span class="fas fa-clock textTheme"></span>
-							</h1>
-							<div class="fdColumn">
-								<h6><?php esc_html_e('TOTAL TIME', 'ecab-taxi-booking-manager'); ?></h6>
-								<strong class="mptbm_total_time"><?php esc_html_e('0 Hour', 'ecab-taxi-booking-manager'); ?></strong>
-							</div>
+					</div>
+					<div class="dFlex">
+						<h1 class="_mLR">
+							<span class="fas fa-clock textTheme"></span>
+						</h1>
+						<div class="fdColumn">
+							<h6><?php esc_html_e('TOTAL TIME', 'ecab-taxi-booking-manager'); ?></h6>
+							<strong class="mptbm_total_time"><?php esc_html_e('0 Hour', 'ecab-taxi-booking-manager'); ?></strong>
 						</div>
 					</div>
 				</div>
 			</div>
-		<?php } ?>
+		</div>
 	</div>
 	<div class="_fullWidth get_details_next_link">
 		<div class="divider"></div>
