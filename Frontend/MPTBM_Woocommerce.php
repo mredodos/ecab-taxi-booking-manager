@@ -27,6 +27,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			add_action('wp_ajax_mptbm_add_to_cart', [$this, 'mptbm_add_to_cart']);
 			add_action('wp_ajax_nopriv_mptbm_add_to_cart', [$this, 'mptbm_add_to_cart']);
 		}
+		
 		public function product_custom_field_to_custom_order_notes($order_id, $data)
 		{
 			foreach ($data as $key => $value) {
@@ -204,7 +205,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						if ($return_date_time && $return_time !== "") {
 							$return_date_time .= " " . $return_time_formatted;
 						}
-
+						
 
 						$item->add_meta_data(esc_html__('Return Date', 'ecab-taxi-booking-manager'), esc_html(MP_Global_Function::date_format($return_date_time)));
 						$item->add_meta_data(esc_html__('Return Time', 'ecab-taxi-booking-manager'), esc_html(MP_Global_Function::date_format($return_date_time, 'time')));
