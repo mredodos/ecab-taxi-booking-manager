@@ -21,7 +21,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 			$plugin_active = MP_Global_Function::check_plugin('ecab-taxi-booking-manager', 'MPTBM_Plugin.php');
 			if ($count_existing_event == 0 && $plugin_active == 1 && $dummy_post_inserted != 'yes') {
 				$this->add_post($this->dummy_cpt());
-				$this->dummy_taxonomy();
+				$this->location_taxonomy();
 				$this->driver_status_taxanomy();
 				flush_rewrite_rules();
 				update_option('mptbm_dummy_already_inserted', 'yes');
@@ -103,7 +103,6 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 			foreach ($taxonomy_data as $taxonomy => $terms) {
 				foreach ($terms as $term) {
 					$term_insert_result = wp_insert_term($term, $taxonomy);
-					error_log($term_insert_result->get_error_message());
 				}
 			}
 			return $taxonomy_data;
