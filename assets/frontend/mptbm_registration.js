@@ -397,27 +397,31 @@ function mptbmCreateMarker(place) {
         let mptbm_enable_return_in_different_date = $('[name="mptbm_enable_return_in_different_date"]').val();
         var selectedDate = $('#mptbm_map_start_date').val();
         var formattedDate = $.datepicker.parseDate('yy-mm-dd', selectedDate);
-
+    
         // Get today's date in YYYY-MM-DD format
         var today = new Date();
         var day = String(today.getDate()).padStart(2, '0');
         var month = String(today.getMonth() + 1).padStart(2, '0');
         var year = today.getFullYear();
         var currentDate = year + '-' + month + '-' + day;
-
+    
         if (selectedDate == currentDate) {
             var currentTime = new Date();
             var currentHour = currentTime.getHours();
             var currentMinutes = currentTime.getMinutes();
-            // Convert minutes to decimal
-            var decimalMinutes = currentMinutes / 60;
-
-            // Combine hours and decimal minutes
-            var timeInDecimal = currentHour + decimalMinutes;
-            var currentTimeDecimal = timeInDecimal.toFixed(1);
+    
+            // Format minutes to always have two digits (e.g., 5 -> 05)
+            var formattedMinutes = String(currentMinutes).padStart(2, '0');
+    
+            // Combine hours and formatted minutes
+            var currentTimeFormatted = currentHour + '.' + formattedMinutes;
+    
+            console.log(currentMinutes);        // e.g., 41
+            console.log(currentTimeFormatted);  // e.g., "12.41"
+    
             $('.mp_input_select_list li').each(function () {
                 var timeValue = parseFloat($(this).attr('data-value'));
-                if (timeValue > currentTimeDecimal) {
+                if (timeValue > parseFloat(currentTimeFormatted)) {
                     $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
                 }
             });
@@ -427,12 +431,12 @@ function mptbmCreateMarker(place) {
                 $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
             });
         }
-
+    
         // Update the return date picker if needed
         if (mptbm_enable_return_in_different_date == 'yes') {
             $('#mptbm_return_date').datepicker('option', 'minDate', formattedDate);
         }
-
+    
         let parent = $(this).closest(".mptbm_transport_search_area");
         mptbm_content_refresh(parent);
         parent
@@ -441,6 +445,7 @@ function mptbmCreateMarker(place) {
             .find("input.formControl")
             .trigger("click");
     });
+    
 
     $(document).on("change", "#mptbm_map_return_date", function () {
         let mptbm_enable_return_in_different_date = $('[name="mptbm_enable_return_in_different_date"]').val();
@@ -449,7 +454,7 @@ function mptbmCreateMarker(place) {
             var selectedTime = parseFloat($('#mptbm_map_start_time').val());
             var selectedDate = $('#mptbm_map_start_date').val();
             var dateValue = $('#mptbm_map_return_date').val();
-
+           
             // Check if the return date is the same as the pickup date
             if (selectedDate == dateValue) {
                 $('#return_time_list').show();
