@@ -415,10 +415,6 @@ function mptbmCreateMarker(place) {
     
             // Combine hours and formatted minutes
             var currentTimeFormatted = currentHour + '.' + formattedMinutes;
-    
-            console.log(currentMinutes);        // e.g., 41
-            console.log(currentTimeFormatted);  // e.g., "12.41"
-    
             $('.mp_input_select_list li').each(function () {
                 var timeValue = parseFloat($(this).attr('data-value'));
                 if (timeValue > parseFloat(currentTimeFormatted)) {
@@ -474,7 +470,6 @@ function mptbmCreateMarker(place) {
                 $('.mptbm_map_return_time_input').val('');
                 $('.return_time_list-no-dsiplay li').each(function () {
                     var timeValue = parseFloat($(this).attr('data-value'));
-                    console.log(timeValue);
                     $('#mptbm_map_return_time').siblings('.mp_input_select_list').append($(this).clone());
                 });
             }
