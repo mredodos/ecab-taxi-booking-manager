@@ -282,6 +282,10 @@ if (!class_exists('MPTBM_Function')) {
 
 			if ($min_price > 0 && $min_price > $price) {
 				$price = $min_price;
+				$return_min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price_return');
+				if($return_min_price){
+					$price= $price+ $return_min_price;
+				}
 			}
 
 			// Check if session key exists for the specific post_id

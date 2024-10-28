@@ -97,6 +97,7 @@ if (!class_exists('MPTBM_Settings')) {
 				//================//
 				'mptbm_initial_price' => esc_html__('The initial price that will be added as the starting price', 'ecab-taxi-booking-manager'),
 				'mptbm_minimum_price' => esc_html__('Sets the minimum price. If the calculated price is lower, the minimum will be applied', 'ecab-taxi-booking-manager'),
+				'mptbm_return_minimum_price' => esc_html__('Sets the minimum price of return trip', 'ecab-taxi-booking-manager'),
 				'mptbm_price_based' => esc_html__('This is a price calculation model, price will vary based on your choice', 'ecab-taxi-booking-manager'),
 				'mptbm_km_price' => esc_html__('Set Price per KM', 'ecab-taxi-booking-manager'),
 				'mptbm_hour_price' => esc_html__('Set Price per Hour', 'ecab-taxi-booking-manager'),
