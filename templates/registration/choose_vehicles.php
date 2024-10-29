@@ -174,7 +174,11 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
 
 
 
-function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based) {
+function wptbm_get_schedule($post_id, $days_name, $selected_day,$start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based) {
+    $timestamp = strtotime($selected_day);
+
+    $selected_day = date('l', $timestamp);
+    
     // Check & destroy transport session if exist
     session_start();
     if (isset($_SESSION["geo_fence_post_" . $post_id])) {
@@ -209,25 +213,36 @@ function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_
     }
     foreach ($days_name as $name) {
         $start_time = get_post_meta($post_id, "mptbm_" . $name . "_start_time", true);
+        if($start_time == ''){
+            $start_time = get_post_meta($post_id, "mptbm_default_start_time", true);
+        }
         $end_time = get_post_meta($post_id, "mptbm_" . $name . "_end_time", true);
+        if($end_time == ''){
+            $end_time = get_post_meta($post_id, "mptbm_default_end_time", true);
+        }
         if ($start_time !== "" && $end_time !== "") {
             $schedule[$name] = [$start_time, $end_time];
         }
     }
-    // Check if $start_time_schedule is between start_time and end_time for any day
+    
     foreach ($schedule as $day => $times) {
         $day_start_time = $times[0];
         $day_end_time = $times[1];
-        if (isset($return_time_schedule) && $return_time_schedule !== "") {
-            if ($return_time_schedule >= $day_start_time && $return_time_schedule <= $day_end_time && ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time)) {
-                return true; // $start_time_schedule and $return_time_schedule are within the schedule for this day
-                
-            }
-        } else {
-            if ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time) {
-                return true;
+        $day = ucwords($day);
+        
+        if( $selected_day == $day){ 
+            if (isset($return_time_schedule) && $return_time_schedule !== "") {
+                if ($return_time_schedule >= $day_start_time && $return_time_schedule <= $day_end_time && ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time)) {
+                    return true; 
+                    
+                }
+            } else {
+                if ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time) {
+                    return true;
+                }
             }
         }
+        
     }
     // If all other days have empty start and end times, check the 'default' day
     $all_empty = true;
@@ -237,6 +252,7 @@ function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_
             break;
         }
     }
+    
     if ($all_empty) {
         $default_start_time = get_post_meta($post_id, "mptbm_default_start_time", true);
         $default_end_time = get_post_meta($post_id, "mptbm_default_end_time", true);
@@ -257,6 +273,7 @@ function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_
     return false;
 }
 $start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_date"]) : "";
+
 $start_time_schedule = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 $start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 
@@ -419,7 +436,7 @@ if ($all_posts->found_posts > 0) {
     $vehicle_item_count = 0;
     foreach ($posts as $post) {
         $post_id = $post->ID;
-        $check_schedule = wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based);
+        $check_schedule = wptbm_get_schedule($post_id, $days_name, $start_date,$start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based);
         if ($check_schedule) {
             $vehicle_item_count = $vehicle_item_count + 1;
             include MPTBM_Function::template_path("registration/vehicle_item.php");

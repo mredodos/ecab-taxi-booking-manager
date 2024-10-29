@@ -24,14 +24,21 @@
 			public function time_slot($time, $stat_time = '', $end_time = '') {
 				if ($stat_time >= 0 || $stat_time == '') {
 					$time_count = $stat_time == '' ? 0 : $stat_time;
-					$end_time = $end_time != '' ? $end_time : 24;
-					for ($i = $time_count; $i <= $end_time; $i = $i + 0.5) {
-						if ($stat_time == 'yes' || $i > $time_count) {
-						?>
-						<option value="<?php echo esc_attr($i); ?>" <?php echo esc_attr($time != '' && $time == $i ? 'selected' : ''); ?>><?php echo esc_html(date_i18n('h:i A', $i * 3600)); ?></option>							
-						<?php
-						}
-					}
+					$end_time = $end_time != '' ? $end_time : 48*30;
+					
+					for ($i = 30; $i <= $end_time; $i += 30) {
+						// Calculate hours and minutes
+						$hours = floor($i / 60);
+						$minutes = $i % 60;
+
+						// Generate the data-value as hours + fraction (minutes / 60)
+						$data_value = $hours + ($minutes / 100);
+
+						// Format the time for display
+						$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+					?>
+						<option  value="<?php echo esc_attr($data_value);?>" <?php echo esc_attr($time != '' && $time == $data_value ? 'selected' : '');?>><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></option>
+					<?php }
 				}
 			}
 			
@@ -61,15 +68,18 @@
 			public function time_slot_tr($post_id, $day) {
 				$start_name = 'mptbm_' . $day . '_start_time';
 				$default_start_time = $day == 'default' ? 0.5 : '';
+				
 				$start_time = MP_Global_Function::get_post_info($post_id, $start_name, $default_start_time);
+				
 				$end_name = 'mptbm_' . $day . '_end_time';
 				$default_end_time = $day == 'default' ? 24 : '';
+				
 				$end_time = MP_Global_Function::get_post_info($post_id, $end_name, $default_end_time);
+				
 				?>
 				<tr>
 					<th style="text-transform: capitalize;"><?php echo esc_html($day); ?></th>
 					<td class="mptbm_start_time" data-day-name="<?php echo esc_attr($day); ?>">
-						<?php //echo '<pre>'; print_r( $start_time );echo '</pre>'; ?>
 						<label>
 							<select class="formControl" name="<?php echo esc_attr($start_name); ?>">
 								<option value="" <?php echo esc_attr($start_time == '' ? 'selected' : ''); ?>>
@@ -83,7 +93,13 @@
 						<strong><?php esc_html_e('To', 'ecab-taxi-booking-manager'); ?></strong>
 					</td>
 					<td class="mptbm_end_time">
-						<?php $this->end_time_slot($post_id, $day, $start_time); ?>
+					<select class="formControl" name="<?php echo esc_attr($end_name); ?>">
+								<option value="" <?php echo esc_attr($end_time == '' ? 'selected' : ''); ?>>
+									<?php $this->default_text($day); ?>
+								</option>
+								<?php $this->time_slot($end_time); ?>
+							</select>
+						
 					</td>
 					
 				</tr>
@@ -411,6 +427,7 @@
 				$end_name = 'mptbm_' . $day . '_end_time';
 				$end_time = $this->get_submit_info($end_name);
 				update_post_meta($post_id, $end_name, $end_time);
+				
 			}
 		}
 		new MPTBM_Date_Settings();
