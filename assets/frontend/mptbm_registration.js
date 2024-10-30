@@ -100,6 +100,8 @@ function mptbmCreateMarker(place) {
 (function ($) {
     "use strict";
     $(document).ready(function () {
+        $(".mpStyle ul.mp_input_select_list").hide();
+
         if ($("#mptbm_map_area").length > 0) {
             mptbm_set_cookie_distance_duration();
             if (
@@ -142,9 +144,7 @@ function mptbmCreateMarker(place) {
         let mptbm_enable_return_in_different_date = parent
             .find('[name="mptbm_enable_return_in_different_date"]')
             .val();
-        let mptbm_enable_filter_via_features = parent
-            .find('[name="mptbm_enable_filter_via_features"]')
-            .val();
+        
         let target = parent.find(".tabsContentNext");
         let target_date = parent.find("#mptbm_map_start_date");
         let return_target_date = parent.find("#mptbm_map_return_date");
@@ -392,6 +392,7 @@ function mptbmCreateMarker(place) {
     });
     $(document).on("change", "#mptbm_map_start_date", function () {
         // Clear the time slots list
+
         $('#mptbm_map_start_time').siblings('.start_time_list').empty();
         $('.start_time_input,#mptbm_map_start_time').val('');
         let mptbm_enable_return_in_different_date = $('[name="mptbm_enable_return_in_different_date"]').val();
@@ -415,7 +416,8 @@ function mptbmCreateMarker(place) {
     
             // Combine hours and formatted minutes
             var currentTimeFormatted = currentHour + '.' + formattedMinutes;
-            $('.mp_input_select_list li').each(function () {
+            $('.start_time_list-no-dsiplay li').each(function () {
+                
                 var timeValue = parseFloat($(this).attr('data-value'));
                 if (timeValue > parseFloat(currentTimeFormatted)) {
                     $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());

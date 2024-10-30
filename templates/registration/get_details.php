@@ -117,6 +117,24 @@ if (sizeof($all_dates) > 0) {
 							<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 						<?php } ?>
 					</ul>
+					<ul class="start_time_list-no-dsiplay" style="display:none">
+								<?php
+
+								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
+									// Calculate hours and minutes
+									$hours = floor($i / 60);
+									$minutes = $i % 60;
+
+									// Generate the data-value as hours + fraction (minutes / 60)
+									$data_value = $hours + ($minutes / 100);
+
+									// Format the time for display
+									$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+
+								?>
+									<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
+								<?php } ?>
+							</ul>
 
 				</div>
 				<div class="inputList">
