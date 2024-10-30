@@ -425,7 +425,7 @@ function mptbmCreateMarker(place) {
             });
         } else {
             // If the selected date is not today, show all time slots
-            $('.mp_input_select_list li').each(function () {
+            $('.start_time_list-no-dsiplay li').each(function () {
                 $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
             });
         }
