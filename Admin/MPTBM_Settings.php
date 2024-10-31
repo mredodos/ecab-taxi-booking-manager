@@ -107,7 +107,8 @@ if (!class_exists('MPTBM_Settings')) {
 				'mptbm_operation_area_increase_price_by' => esc_html__("Set the price increase amount, which can be specified as a fixed value or a percentage", "ecab-taxi-booking-manager"),
 				'mptbm_increase_price_fixed' => esc_html__("Specify a fixed amount to increase the price by", "ecab-taxi-booking-manager"),
 				'mptbm_increase_price_percentage' => esc_html__("Specify the percentage by which the price will be increased", "ecab-taxi-booking-manager"),
-				'mptbm_increase_price_direction' => esc_html__("Select the direction of travel: 'Origin to Destination' or 'Both ways' for round trips", "ecab-taxi-booking-manager")
+				'mptbm_increase_price_direction' => esc_html__("Select the direction of travel: 'Origin to Destination' or 'Both ways' for round trips", "ecab-taxi-booking-manager"),
+				'mptbm_return_discount' => esc_html__('This is to way return discount fixed or percentage', 'ecab-taxi-booking-manager'),
 			);
 			$des = apply_filters('mptbm_filter_description_array', $des);
 			return $des[$key];

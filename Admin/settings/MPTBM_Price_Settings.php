@@ -19,6 +19,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 			$initial_price = MP_Global_Function::get_post_info($post_id, 'mptbm_initial_price');
 			$min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price');
 			$return_min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price_return');
+			$return_discount = MP_Global_Function::get_post_info($post_id, 'mptbm_return_discount');
 			$display_map = MP_Global_Function::get_settings('mptbm_map_api_settings', 'display_map', 'enable');
 			$price_based = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
 			$price_based = $display_map == 'disable' ? 'manual' : $price_based;
@@ -74,6 +75,15 @@ if (!class_exists('MPTBM_Price_Settings')) {
 							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_return_minimum_price'); ?></span>
 						</div>
 						<input class="formControl mp_price_validation" name="mptbm_min_price_return" value="<?php echo esc_attr($return_min_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+					</label>
+				</section>
+				<section>
+					<label class="label">
+						<div>
+							<h6><?php esc_html_e('Return Discount', 'ecab-taxi-booking-manager'); ?></h6>
+							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_return_discount'); ?></span>
+						</div>
+						<input class="formControl " name="mptbm_return_discount" value="<?php echo esc_attr($return_discount); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 					</label>
 				</section>
 				<?php if ($waiting_time_check == 'enable') { ?>
@@ -328,6 +338,8 @@ if (!class_exists('MPTBM_Price_Settings')) {
 				update_post_meta($post_id, 'mptbm_min_price', $min_price);
 				$return_min_price = isset($_POST['mptbm_min_price_return']) ? sanitize_text_field($_POST['mptbm_min_price_return']) : '';
 				update_post_meta($post_id, 'mptbm_min_price_return', $return_min_price);
+				$return_discount = isset($_POST['mptbm_return_discount']) ? sanitize_text_field($_POST['mptbm_return_discount']) : '';
+    			update_post_meta($post_id, 'mptbm_return_discount', $return_discount);
 				$price_based = isset($_POST['mptbm_price_based']) ? sanitize_text_field($_POST['mptbm_price_based']) : '';
 				update_post_meta($post_id, 'mptbm_price_based', $price_based);
 				$distance_price = isset($_POST['mptbm_km_price']) ? sanitize_text_field($_POST['mptbm_km_price']) : 0;
