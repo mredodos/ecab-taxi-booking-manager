@@ -223,6 +223,7 @@ if (!class_exists('MPTBM_Function')) {
 		public static function get_price($post_id, $distance = 1000, $duration = 3600, $start_place = '', $destination_place = '', $waiting_time = 0, $two_way = 1, $fixed_time = 0)
 		{
 			$price = 0.0;  // Initialize price as a float
+			$return_discount_amount = 0;
 			// Check if the session is active
 			if (session_status() !== PHP_SESSION_ACTIVE) {
 				// Start the session if it's not active
@@ -288,6 +289,65 @@ if (!class_exists('MPTBM_Function')) {
 				}
 			}
 
+			if ($two_way > 1) {
+				$return_discount_amount = self::calculate_return_discount($post_id, $price); // Calculate discount for two-way
+				$price -= $return_discount_amount; // Apply discount
+			}
+			if ($min_price > 0) {
+        if ($price < $min_price) {
+            $price = $min_price; 
+			$return_discount_amount = 0; 
+        }
+
+        if ($return_discount_amount > 0 && $min_price < $return_discount_amount ) {
+	
+            if ($return_discount_amount >= $min_price ) {
+                $return_discount_amount = 0; 
+                $price = $min_price; 
+            } else {
+                $price -= $return_discount_amount; 
+            }
+        }
+    }
+
+			if(class_exists('MPTBM_Datewise_Discount_Addon')){
+				$selected_start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_date"]) : "";
+			$selected_start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
+
+				if (strlen($selected_start_time) == 2) {
+					$selected_start_time .= ":00"; // Convert '17' to '17:00'
+				}
+
+				$selected_start_date = date('Y-m-d', strtotime($selected_start_date));
+				$selected_start_time = date('H:i', strtotime($selected_start_time));
+
+				$discounts = MP_Global_Function::get_post_info($post_id, 'mptbm_discounts', []);
+				if (!empty($discounts)) {
+					foreach ($discounts as $discount) {
+						$start_date = isset($discount['start_date']) ? date('Y-m-d', strtotime($discount['start_date'])) : '';
+						$end_date = isset($discount['end_date']) ? date('Y-m-d', strtotime($discount['end_date'])) : '';
+						$time_slots = $discount['time_slots'] ?? [];
+						if ($selected_start_date >= $start_date && $selected_start_date <= $end_date) {
+							foreach ($time_slots as $slot) {
+								$start_time = isset($slot['start_time']) ? date('H:i', strtotime($slot['start_time'])) : '';
+								$end_time = isset($slot['end_time']) ? date('H:i', strtotime($slot['end_time'])) : '';
+								$percentage = floatval(rtrim($slot['percentage'], '%'));
+								$type = $slot['type'] ?? 'increase'; // Use default if not set
+								if ($selected_start_time >= $start_time && $selected_start_time <= $end_time) {
+									$discount_amount = ($percentage / 100) * $price;
+									if ($type === 'decrease') {
+										$price -= abs($discount_amount);
+									} else {
+										$price += $discount_amount;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+
 			// Check if session key exists for the specific post_id
 			if (isset($_SESSION['geo_fence_post_' . $post_id])) {
 				$session_data = $_SESSION['geo_fence_post_' . $post_id];
@@ -302,7 +362,25 @@ if (!class_exists('MPTBM_Function')) {
 
 			session_write_close();
 			//delete_transient('original_price_based');
-			return $price ? (float) $price : 0.0;  // Ensure price is returned as a float
+			return $price;
+		
+		}
+		public static function calculate_return_discount($post_id, $price) {
+				$return_discount = MP_Global_Function::get_post_info($post_id, 'mptbm_return_discount', 0);
+				
+				// Check if the return discount is a percentage or a fixed amount
+				if (strpos($return_discount, '%') !== false) {
+					// It's a percentage discount
+					$percentage = floatval(trim($return_discount, '%'));
+					$return_discount_amount = ($percentage / 100) * $price;
+					
+				} else {
+					// It's a fixed amount discount
+					$return_discount_amount = floatval($return_discount);
+					
+				}
+				
+				return $return_discount_amount;
 		}
 		public static function get_extra_service_price_by_name($post_id, $service_name)
 		{
