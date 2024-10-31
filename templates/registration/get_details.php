@@ -67,7 +67,11 @@ $max_schedule_value = floatval($max_schedule_value);
 $min_minutes = floor($min_schedule_value) * 60 + ($min_schedule_value - floor($min_schedule_value)) * 60;
 $max_minutes = floor($max_schedule_value) * 60 + ($max_schedule_value - floor($max_schedule_value)) * 60;
 
-
+$buffer_time = (int) MP_Global_Function::get_settings('mptbm_general_settings', 'enable_buffer_time');
+$current_time = current_time('timestamp');
+$current_minutes = intval(date('H', $current_time)) * 60 + intval(date('i', $current_time));
+$buffer_end_minutes = $current_minutes + $buffer_time;
+$buffer_end_minutes = max($buffer_end_minutes, 0);
 
 if (sizeof($all_dates) > 0) {
 	$taxi_return = MPTBM_Function::get_general_settings('taxi_return', 'enable');
@@ -104,6 +108,9 @@ if (sizeof($all_dates) > 0) {
 					<ul class="mp_input_select_list start_time_list">
 						<?php
 						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
+							if ($i < $buffer_end_minutes) {
+            continue; // Skip this time as it's within the buffer period
+        }
 							// Calculate hours and minutes
 							$hours = floor($i / 60);
 							$minutes = $i % 60;
@@ -121,6 +128,9 @@ if (sizeof($all_dates) > 0) {
 								<?php
 
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
+									if ($i < $buffer_end_minutes) {
+            continue; // Skip this time as it's within the buffer period
+        }
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
@@ -218,6 +228,9 @@ if (sizeof($all_dates) > 0) {
 								<?php
 
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
+									if ($i < $buffer_end_minutes) {
+            continue; // Skip this time as it's within the buffer period
+        }
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
@@ -235,6 +248,9 @@ if (sizeof($all_dates) > 0) {
 							<ul class="mp_input_select_list return_time_list">
 								<?php
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
+									if ($i < $buffer_end_minutes) {
+            continue; // Skip this time as it's within the buffer period
+        }
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;

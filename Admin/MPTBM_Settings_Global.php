@@ -210,6 +210,13 @@ if (!class_exists('MPTBM_Settings_Global')) {
 						'placeholder' => 'https://mysite.com/taxi'
 					),
 					array(
+    'name' => 'enable_buffer_time',
+    'label' => $label . ' ' . esc_html__('Buffer Time', 'ecab-taxi-booking-manager'),
+    'desc' => esc_html__('Enter buffer time per minutes. Also you have to change the timezone from') . '<strong style="color: red;">' . esc_html__('Settings --> General --> Timezone', 'ecab-taxi-booking-manager') . '</strong>',
+    'type' => 'text',
+    'placeholder' => 'Ex:10'
+						),
+					array(
 						'name' => 'mptbm_pickup_interval_time',
 						'label' => $label . ' ' . esc_html__('Interval of pickup/return time in frontend', 'ecab-taxi-booking-manager'),
 						'desc' => esc_html__('Select frontend interval pickup and return time', 'ecab-taxi-booking-manager'),
