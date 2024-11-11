@@ -145,8 +145,8 @@
                                 <h3>CHECKOUT FIELDS</h3>
                                 <li class="tab-item" data-tabs-target="#mptbm_wc_checkout_settings"><i class="dashicons dashicons-admin-generic text-primary"></i> Checkout Settings <i class="i i-chevron-right dashicons dashicons-arrow-right-alt2"></i></li>
                                 <li class="tab-item active" data-tabs-target="#mptbm_wc_billing_field_settings"><i class="dashicons dashicons-clipboard text-primary"></i> Billing Fields <i class="i i-chevron-right dashicons dashicons-arrow-right-alt2"></i></li>
-                                <li class="tab-item" data-tabs-target="#mptbm_wc_shipping_field_settings"><i class="dashicons dashicons-airplane text-primary"></i> Shipping Fields <i class="i i-chevron-right dashicons dashicons-arrow-right-alt2"></i></li>
-                                <li class="tab-item" data-tabs-target="#mptbm_wc_order_field_settings"><i class="dashicons dashicons-format-status text-primary"></i> Order Fields <i class="i i-chevron-right dashicons dashicons-arrow-right-alt2"></i></li>
+                                <!-- <li class="tab-item" data-tabs-target="#mptbm_wc_shipping_field_settings"><i class="dashicons dashicons-airplane text-primary"></i> Shipping Fields <i class="i i-chevron-right dashicons dashicons-arrow-right-alt2"></i></li>
+                                <li class="tab-item" data-tabs-target="#mptbm_wc_order_field_settings"><i class="dashicons dashicons-format-status text-primary"></i> Order Fields <i class="i i-chevron-right dashicons dashicons-arrow-right-alt2"></i></li> -->
                             </ul>
                             <div class="tab-content-container">
 								<?php do_action('mptbm_wc_checkout_tab_content', MPTBM_Wc_Checkout_Fields_Helper::get_checkout_fields_for_list()); ?>

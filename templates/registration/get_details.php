@@ -7,6 +7,9 @@ if (!defined('ABSPATH')) {
 	die;
 } // Cannot access pages directly
 delete_transient('original_price_based');
+$restrict_search_country = MP_Global_Function::get_settings('mptbm_map_api_settings', 'mp_country_restriction', 'no');
+
+$country = MP_Global_Function::get_settings('mptbm_map_api_settings', 'mp_country', 'no');
 $km_or_mile = MP_Global_Function::get_settings('mp_global_settings', 'km_or_mile', 'km');
 $price_based = $price_based ?? '';
 set_transient('original_price_based', $price_based);
@@ -73,6 +76,12 @@ $current_minutes = intval(date('H', $current_time)) * 60 + intval(date('i', $cur
 $buffer_end_minutes = $current_minutes + $buffer_time;
 $buffer_end_minutes = max($buffer_end_minutes, 0);
 
+while ($buffer_end_minutes > 1440) {
+	array_shift($all_dates);
+	$buffer_end_minutes -= 1440;
+}
+
+
 if (sizeof($all_dates) > 0) {
 	$taxi_return = MPTBM_Function::get_general_settings('taxi_return', 'enable');
 	$interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30');
@@ -88,6 +97,11 @@ if (sizeof($all_dates) > 0) {
 				<input type='hidden' id="mptbm_enable_view_search_result_page" name="mptbm_enable_view_search_result_page" value="<?php echo MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_search_result_page') ?>" />
 				<input type='hidden' id="mptbm_enable_return_in_different_date" name="mptbm_enable_return_in_different_date" value="<?php echo MP_Global_Function::get_settings('mptbm_general_settings', 'enable_return_in_different_date') ?>" />
 				<input type='hidden' id="mptbm_enable_filter_via_features" name="mptbm_enable_filter_via_features" value="<?php echo MP_Global_Function::get_settings('mptbm_general_settings', 'enable_filter_via_features') ?>" />
+				<input type='hidden' id="mptbm_buffer_end_minutes" name="mptbm_buffer_end_minutes" value="<?php echo $buffer_end_minutes; ?>" />
+				<input type='hidden' id="mptbm_first_calendar_date" name="mptbm_first_calendar_date" value="<?php echo $all_dates[0]; ?>" />
+				<input type='hidden' id="mptbm_country" name="mptbm_country" value="<?php echo $country; ?>" />
+				<input type='hidden' id="mptbm_restrict_search_country" name="mptbm_restrict_search_country" value="<?php echo $restrict_search_country; ?>" />
+				
 				<div class="inputList">
 					<label class="fdColumn">
 						<input type="hidden" id="mptbm_map_start_date" value="" />
@@ -108,9 +122,8 @@ if (sizeof($all_dates) > 0) {
 					<ul class="mp_input_select_list start_time_list">
 						<?php
 						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
-							if ($i < $buffer_end_minutes) {
-            continue; // Skip this time as it's within the buffer period
-        }
+							
+							
 							// Calculate hours and minutes
 							$hours = floor($i / 60);
 							$minutes = $i % 60;
@@ -123,28 +136,28 @@ if (sizeof($all_dates) > 0) {
 						?>
 							<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 						<?php } ?>
+						
 					</ul>
 					<ul class="start_time_list-no-dsiplay" style="display:none">
-								<?php
+						<?php
 
-								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
-									if ($i < $buffer_end_minutes) {
-            continue; // Skip this time as it's within the buffer period
-        }
-									// Calculate hours and minutes
-									$hours = floor($i / 60);
-									$minutes = $i % 60;
+						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
+							
+							// Calculate hours and minutes
+							$hours = floor($i / 60);
+							$minutes = $i % 60;
 
-									// Generate the data-value as hours + fraction (minutes / 60)
-									$data_value = $hours + ($minutes / 100);
+							// Generate the data-value as hours + fraction (minutes / 60)
+							$data_value = $hours + ($minutes / 100);
 
-									// Format the time for display
-									$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+							// Format the time for display
+							$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
 
-								?>
-									<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
-								<?php } ?>
-							</ul>
+						?>
+							<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
+						<?php } ?>
+						
+					</ul>
 
 				</div>
 				<div class="inputList">
@@ -229,8 +242,8 @@ if (sizeof($all_dates) > 0) {
 
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
 									if ($i < $buffer_end_minutes) {
-            continue; // Skip this time as it's within the buffer period
-        }
+										continue; // Skip this time as it's within the buffer period
+									}
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
@@ -249,8 +262,8 @@ if (sizeof($all_dates) > 0) {
 								<?php
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
 									if ($i < $buffer_end_minutes) {
-            continue; // Skip this time as it's within the buffer period
-        }
+										continue; // Skip this time as it's within the buffer period
+									}
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
