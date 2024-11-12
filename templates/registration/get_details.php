@@ -71,11 +71,13 @@ $min_minutes = floor($min_schedule_value) * 60 + ($min_schedule_value - floor($m
 $max_minutes = floor($max_schedule_value) * 60 + ($max_schedule_value - floor($max_schedule_value)) * 60;
 
 $buffer_time = (int) MP_Global_Function::get_settings('mptbm_general_settings', 'enable_buffer_time');
+
 $current_time = current_time('timestamp');
+
 $current_minutes = intval(date('H', $current_time)) * 60 + intval(date('i', $current_time));
+
 $buffer_end_minutes = $current_minutes + $buffer_time;
 $buffer_end_minutes = max($buffer_end_minutes, 0);
-
 while ($buffer_end_minutes > 1440) {
 	array_shift($all_dates);
 	$buffer_end_minutes -= 1440;

@@ -437,7 +437,7 @@ function mptbmCreateMarker(place) {
             $('.start_time_list-no-dsiplay li').each(function () {
 
                 var timeValue = parseFloat($(this).attr('data-value'));
-                if (timeValue > parseFloat(currentTimeFormatted)) {
+                if (timeValue > parseFloat(currentTimeFormatted) && timeValue >= mptbm_buffer_end_minutes / 60) {
                     $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
                 }
             });
