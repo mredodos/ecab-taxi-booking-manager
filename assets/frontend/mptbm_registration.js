@@ -138,7 +138,7 @@ function mptbmCreateMarker(place) {
                 );
                 if(mptbm_restrict_search_to_country == 'yes'){
                     end_place_autoload.setComponentRestrictions({
-                        country: ["bd"]
+                        country: [mptbm_country]
                     });
                 }
                 
