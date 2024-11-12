@@ -67,8 +67,14 @@ $min_schedule_value = floatval($min_schedule_value);
 $max_schedule_value = floatval($max_schedule_value);
 
 // Convert schedule values to minutes
-$min_minutes = floor($min_schedule_value) * 60 + ($min_schedule_value - floor($min_schedule_value)) * 60;
-$max_minutes = floor($max_schedule_value) * 60 + ($max_schedule_value - floor($max_schedule_value)) * 60;
+function convertToMinutes($schedule_value) {
+    $hours = floor($schedule_value); // Get the hour part
+    $minutes = ($schedule_value - $hours) * 100; // Convert decimal part to minutes
+    return $hours * 60 + $minutes;
+}
+
+$min_minutes = convertToMinutes($min_schedule_value);
+$max_minutes = convertToMinutes($max_schedule_value);
 
 $buffer_time = (int) MP_Global_Function::get_settings('mptbm_general_settings', 'enable_buffer_time');
 
