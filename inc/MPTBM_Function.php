@@ -284,7 +284,7 @@ if (!class_exists('MPTBM_Function')) {
 			if ($min_price > 0 && $min_price > $price) {
 				$price = $min_price;
 				$return_min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price_return');
-				if($return_min_price){
+				if($return_min_price && $two_way > 1){
 					$price= $price+ $return_min_price;
 				}
 			}
