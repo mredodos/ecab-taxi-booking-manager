@@ -23,7 +23,6 @@ $area_class = $form_style != 'horizontal' ? 'mptbm_form_details_area fdColumn' :
 $mptbm_all_transport_id = MP_Global_Function::get_all_post_id('mptbm_rent');
 $mptbm_available_for_all_time = false;
 $mptbm_schedule = [];
-// Initialize variables to hold the global smallest and largest values
 $min_schedule_value = 0;
 $max_schedule_value = 24;
 $loop = 1;
@@ -78,18 +77,20 @@ $max_minutes = convertToMinutes($max_schedule_value);
 
 $buffer_time = (int) MP_Global_Function::get_settings('mptbm_general_settings', 'enable_buffer_time');
 
-$current_time = current_time('timestamp');
+$current_time = time(); 
+$current_hour = wp_date('H', $current_time); 
+$current_minute = wp_date('i', $current_time); 
 
-$current_minutes = intval(date('H', $current_time)) * 60 + intval(date('i', $current_time));
+// Convert to total minutes since midnight local time
+$current_minutes = intval($current_hour) * 60 + intval($current_minute);
 
 $buffer_end_minutes = $current_minutes + $buffer_time;
+
 $buffer_end_minutes = max($buffer_end_minutes, 0);
 while ($buffer_end_minutes > 1440) {
 	array_shift($all_dates);
 	$buffer_end_minutes -= 1440;
 }
-
-
 if (sizeof($all_dates) > 0) {
 	$taxi_return = MPTBM_Function::get_general_settings('taxi_return', 'enable');
 	$interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30');
@@ -249,9 +250,7 @@ if (sizeof($all_dates) > 0) {
 								<?php
 
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
-									if ($i < $buffer_end_minutes) {
-										continue; // Skip this time as it's within the buffer period
-									}
+									
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
@@ -269,9 +268,7 @@ if (sizeof($all_dates) > 0) {
 							<ul class="mp_input_select_list return_time_list">
 								<?php
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
-									if ($i < $buffer_end_minutes) {
-										continue; // Skip this time as it's within the buffer period
-									}
+									
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;

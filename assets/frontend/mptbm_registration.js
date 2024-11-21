@@ -414,6 +414,7 @@ function mptbmCreateMarker(place) {
         let mptbm_enable_return_in_different_date = $('[name="mptbm_enable_return_in_different_date"]').val();
         let mptbm_buffer_end_minutes = $('[name="mptbm_buffer_end_minutes"]').val();
         let mptbm_first_calendar_date = $('[name="mptbm_first_calendar_date"]').val();
+        
         var selectedDate = $('#mptbm_map_start_date').val();
         var formattedDate = $.datepicker.parseDate('yy-mm-dd', selectedDate);
 
@@ -435,14 +436,14 @@ function mptbmCreateMarker(place) {
             // Combine hours and formatted minutes
             var currentTimeFormatted = currentHour + '.' + formattedMinutes;
             $('.start_time_list-no-dsiplay li').each(function () {
-
-                var timeValue = parseFloat($(this).attr('data-value'));
+                const timeValue = parseFloat($(this).attr('data-value'));
                 if (timeValue > parseFloat(currentTimeFormatted) && timeValue >= mptbm_buffer_end_minutes / 60) {
                     $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
                 }
             });
         } else {
             if(selectedDate  == mptbm_first_calendar_date){
+                console.log(mptbm_first_calendar_date);
                 $('.start_time_list-no-dsiplay li').each(function () {
                     const timeValue = parseFloat($(this).attr('data-value'));
                     if (timeValue >= mptbm_buffer_end_minutes / 60) {
