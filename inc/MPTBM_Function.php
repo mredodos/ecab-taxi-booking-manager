@@ -286,6 +286,8 @@ if (!class_exists('MPTBM_Function')) {
 				$return_min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price_return');
 				if($return_min_price && $two_way > 1){
 					$price= $price+ $return_min_price;
+				}elseif($two_way > 1){
+					$price = $price *2 ;
 				}
 			}
 
@@ -294,10 +296,10 @@ if (!class_exists('MPTBM_Function')) {
 				$price -= $return_discount_amount; // Apply discount
 			}
 			if ($min_price > 0) {
-        if ($price < $min_price) {
-            $price = $min_price; 
-			$return_discount_amount = 0; 
-        }
+				if ($price < $min_price) {
+					$price = $min_price; 
+					$return_discount_amount = 0; 
+				}
 
         if ($return_discount_amount > 0 && $min_price < $return_discount_amount ) {
 	
