@@ -65,11 +65,12 @@ if ($mptbm_available_for_all_time == false) {
 $min_schedule_value = floatval($min_schedule_value);
 $max_schedule_value = floatval($max_schedule_value);
 
-// Convert schedule values to minutes
-function convertToMinutes($schedule_value) {
-    $hours = floor($schedule_value); // Get the hour part
-    $minutes = ($schedule_value - $hours) * 100; // Convert decimal part to minutes
-    return $hours * 60 + $minutes;
+if (!function_exists('convertToMinutes')) {
+    function convertToMinutes($schedule_value) {
+        $hours = floor($schedule_value); // Get the hour part
+        $minutes = ($schedule_value - $hours) * 100; // Convert decimal part to minutes
+        return $hours * 60 + $minutes;
+    }
 }
 
 $min_minutes = convertToMinutes($min_schedule_value);
