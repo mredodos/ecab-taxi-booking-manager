@@ -487,3 +487,5 @@ if ($all_posts->found_posts > 0) {
 	</div>
 </div>
 <?php
+
+?>
