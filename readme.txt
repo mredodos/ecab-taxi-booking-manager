@@ -4,7 +4,7 @@ Author URI : https://mage-people.com
 Tags: Taxi Service, Chauffeur Service, Ride Booking, Cab Booking, Transportation
 Requires at least: 5.3
 Stable tag: trunk
-Tested up to: 6.5.4
+Tested up to: 6.7.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
