@@ -231,8 +231,9 @@ if (!class_exists('MPTBM_Function')) {
 			}
 			$initial_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_initial_price');
 			$min_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_min_price');
+			$return_min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price_return');
 			$price_based = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
-			
+
 			$original_price_based = get_transient('original_price_based');
 			$waiting_price = (float) MP_Global_Function::get_post_info($post_id, 'mptbm_waiting_price', 0) * (float) $waiting_time;
 
@@ -269,10 +270,7 @@ if (!class_exists('MPTBM_Function')) {
 				}
 			}
 
-			if ($two_way > 1) {
-				$price *= 2;
-			}
-
+			
 			if ($waiting_time > 0) {
 				$price += $waiting_price;
 			}
@@ -280,15 +278,19 @@ if (!class_exists('MPTBM_Function')) {
 			if ($initial_price > 0) {
 				$price += $initial_price;
 			}
-
+			
 			if ($min_price > 0 && $min_price > $price) {
+				
 				$price = $min_price;
-				$return_min_price = MP_Global_Function::get_post_info($post_id, 'mptbm_min_price_return');
-				if($return_min_price && $two_way > 1){
-					$price= $price+ $return_min_price;
-				}elseif($two_way > 1){
-					$price = $price *2 ;
+				
+				
+				if ($return_min_price > 0 && $two_way > 1) {
+					$price = $price + $return_min_price;
+				}elseif($return_min_price == '' && $two_way > 1){
+					$price = $price * 2;
 				}
+			}elseif ($two_way > 1) {
+				$price = $price * 2;
 			}
 
 			if ($two_way > 1) {
@@ -297,24 +299,24 @@ if (!class_exists('MPTBM_Function')) {
 			}
 			if ($min_price > 0) {
 				if ($price < $min_price) {
-					$price = $min_price; 
-					$return_discount_amount = 0; 
+					$price = $min_price;
+					$return_discount_amount = 0;
 				}
 
-        if ($return_discount_amount > 0 && $min_price < $return_discount_amount ) {
-	
-            if ($return_discount_amount >= $min_price ) {
-                $return_discount_amount = 0; 
-                $price = $min_price; 
-            } else {
-                $price -= $return_discount_amount; 
-            }
-        }
-    }
+				if ($return_discount_amount > 0 && $min_price < $return_discount_amount) {
 
-			if(class_exists('MPTBM_Datewise_Discount_Addon')){
+					if ($return_discount_amount >= $min_price) {
+						$return_discount_amount = 0;
+						$price = $min_price;
+					} else {
+						$price -= $return_discount_amount;
+					}
+				}
+			}
+
+			if (class_exists('MPTBM_Datewise_Discount_Addon')) {
 				$selected_start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_date"]) : "";
-			$selected_start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
+				$selected_start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 
 				if (strlen($selected_start_time) == 2) {
 					$selected_start_time .= ":00"; // Convert '17' to '17:00'
@@ -348,7 +350,7 @@ if (!class_exists('MPTBM_Function')) {
 					}
 				}
 			}
-			
+
 
 			// Check if session key exists for the specific post_id
 			if (isset($_SESSION['geo_fence_post_' . $post_id])) {
@@ -365,24 +367,22 @@ if (!class_exists('MPTBM_Function')) {
 			session_write_close();
 			//delete_transient('original_price_based');
 			return $price;
-		
 		}
-		public static function calculate_return_discount($post_id, $price) {
-				$return_discount = MP_Global_Function::get_post_info($post_id, 'mptbm_return_discount', 0);
-				
-				// Check if the return discount is a percentage or a fixed amount
-				if (strpos($return_discount, '%') !== false) {
-					// It's a percentage discount
-					$percentage = floatval(trim($return_discount, '%'));
-					$return_discount_amount = ($percentage / 100) * $price;
-					
-				} else {
-					// It's a fixed amount discount
-					$return_discount_amount = floatval($return_discount);
-					
-				}
-				
-				return $return_discount_amount;
+		public static function calculate_return_discount($post_id, $price)
+		{
+			$return_discount = MP_Global_Function::get_post_info($post_id, 'mptbm_return_discount', 0);
+
+			// Check if the return discount is a percentage or a fixed amount
+			if (strpos($return_discount, '%') !== false) {
+				// It's a percentage discount
+				$percentage = floatval(trim($return_discount, '%'));
+				$return_discount_amount = ($percentage / 100) * $price;
+			} else {
+				// It's a fixed amount discount
+				$return_discount_amount = floatval($return_discount);
+			}
+
+			return $return_discount_amount;
 		}
 		public static function get_extra_service_price_by_name($post_id, $service_name)
 		{
