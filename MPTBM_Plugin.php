@@ -81,47 +81,57 @@ if (!class_exists('MPTBM_Plugin')) {
 
         public static function create_pages(): void
         {
-            if (!MP_Global_Function::get_page_by_slug('transport_booking')) {
-                $transport_booking = array(
-                    'post_type' => 'page',
-                    'post_name' => 'transport_booking',
-                    'post_title' => 'Transport Booking',
-                    'post_content' => '[mptbm_booking]',
-                    'post_status' => 'publish',
+                $forbidden_slugs = array(
+                    'transport_booking',
+                    'transport_booking_manual',
+                    'transport_booking_fixed_hourly',
+                    'transport-result'
                 );
-                wp_insert_post($transport_booking);
-            }
-            if (!MP_Global_Function::get_page_by_slug('transport_booking_manual')) {
-                $transport_booking_manual = array(
-                    'post_type' => 'page',
-                    'post_name' => 'transport_booking_manual',
-                    'post_title' => 'Transport Booking Manual',
-                    'post_content' => '[mptbm_booking price_based="manual" form="inline"]',
-                    'post_status' => 'publish',
-                );
-                wp_insert_post($transport_booking_manual);
-            }
-            if (!MP_Global_Function::get_page_by_slug('transport_booking_fixed_hourly')) {
-                $transport_booking_fixed_hourly = array(
-                    'post_type' => 'page',
-                    'post_name' => 'transport_booking_fixed_hourly',
-                    'post_title' => 'Transport Booking Fixed Hourly',
-                    'post_content' => '[mptbm_booking price_based="fixed_hourly"]',
-                    'post_status' => 'publish',
-                );
-                wp_insert_post($transport_booking_fixed_hourly);
-            }
-            if (!MP_Global_Function::get_page_by_slug('transport-result')) {
-                $transport_result = array(
-                    'post_type' => 'page',
-                    'post_name' => 'transport-result',
-                    'post_title' => 'Transport Result',
-                    'post_content' => '',
-                    'post_status' => 'publish',
-                );
-                wp_insert_post($transport_result);
-            }
-            flush_rewrite_rules();
+                if (!MP_Global_Function::get_page_by_slug($forbidden_slugs[0])) {
+                    $transport_booking = array(
+                        'post_type' => 'page',
+                        'post_name' => 'transport_booking',
+                        'post_title' => 'Transport Booking',
+                        'post_content' => '[mptbm_booking]',
+                        'post_status' => 'publish',
+                    );
+                    wp_insert_post($transport_booking);
+                }
+
+                if (!MP_Global_Function::get_page_by_slug($forbidden_slugs[1])) {
+                    $transport_booking_manual = array(
+                        'post_type' => 'page',
+                        'post_name' => 'transport_booking_manual',
+                        'post_title' => 'Transport Booking Manual',
+                        'post_content' => '[mptbm_booking price_based="manual" form="inline"]',
+                        'post_status' => 'publish',
+                    );
+                    wp_insert_post($transport_booking_manual);
+                }
+
+                if (!MP_Global_Function::get_page_by_slug($forbidden_slugs[2])) {
+                    $transport_booking_fixed_hourly = array(
+                        'post_type' => 'page',
+                        'post_name' => 'transport_booking_fixed_hourly',
+                        'post_title' => 'Transport Booking Fixed Hourly',
+                        'post_content' => '[mptbm_booking price_based="fixed_hourly"]',
+                        'post_status' => 'publish',
+                    );
+                    wp_insert_post($transport_booking_fixed_hourly);
+                }
+
+                if (!MP_Global_Function::get_page_by_slug($forbidden_slugs[3])) {
+                    $transport_result = array(
+                        'post_type' => 'page',
+                        'post_name' => 'transport-result',
+                        'post_title' => 'Transport Result',
+                        'post_content' => '',
+                        'post_status' => 'publish',
+                    );
+                    wp_insert_post($transport_result);
+                }
+
+                flush_rewrite_rules();
         }
 
         public function mptbm_on_activation_template_create($templates)
