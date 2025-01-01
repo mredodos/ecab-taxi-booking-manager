@@ -45,7 +45,8 @@ if (!class_exists('MPTBM_Price_Settings')) {
 			<div class="tabsItem" data-tabs="#mptbm_settings_pricing">
 				<h2><?php esc_html_e('Price Settings', 'ecab-taxi-booking-manager'); ?></h2>
 				<p><?php esc_html_e('here you can set initial price, Waiting Time price, price calculation model', 'ecab-taxi-booking-manager'); ?></p>
-
+				<!-- Add the nonce field here -->
+				<?php wp_nonce_field('mptbm_price_settings_action', 'mptbm_price_settings_nonce'); ?>
 				<section class="bg-light" >
 					<h6><?php esc_html_e('Price Settings', 'ecab-taxi-booking-manager'); ?></h6>
 					<span><?php esc_html_e('Here you can set price', 'ecab-taxi-booking-manager'); ?></span>
@@ -193,7 +194,6 @@ if (!class_exists('MPTBM_Price_Settings')) {
 		}
 		public function manual_price_item($manual_price = array())
 		{
-
 			$manual_price = $manual_price && is_array($manual_price) ? $manual_price : array();
 			$start_location = array_key_exists('start_location', $manual_price) ? $manual_price['start_location'] : '';
 			$end_location = array_key_exists('end_location', $manual_price) ? $manual_price['end_location'] : '';
@@ -281,8 +281,6 @@ if (!class_exists('MPTBM_Price_Settings')) {
 		public function location_terms_add_price_item($location_terms = array())
 		{
 			?>
-
-
 			<tr class="mp_remove_area">
 				<td>
 					<label>
@@ -328,12 +326,18 @@ if (!class_exists('MPTBM_Price_Settings')) {
 		}
 		public function save_price_settings($post_id)
 		{
-			if (!isset($_POST['mptbm_transportation_type_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mptbm_transportation_type_nonce'])), 'mptbm_transportation_type_nonce') && defined('DOING_AUTOSAVE') && DOING_AUTOSAVE && !current_user_can('edit_post', $post_id)) {
-				return;
+			if (
+				!isset($_POST['mptbm_price_settings_nonce']) || 
+				!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mptbm_price_settings_nonce'])), 'mptbm_price_settings_action')
+			) {
+				return; // Exit if nonce is invalid
 			}
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
-				$initial_price = isset($_POST['mptbm_initial_price']) ? sanitize_text_field($_POST['mptbm_initial_price']) : '';
-				update_post_meta($post_id, 'mptbm_initial_price', $initial_price);
+				if (!empty($_POST['mptbm_initial_price']) && !is_serialized($_POST['mptbm_initial_price']) && current_user_can('manage_options')) {
+					$initial_price = filter_var($_POST['mptbm_initial_price'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+					update_post_meta($post_id, 'mptbm_initial_price', $initial_price);
+				}
+				
 				$min_price = isset($_POST['mptbm_min_price']) ? sanitize_text_field($_POST['mptbm_min_price']) : '';
 				update_post_meta($post_id, 'mptbm_min_price', $min_price);
 				$return_min_price = isset($_POST['mptbm_min_price_return']) ? sanitize_text_field($_POST['mptbm_min_price_return']) : '';
