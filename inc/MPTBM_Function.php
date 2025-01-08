@@ -270,7 +270,7 @@ if (!class_exists('MPTBM_Function')) {
 				}
 			}
 
-			
+
 			if ($waiting_time > 0) {
 				$price += $waiting_price;
 			}
@@ -278,18 +278,18 @@ if (!class_exists('MPTBM_Function')) {
 			if ($initial_price > 0) {
 				$price += $initial_price;
 			}
-			
+
 			if ($min_price > 0 && $min_price > $price) {
-				
+
 				$price = $min_price;
-				
-				
+
+
 				if ($return_min_price > 0 && $two_way > 1) {
 					$price = $price + $return_min_price;
-				}elseif($return_min_price == '' && $two_way > 1){
+				} elseif ($return_min_price == '' && $two_way > 1) {
 					$price = $price * 2;
 				}
-			}elseif ($two_way > 1) {
+			} elseif ($two_way > 1) {
 				$price = $price * 2;
 			}
 
@@ -337,12 +337,19 @@ if (!class_exists('MPTBM_Function')) {
 								$end_time = isset($slot['end_time']) ? date('H:i', strtotime($slot['end_time'])) : '';
 								$percentage = floatval(rtrim($slot['percentage'], '%'));
 								$type = $slot['type'] ?? 'increase'; // Use default if not set
-								if ($selected_start_time >= $start_time && $selected_start_time <= $end_time) {
-									$discount_amount = ($percentage / 100) * $price;
-									if ($type === 'decrease') {
-										$price -= abs($discount_amount);
-									} else {
-										$price += $discount_amount;
+
+								// Handle midnight transition
+								if ($end_time < $start_time) {
+									// Time spans across midnight
+									if (($selected_start_time >= $start_time) || ($selected_start_time <= $end_time)) {
+										$discount_amount = ($percentage / 100) * $price;
+										$price = ($type === 'decrease') ? $price - abs($discount_amount) : $price + $discount_amount;
+									}
+								} else {
+									// Regular time slot
+									if ($selected_start_time >= $start_time && $selected_start_time <= $end_time) {
+										$discount_amount = ($percentage / 100) * $price;
+										$price = ($type === 'decrease') ? $price - abs($discount_amount) : $price + $discount_amount;
 									}
 								}
 							}
