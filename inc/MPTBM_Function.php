@@ -315,50 +315,67 @@ if (!class_exists('MPTBM_Function')) {
 			}
 
 			if (class_exists('MPTBM_Datewise_Discount_Addon')) {
-				$selected_start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_date"]) : "";
-				$selected_start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
+    $selected_start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_date"]) : "";
+    $selected_start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 
-				if (strlen($selected_start_time) == 2) {
-					$selected_start_time .= ":00"; // Convert '17' to '17:00'
-				}
+    if (strpos($selected_start_time, '.') !== false) {
+        $selected_start_time = sprintf('%02d:%02d', floor($selected_start_time), ($selected_start_time - floor($selected_start_time)) * 60);
+    } else {
+        $selected_start_time = sprintf('%02d:00', $selected_start_time);
+    }
 
-				$selected_start_date = date('Y-m-d', strtotime($selected_start_date));
-				$selected_start_time = date('H:i', strtotime($selected_start_time));
+    $discounts = MP_Global_Function::get_post_info($post_id, 'mptbm_discounts', []);
 
-				$discounts = MP_Global_Function::get_post_info($post_id, 'mptbm_discounts', []);
-				if (!empty($discounts)) {
-					foreach ($discounts as $discount) {
-						$start_date = isset($discount['start_date']) ? date('Y-m-d', strtotime($discount['start_date'])) : '';
-						$end_date = isset($discount['end_date']) ? date('Y-m-d', strtotime($discount['end_date'])) : '';
-						$time_slots = $discount['time_slots'] ?? [];
-						if ($selected_start_date >= $start_date && $selected_start_date <= $end_date) {
-							foreach ($time_slots as $slot) {
-								$start_time = isset($slot['start_time']) ? date('H:i', strtotime($slot['start_time'])) : '';
-								$end_time = isset($slot['end_time']) ? date('H:i', strtotime($slot['end_time'])) : '';
-								$percentage = floatval(rtrim($slot['percentage'], '%'));
-								$type = $slot['type'] ?? 'increase'; // Use default if not set
+    if (!empty($discounts)) {
+        foreach ($discounts as $discount) {
+            $start_date = isset($discount['start_date']) ? date('Y-m-d', strtotime($discount['start_date'])) : '';
+            $end_date = isset($discount['end_date']) ? date('Y-m-d', strtotime($discount['end_date'])) : '';
+            $time_slots = isset($discount['time_slots']) ? $discount['time_slots'] : [];
 
-								// Handle midnight transition
-								if ($end_time < $start_time) {
-									// Time spans across midnight
-									if (($selected_start_time >= $start_time) || ($selected_start_time <= $end_time)) {
-										$discount_amount = ($percentage / 100) * $price;
-										$price = ($type === 'decrease') ? $price - abs($discount_amount) : $price + $discount_amount;
-									}
-								} else {
-									// Regular time slot
-									if ($selected_start_time >= $start_time && $selected_start_time <= $end_time) {
-										$discount_amount = ($percentage / 100) * $price;
-										$price = ($type === 'decrease') ? $price - abs($discount_amount) : $price + $discount_amount;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+            if (strtotime($selected_start_date) >= strtotime($start_date) && strtotime($selected_start_date) <= strtotime($end_date)) {
+                foreach ($time_slots as $slot) {
+                    $start_time = isset($slot['start_time']) ? sanitize_text_field($slot['start_time']) : '';
+                    $end_time = isset($slot['end_time']) ? sanitize_text_field($slot['end_time']) : '';
 
+                    if (strpos($start_time, '.') !== false) {
+                        $start_time = sprintf('%02d:%02d', floor($start_time), ($start_time - floor($start_time)) * 60);
+                    }
+                    if (strpos($end_time, '.') !== false) {
+                        $end_time = sprintf('%02d:%02d', floor($end_time), ($end_time - floor($end_time)) * 60);
+                    }
 
+                    if (strtotime($start_time) > strtotime($end_time)) {
+                        if (strtotime($selected_start_time) >= strtotime($start_time) || strtotime($selected_start_time) <= strtotime($end_time)) {
+                            $percentage = floatval(rtrim($slot['percentage'], '%'));
+                            $type = isset($slot['type']) ? $slot['type'] : 'increase';
+
+                            $discount_amount = ($percentage / 100) * $price;
+
+                            if ($type === 'decrease') {
+                                $price -= abs($discount_amount);
+                            } else {
+                                $price += $discount_amount;
+                            }
+                        }
+                    } else {
+                        if (strtotime($selected_start_time) >= strtotime($start_time) && strtotime($selected_start_time) <= strtotime($end_time)) {
+                            $percentage = floatval(rtrim($slot['percentage'], '%'));
+                            $type = isset($slot['type']) ? $slot['type'] : 'increase';
+
+                            $discount_amount = ($percentage / 100) * $price;
+
+                            if ($type === 'decrease') {
+                                $price -= abs($discount_amount);
+                            } else {
+                                $price += $discount_amount;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 			// Check if session key exists for the specific post_id
 			if (isset($_SESSION['geo_fence_post_' . $post_id])) {
 				$session_data = $_SESSION['geo_fence_post_' . $post_id];
