@@ -125,7 +125,7 @@ if (sizeof($all_dates) > 0) {
 					<input type="hidden" id="mptbm_map_start_time" value="" />
 					<label class="fdColumn">
 						<span><i class="far fa-clock _textTheme_mR_xs"></i><?php esc_html_e('Pickup Time', 'ecab-taxi-booking-manager'); ?></span>
-						<input type="text" class="formControl" placeholder="<?php esc_html_e('Please Select Time', 'ecab-taxi-booking-manager'); ?>" value="" readonly />
+						<input type="text" id="mptbm_start_time" class="formControl" placeholder="<?php esc_html_e('Please Select Time', 'ecab-taxi-booking-manager'); ?>" value="" readonly />
 						<span class="far fa-clock mptbm_left_icon allCenter"></span>
 					</label>
 
