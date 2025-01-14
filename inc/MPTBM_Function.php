@@ -315,8 +315,8 @@ if (!class_exists('MPTBM_Function')) {
 			}
 
 			if (class_exists('MPTBM_Datewise_Discount_Addon')) {
-    $selected_start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_date"]) : "";
-    $selected_start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
+    $selected_start_date = get_transient('start_date_transient');
+    $selected_start_time = get_transient('start_time_schedule_transient');
 
     if (strpos($selected_start_time, '.') !== false) {
         $selected_start_time = sprintf('%02d:%02d', floor($selected_start_time), ($selected_start_time - floor($selected_start_time)) * 60);

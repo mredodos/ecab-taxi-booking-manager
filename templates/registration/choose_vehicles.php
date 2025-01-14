@@ -276,6 +276,26 @@ $start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_da
 
 $start_time_schedule = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 $start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
+// Retrieve and sanitize POST data
+$start_time_schedule = isset($_POST["start_time_schedule"]) ? sanitize_text_field($_POST["start_time_schedule"]) : "";
+$start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
+
+// Define unique keys for each transient
+$transient_key_schedule = 'start_time_schedule_transient';
+$transient_key_date = 'start_date_transient';
+echo $start_time_schedule;
+// Check and set the transient for start_time_schedule
+if (get_transient($start_time_schedule_transient)) {
+    delete_transient($transient_key_schedule); // Delete existing transient if found
+}
+set_transient($transient_key_schedule, $start_time); // Set new transient
+
+
+// Check and set the transient for start_time
+if (get_transient($transient_key_date)) {
+    delete_transient($transient_key_date); // Delete existing transient if found
+}
+set_transient($transient_key_date, $start_date); // Set new transient
 
 if ($start_time !== "") {
     if ($start_time !== "0") {
