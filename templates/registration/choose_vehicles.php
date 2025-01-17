@@ -175,6 +175,7 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
 
 
 function wptbm_get_schedule($post_id, $days_name, $selected_day,$start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based) {
+    
     $timestamp = strtotime($selected_day);
 
     $selected_day = date('l', $timestamp);
@@ -208,6 +209,7 @@ function wptbm_get_schedule($post_id, $days_name, $selected_day,$start_time_sche
     
     $available_all_time = get_post_meta($post_id, 'mptbm_available_for_all_time');
     
+    
     if($available_all_time[0] == 'on'){
         return true;
     }
@@ -231,6 +233,7 @@ function wptbm_get_schedule($post_id, $days_name, $selected_day,$start_time_sche
         $day = ucwords($day);
         
         if( $selected_day == $day){ 
+            
             if (isset($return_time_schedule) && $return_time_schedule !== "") {
                 if ($return_time_schedule >= $day_start_time && $return_time_schedule <= $day_end_time && ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time)) {
                     return true; 
@@ -276,14 +279,12 @@ $start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_da
 
 $start_time_schedule = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 $start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
-// Retrieve and sanitize POST data
-$start_time_schedule = isset($_POST["start_time_schedule"]) ? sanitize_text_field($_POST["start_time_schedule"]) : "";
+
 $start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 
 // Define unique keys for each transient
 $transient_key_schedule = 'start_time_schedule_transient';
 $transient_key_date = 'start_date_transient';
-echo $start_time_schedule;
 // Check and set the transient for start_time_schedule
 if (get_transient($start_time_schedule_transient)) {
     delete_transient($transient_key_schedule); // Delete existing transient if found
@@ -457,6 +458,7 @@ if ($all_posts->found_posts > 0) {
     foreach ($posts as $post) {
         $post_id = $post->ID;
         $check_schedule = wptbm_get_schedule($post_id, $days_name, $start_date,$start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based);
+        
         if ($check_schedule) {
             $vehicle_item_count = $vehicle_item_count + 1;
             include MPTBM_Function::template_path("registration/vehicle_item.php");
