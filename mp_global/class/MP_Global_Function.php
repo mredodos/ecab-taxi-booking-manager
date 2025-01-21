@@ -61,20 +61,23 @@
 			}
 			public static function data_sanitize($data) {
 				if (is_string($data)) {
-					// Try to unserialize with allowed_classes set to false
+					// Attempt to unserialize safely
 					$unserialized = @unserialize($data, ['allowed_classes' => false]);
 					if ($unserialized !== false || $data === 'b:0;') {
-						$data = self::data_sanitize($unserialized);
+						// Recursively sanitize unserialized data
+						return self::data_sanitize($unserialized);
 					} else {
-						$data = sanitize_text_field(stripslashes(strip_tags($data)));
+						// Sanitize string data
+						return sanitize_text_field(stripslashes(strip_tags($data)));
 					}
 				} elseif (is_array($data)) {
-					foreach ($data as &$value) {
-						$value = self::data_sanitize($value);
-					}
+					// Recursively sanitize array values
+					return array_map([self::class, 'data_sanitize'], $data);
 				}
+				// Return data as-is for unsupported types
 				return $data;
 			}
+			
 			//**************Date related*********************//
 			public static function date_picker_format_without_year($key = 'date_format'): string {
 				$format = MP_Global_Function::get_settings('mp_global_settings', $key, 'D d M , yy');

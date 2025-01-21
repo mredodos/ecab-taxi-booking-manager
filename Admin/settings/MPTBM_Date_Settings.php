@@ -394,28 +394,19 @@
 				return $this->data_sanitize($_POST[$key] ?? $default);
 			}
 			public function data_sanitize($data) {
-				$data = maybe_unserialize($data);
 				if (is_string($data)) {
-					$data = maybe_unserialize($data);
-					if (is_array($data)) {
-						$data = $this->data_sanitize($data);
-					}
-					else {
-
+					// Attempt to unserialize safely
+					$unserialized = @unserialize($data, ['allowed_classes' => false]);
+					if ($unserialized !== false || $data === 'b:0;') {
+						$data = $this->data_sanitize($unserialized);
+					} else {
+						// Sanitize string
 						$data = sanitize_text_field(stripslashes(wp_strip_all_tags($data)));
-
 					}
-				}
-				elseif (is_array($data)) {
+				} elseif (is_array($data)) {
+					// Recursively sanitize arrays
 					foreach ($data as &$value) {
-						if (is_array($value)) {
-							$value = $this->data_sanitize($value);
-						}
-						else {
-							$value = sanitize_text_field(stripslashes(wp_strip_all_tags($value)));
-
-
-						}
+						$value = $this->data_sanitize($value);
 					}
 				}
 				return $data;
