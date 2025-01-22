@@ -54,13 +54,14 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 							if ($custom_post == 'mptbm_extra_services') {
 								$ex_id = $post_id;
 							}
+							
 							if (array_key_exists('post_data', $dummy_data)) {
+								
 								foreach ($dummy_data['post_data'] as $meta_key => $data) {
-									if ($meta_key == 'mptbm_extra_services_id') {
-										update_post_meta($post_id, $meta_key, $ex_id);
-									} else {
+									
+										update_post_meta($post_id,'mptbm_extra_services_id', 17);
+
 										update_post_meta($post_id, $meta_key, $data);
-									}
 								}
 							}
 						}
@@ -187,14 +188,42 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'image' => '',
 										'text' => 'Diesel'
 									),
-
+									4 => array(
+										'label' => 'Transmission',
+										'icon' => 'fas fa-cogs',
+										'image' => '',
+										'text' => 'Automatic'
+									),
+									5 => array(
+										'label' => 'Seating Capacity',
+										'icon' => 'fas fa-users',
+										'image' => '',
+										'text' => '5'
+									),
 								],
 								//price_settings
-								'mptbm_price_based' => 'distance',
+								'mptbm_price_based' => 'inclusive',
 								'mptbm_km_price' => 1.2,
 								'mptbm_hour_price' => 10,
+								'mptbm_terms_price_info' => [
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'dhaka',
+										'price' => 10
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'rajshahi',
+										'price' => 20
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'sylhet',
+										'price' => 30
+									]
+								],
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => '',
+								'mptbm_extra_services_id' => 16,
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -249,19 +278,19 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'label' => 'Name',
 										'icon' => 'fas fa-car-side',
 										'image' => '',
-										'text' => 'Cadillac Escalade Limousine'
+										'text' => 'BMW 5 Series Long'
 									),
 									1 => array(
 										'label' => 'Model',
 										'icon' => 'fas fa-car',
 										'image' => '',
-										'text' => 'CADESR'
+										'text' => 'EXPRW'
 									),
 									2 => array(
 										'label' => 'Engine',
 										'icon' => 'fas fa-cogs',
 										'image' => '',
-										'text' => '2500'
+										'text' => '3000'
 									),
 									3 => array(
 										'label' => 'Fuel Type',
@@ -269,15 +298,43 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'image' => '',
 										'text' => 'Diesel'
 									),
-
+									4 => array(
+										'label' => 'Transmission',
+										'icon' => 'fas fa-cogs',
+										'image' => '',
+										'text' => 'Automatic'
+									),
+									5 => array(
+										'label' => 'Seating Capacity',
+										'icon' => 'fas fa-users',
+										'image' => '',
+										'text' => '5'
+									),
 								],
 								//price_settings
-								'mptbm_price_based' => 'distance',
+								'mptbm_price_based' => 'inclusive',
 								'mptbm_km_price' => 1.2,
 								'mptbm_hour_price' => 10,
+								'mptbm_terms_price_info' => [
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'dhaka',
+										'price' => 10
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'rajshahi',
+										'price' => 20
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'sylhet',
+										'price' => 30
+									]
+								],
 								//Extra Services
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => '',
+								'mptbm_extra_services_id' => 16,
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -332,19 +389,19 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'label' => 'Name',
 										'icon' => 'fas fa-car-side',
 										'image' => '',
-										'text' => 'Hummer New York Limousine'
+										'text' => 'BMW 5 Series Long'
 									),
 									1 => array(
 										'label' => 'Model',
 										'icon' => 'fas fa-car',
 										'image' => '',
-										'text' => 'HUMYL'
+										'text' => 'EXPRW'
 									),
 									2 => array(
 										'label' => 'Engine',
 										'icon' => 'fas fa-cogs',
 										'image' => '',
-										'text' => '3500'
+										'text' => '3000'
 									),
 									3 => array(
 										'label' => 'Fuel Type',
@@ -352,15 +409,43 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'image' => '',
 										'text' => 'Diesel'
 									),
-
+									4 => array(
+										'label' => 'Transmission',
+										'icon' => 'fas fa-cogs',
+										'image' => '',
+										'text' => 'Automatic'
+									),
+									5 => array(
+										'label' => 'Seating Capacity',
+										'icon' => 'fas fa-users',
+										'image' => '',
+										'text' => '5'
+									),
 								],
 								//price_settings
-								'mptbm_price_based' => 'distance',
+								'mptbm_price_based' => 'inclusive',
 								'mptbm_km_price' => 1.2,
 								'mptbm_hour_price' => 10,
+								'mptbm_terms_price_info' => [
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'dhaka',
+										'price' => 10
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'rajshahi',
+										'price' => 20
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'sylhet',
+										'price' => 30
+									]
+								],
 								//Extra Services
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => '',
+								'mptbm_extra_services_id' => 16,
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -415,19 +500,19 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'label' => 'Name',
 										'icon' => 'fas fa-car-side',
 										'image' => '',
-										'text' => 'Cadillac Escalade SUV'
+										'text' => 'BMW 5 Series Long'
 									),
 									1 => array(
 										'label' => 'Model',
 										'icon' => 'fas fa-car',
 										'image' => '',
-										'text' => 'CASUV'
+										'text' => 'EXPRW'
 									),
 									2 => array(
 										'label' => 'Engine',
 										'icon' => 'fas fa-cogs',
 										'image' => '',
-										'text' => '2800'
+										'text' => '3000'
 									),
 									3 => array(
 										'label' => 'Fuel Type',
@@ -435,15 +520,43 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'image' => '',
 										'text' => 'Diesel'
 									),
-
+									4 => array(
+										'label' => 'Transmission',
+										'icon' => 'fas fa-cogs',
+										'image' => '',
+										'text' => 'Automatic'
+									),
+									5 => array(
+										'label' => 'Seating Capacity',
+										'icon' => 'fas fa-users',
+										'image' => '',
+										'text' => '5'
+									),
 								],
 								//price_settings
-								'mptbm_price_based' => 'distance',
+								'mptbm_price_based' => 'inclusive',
 								'mptbm_km_price' => 1.2,
 								'mptbm_hour_price' => 10,
+								'mptbm_terms_price_info' => [
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'dhaka',
+										'price' => 10
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'rajshahi',
+										'price' => 20
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'sylhet',
+										'price' => 30
+									]
+								],
 								//Extra Services
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => '',
+								'mptbm_extra_services_id' => 16,
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -498,19 +611,19 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'label' => 'Name',
 										'icon' => 'fas fa-car-side',
 										'image' => '',
-										'text' => 'Ford Tourneo'
+										'text' => 'BMW 5 Series Long'
 									),
 									1 => array(
 										'label' => 'Model',
 										'icon' => 'fas fa-car',
 										'image' => '',
-										'text' => 'FORD_DD'
+										'text' => 'EXPRW'
 									),
 									2 => array(
 										'label' => 'Engine',
 										'icon' => 'fas fa-cogs',
 										'image' => '',
-										'text' => '3200'
+										'text' => '3000'
 									),
 									3 => array(
 										'label' => 'Fuel Type',
@@ -518,14 +631,42 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'image' => '',
 										'text' => 'Diesel'
 									),
-
+									4 => array(
+										'label' => 'Transmission',
+										'icon' => 'fas fa-cogs',
+										'image' => '',
+										'text' => 'Automatic'
+									),
+									5 => array(
+										'label' => 'Seating Capacity',
+										'icon' => 'fas fa-users',
+										'image' => '',
+										'text' => '5'
+									),
 								],
 								//price_settings
-								'mptbm_price_based' => 'distance',
+								'mptbm_price_based' => 'inclusive',
 								'mptbm_km_price' => 1.2,
 								'mptbm_hour_price' => 10,
+								'mptbm_terms_price_info' => [
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'dhaka',
+										'price' => 10
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'rajshahi',
+										'price' => 20
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'sylhet',
+										'price' => 30
+									]
+								],
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => '',
+								'mptbm_extra_services_id' => 16,
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -580,34 +721,62 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'label' => 'Name',
 										'icon' => 'fas fa-car-side',
 										'image' => '',
-										'text' => 'Mercedes-Benz E220'
+										'text' => 'BMW 5 Series Long'
 									),
 									1 => array(
 										'label' => 'Model',
 										'icon' => 'fas fa-car',
 										'image' => '',
-										'text' => 'Mercedes'
+										'text' => 'EXPRW'
 									),
 									2 => array(
 										'label' => 'Engine',
 										'icon' => 'fas fa-cogs',
 										'image' => '',
-										'text' => '3200'
+										'text' => '3000'
 									),
 									3 => array(
 										'label' => 'Fuel Type',
 										'icon' => 'fas fa-gas-pump',
 										'image' => '',
-										'text' => 'Octane'
+										'text' => 'Diesel'
 									),
-
+									4 => array(
+										'label' => 'Transmission',
+										'icon' => 'fas fa-cogs',
+										'image' => '',
+										'text' => 'Automatic'
+									),
+									5 => array(
+										'label' => 'Seating Capacity',
+										'icon' => 'fas fa-users',
+										'image' => '',
+										'text' => '5'
+									),
 								],
 								//price_settings
-								'mptbm_price_based' => 'distance',
+								'mptbm_price_based' => 'inclusive',
 								'mptbm_km_price' => 1.2,
 								'mptbm_hour_price' => 10,
+								'mptbm_terms_price_info' => [
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'dhaka',
+										'price' => 10
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'rajshahi',
+										'price' => 20
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'sylhet',
+										'price' => 30
+									]
+								],
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => '',
+								'mptbm_extra_services_id' => 16,
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -662,34 +831,62 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 										'label' => 'Name',
 										'icon' => 'fas fa-car-side',
 										'image' => '',
-										'text' => 'Fiat Panda'
+										'text' => 'BMW 5 Series Long'
 									),
 									1 => array(
 										'label' => 'Model',
 										'icon' => 'fas fa-car',
 										'image' => '',
-										'text' => 'FIAT'
+										'text' => 'EXPRW'
 									),
 									2 => array(
 										'label' => 'Engine',
 										'icon' => 'fas fa-cogs',
 										'image' => '',
-										'text' => '2200'
+										'text' => '3000'
 									),
 									3 => array(
 										'label' => 'Fuel Type',
 										'icon' => 'fas fa-gas-pump',
 										'image' => '',
-										'text' => 'Octane'
+										'text' => 'Diesel'
 									),
-
+									4 => array(
+										'label' => 'Transmission',
+										'icon' => 'fas fa-cogs',
+										'image' => '',
+										'text' => 'Automatic'
+									),
+									5 => array(
+										'label' => 'Seating Capacity',
+										'icon' => 'fas fa-users',
+										'image' => '',
+										'text' => '5'
+									),
 								],
 								//price_settings
-								'mptbm_price_based' => 'distance',
+								'mptbm_price_based' => 'inclusive',
 								'mptbm_km_price' => 1.2,
 								'mptbm_hour_price' => 10,
+								'mptbm_terms_price_info' => [
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'dhaka',
+										'price' => 10
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'rajshahi',
+										'price' => 20
+									],
+									[
+										'start_location' => 'chittagong',
+										'end_location' => 'sylhet',
+										'price' => 30
+									]
+								],
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => '',
+								'mptbm_extra_services_id' => 16,
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [

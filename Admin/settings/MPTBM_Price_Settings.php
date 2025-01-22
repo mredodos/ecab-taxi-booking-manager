@@ -32,7 +32,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 			$waiting_price = MP_Global_Function::get_post_info($post_id, 'mptbm_waiting_price');
 			$distance_selected = $price_based == 'distance' ? 'selected' : '';
 			$distance_selected = $display_map == 'disable' ? 'disabled' : $distance_selected;
-			
+
 			$duration_selected = $price_based == 'duration' ? 'selected' : '';
 			$duration_selected = $display_map == 'disable' ? 'disabled' : $duration_selected;
 			$distance_duration_selected = $price_based == 'distance_duration' ? 'selected' : '';
@@ -47,7 +47,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 				<p><?php esc_html_e('here you can set initial price, Waiting Time price, price calculation model', 'ecab-taxi-booking-manager'); ?></p>
 				<!-- Add the nonce field here -->
 				<?php wp_nonce_field('mptbm_price_settings_action', 'mptbm_price_settings_nonce'); ?>
-				<section class="bg-light" >
+				<section class="bg-light">
 					<h6><?php esc_html_e('Price Settings', 'ecab-taxi-booking-manager'); ?></h6>
 					<span><?php esc_html_e('Here you can set price', 'ecab-taxi-booking-manager'); ?></span>
 				</section>
@@ -90,7 +90,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 				<?php if ($waiting_time_check == 'enable') { ?>
 					<section class="<?php echo esc_attr($price_based == 'duration' || $price_based == 'distance' || $price_based == 'distance_duration' || $price_based == 'manual' ? 'mActive' : ''); ?>">
 						<label class="label">
-							<div >
+							<div>
 								<h6><?php esc_html_e('Waiting Time Price/Hour', 'ecab-taxi-booking-manager'); ?></h6>
 								<span class="desc"><?php MPTBM_Settings::info_text('mptbm_waiting_price'); ?></span>
 							</div>
@@ -101,10 +101,12 @@ if (!class_exists('MPTBM_Price_Settings')) {
 				<section>
 					<label class="label">
 						<div>
-							<h6><?php esc_html_e('Pricing based on', 'ecab-taxi-booking-manager'); ?></h6>
+							<h6><?php esc_html_e('Pricing based on', 'ecab-taxi-booking-manager'); ?>
+								<i class="fas fa-question-circle tooltip-icon" title="The Inclusive pricing model applies to all pricing models; when set, it works with all shortcodes as long as the relevant data is available in the fields"></i>
+							</h6>
 							<?php if ($display_map == 'disable') { ?>
 								<span class="desc"><?php esc_html_e('To enable google map pricing option you must enable  ', 'ecab-taxi-booking-manager'); ?><a href="<?php echo esc_attr($gm_api_url); ?>"><?php esc_html_e('google map base pricing option', 'ecab-taxi-booking-manager'); ?></a></span>
-							<?php }else{ ?>
+							<?php } else { ?>
 								<span class="desc"><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
 							<?php } ?>
 						</div>
@@ -124,22 +126,32 @@ if (!class_exists('MPTBM_Price_Settings')) {
 				<section data-collapse="#mp_distance" class="<?php echo esc_attr($price_based == 'distance' || $price_based == 'distance_duration' ? 'mActive' : ''); ?>">
 					<label class="label">
 						<div>
-							<h6><?php esc_html_e('Price/KM', 'ecab-taxi-booking-manager'); ?></h6>
+							<h6>
+								<?php esc_html_e('Price/KM', 'ecab-taxi-booking-manager'); ?>
+								<i class="fas fa-question-circle tooltip-icon" title="Price per kilometer is based on the selected pricing model: Distance (per km), Distance/Duration (per km or per hour), or Distance+Duration (combined distance and time charges)"></i>
+							</h6>
 							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_km_price'); ?></span>
 						</div>
-						<input class="formControl mp_price_validation" name="mptbm_km_price" value="<?php echo esc_attr($distance_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
+						<input
+							class="formControl mp_price_validation"
+							name="mptbm_km_price"
+							value="<?php echo esc_attr($distance_price); ?>"
+							type="text"
+							placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 					</label>
 				</section>
 				<section data-collapse="#mp_duration" class="<?php echo esc_attr($price_based == 'duration' || $price_based == 'distance_duration' || $price_based == 'fixed_hourly' ? 'mActive' : ''); ?>">
 					<label class="label">
 						<div>
-							<h6><?php esc_html_e('Price/Hour', 'ecab-taxi-booking-manager'); ?></h6>
+							<h6><?php esc_html_e('Price/Hour', 'ecab-taxi-booking-manager'); ?>
+								<i class="fas fa-question-circle tooltip-icon" title="Price per hour is based on the selected pricing model: Duration/Time (per hour), Distance+Duration (combined distance and time), or Fixed Hourly Price (flat rate per hour)"></i>
+							</h6>
 							<span class="desc"><?php MPTBM_Settings::info_text('mptbm_hour_price'); ?></span>
 						</div>
 						<input class="formControl mp_price_validation" name="mptbm_hour_price" value="<?php echo esc_attr($time_price); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
 					</label>
 				</section>
-				
+
 				<!-- Manual price -->
 				<section class="bg-light" style="margin-top: 20px;" data-collapse="#mp_manual">
 					<h6><?php esc_html_e('Manual Price Settings', 'ecab-taxi-booking-manager'); ?></h6>
@@ -176,7 +188,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 						<?php $this->hidden_manual_price_item($location_terms); ?>
 					</div>
 				</section>
-				
+
 			</div>
 		<?php
 		}
@@ -286,11 +298,11 @@ if (!class_exists('MPTBM_Price_Settings')) {
 					<label>
 						<select name="mptbm_terms_start_location[]" class="formControl mp_name_validation">
 							<option value="">Select Start Location</option>
-							
+
 							<?php foreach ($location_terms as $term) : ?>
-								
+
 								<?php
-								
+
 								// $selected = ($start_location == $term->slug) ? 'selected' : '';
 								?>
 								<option value="<?php echo esc_attr($term->slug); ?>"><?php echo esc_html($term->name); ?></option>
@@ -327,7 +339,7 @@ if (!class_exists('MPTBM_Price_Settings')) {
 		public function save_price_settings($post_id)
 		{
 			if (
-				!isset($_POST['mptbm_price_settings_nonce']) || 
+				!isset($_POST['mptbm_price_settings_nonce']) ||
 				!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mptbm_price_settings_nonce'])), 'mptbm_price_settings_action')
 			) {
 				return; // Exit if nonce is invalid
@@ -337,13 +349,13 @@ if (!class_exists('MPTBM_Price_Settings')) {
 					$initial_price = filter_var($_POST['mptbm_initial_price'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 					update_post_meta($post_id, 'mptbm_initial_price', $initial_price);
 				}
-				
+
 				$min_price = isset($_POST['mptbm_min_price']) ? sanitize_text_field($_POST['mptbm_min_price']) : '';
 				update_post_meta($post_id, 'mptbm_min_price', $min_price);
 				$return_min_price = isset($_POST['mptbm_min_price_return']) ? sanitize_text_field($_POST['mptbm_min_price_return']) : '';
 				update_post_meta($post_id, 'mptbm_min_price_return', $return_min_price);
 				$return_discount = isset($_POST['mptbm_return_discount']) ? sanitize_text_field($_POST['mptbm_return_discount']) : '';
-    			update_post_meta($post_id, 'mptbm_return_discount', $return_discount);
+				update_post_meta($post_id, 'mptbm_return_discount', $return_discount);
 				$price_based = isset($_POST['mptbm_price_based']) ? sanitize_text_field($_POST['mptbm_price_based']) : '';
 				update_post_meta($post_id, 'mptbm_price_based', $price_based);
 				$distance_price = isset($_POST['mptbm_km_price']) ? sanitize_text_field($_POST['mptbm_km_price']) : 0;
@@ -380,7 +392,6 @@ if (!class_exists('MPTBM_Price_Settings')) {
 							$terms_price_infos[$count]['end_location'] = $end_terms_location[$key];
 							$terms_price_infos[$count]['price'] = $terms_price[$key];
 							$count++;
-
 						}
 					}
 				}
