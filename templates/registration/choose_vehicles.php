@@ -15,70 +15,78 @@ $schedule = [];
 function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $start_place_coordinates, $end_place_coordinates) {
     $operation_area_type = get_post_meta($operation_area_id, "mptbm-operation-type", true);
 
-	
     if ($operation_area_type === "fixed-operation-area-type") {
 
         $flat_operation_area_coordinates = get_post_meta($operation_area_id, "mptbm-coordinates-three", true);
+        
+        // Ensure it's an array before processing
+        if (!is_array($flat_operation_area_coordinates)) {
+            return;
+        }
+
         // Convert flat array into array of associative arrays
         $operation_area_coordinates = [];
-        for ($i = 0;$i < count($flat_operation_area_coordinates);$i+= 2) {
-            $operation_area_coordinates[] = ["latitude" => $flat_operation_area_coordinates[$i], "longitude" => $flat_operation_area_coordinates[$i + 1], ];
+        for ($i = 0; $i < count($flat_operation_area_coordinates); $i += 2) {
+            $operation_area_coordinates[] = ["latitude" => $flat_operation_area_coordinates[$i], "longitude" => $flat_operation_area_coordinates[$i + 1]];
         }
-?>
-			<script>
-				var operation_area_coordinates = <?php echo wp_json_encode($operation_area_coordinates); ?>;
-				var post_id = <?php echo wp_json_encode($post_id); ?>;
-				var start_place_coordinates = <?php echo wp_json_encode($start_place_coordinates); ?>;
-				var end_place_coordinates = <?php echo wp_json_encode($end_place_coordinates); ?>;
-				var startInArea = geolib.isPointInPolygon(start_place_coordinates, operation_area_coordinates);
-				var endInArea = geolib.isPointInPolygon(end_place_coordinates, operation_area_coordinates);
-				if (startInArea && endInArea) {
-					var selectorClass = `.mptbm_booking_item_${post_id}`;
-					jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
-					selectorClass = `.mptbm_booking_item_${post_id}`;
-					document.cookie = selectorClass +'='+  selectorClass+";path=/";
-				}
-			</script>
-
-		<?php
-		
+        ?>
+        <script>
+            var operation_area_coordinates = <?php echo wp_json_encode($operation_area_coordinates); ?>;
+            var post_id = <?php echo wp_json_encode($post_id); ?>;
+            var start_place_coordinates = <?php echo wp_json_encode($start_place_coordinates); ?>;
+            var end_place_coordinates = <?php echo wp_json_encode($end_place_coordinates); ?>;
+            var startInArea = geolib.isPointInPolygon(start_place_coordinates, operation_area_coordinates);
+            var endInArea = geolib.isPointInPolygon(end_place_coordinates, operation_area_coordinates);
+            if (startInArea && endInArea) {
+                var selectorClass = `.mptbm_booking_item_${post_id}`;
+                jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
+                document.cookie = selectorClass + '=' + selectorClass + ";path=/";
+            }
+        </script>
+        <?php
     } else {
         $flat_operation_area_coordinates_one = get_post_meta($operation_area_id, "mptbm-coordinates-one", true);
         $flat_operation_area_coordinates_two = get_post_meta($operation_area_id, "mptbm-coordinates-two", true);
         $operation_area_geo_direction = get_post_meta($operation_area_id, "mptbm-geo-fence-direction", true);
+
+        // Ensure both arrays are valid before processing
+        if (!is_array($flat_operation_area_coordinates_one) || !is_array($flat_operation_area_coordinates_two)) {
+            return;
+        }
+
         $operation_area_coordinates_one = [];
         $operation_area_coordinates_two = [];
-        for ($i = 0;$i < count($flat_operation_area_coordinates_one);$i+= 2) {
-            // Extract latitude and longitude values
+
+        for ($i = 0; $i < count($flat_operation_area_coordinates_one); $i += 2) {
             $latitude = $flat_operation_area_coordinates_one[$i];
             $longitude = $flat_operation_area_coordinates_one[$i + 1];
-            // Format latitude and longitude into the desired string format
             $operation_area_coordinates_one[] = $latitude . " " . $longitude;
         }
-        for ($i = 0;$i < count($flat_operation_area_coordinates_two);$i+= 2) {
-            // Extract latitude and longitude values
+
+        for ($i = 0; $i < count($flat_operation_area_coordinates_two); $i += 2) {
             $latitude = $flat_operation_area_coordinates_two[$i];
             $longitude = $flat_operation_area_coordinates_two[$i + 1];
-            // Format latitude and longitude into the desired string format
             $operation_area_coordinates_two[] = $latitude . " " . $longitude;
         }
+
         $new_start_place_coordinates = [];
         $new_end_place_coordinates = [];
         $new_start_place_coordinates[] = $start_place_coordinates["latitude"] . " " . $start_place_coordinates["longitude"];
         $new_end_place_coordinates[] = $end_place_coordinates["latitude"] . " " . $end_place_coordinates["longitude"];
+
         $pointLocation = new pointLocation();
         $startInAreaOne = $pointLocation->pointInPolygon($new_start_place_coordinates[0], $operation_area_coordinates_one) !== "outside";
         $endInAreaOne = $pointLocation->pointInPolygon($new_end_place_coordinates[0], $operation_area_coordinates_one) !== "outside";
         $startInAreaTwo = $pointLocation->pointInPolygon($new_start_place_coordinates[0], $operation_area_coordinates_two) !== "outside";
         $endInAreaTwo = $pointLocation->pointInPolygon($new_end_place_coordinates[0], $operation_area_coordinates_two) !== "outside";
+
         $startInAreaOne = $startInAreaOne ? "true" : "false";
         $endInAreaOne = $endInAreaOne ? "true" : "false";
         $startInAreaTwo = $startInAreaTwo ? "true" : "false";
         $endInAreaTwo = $endInAreaTwo ? "true" : "false";
-        // Check the conditions using boolean values
+
         if ($operation_area_geo_direction == "geo-fence-one-direction") {
             if ($startInAreaOne == "true" && $endInAreaTwo == "true") {
-                //set_transient( 'same_location','addValue' );
                 session_start();
                 $operation_area_id = get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true);
                 if ($operation_area_id > 0) {
@@ -87,35 +95,31 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
                         $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
                         if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
                             $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by, ];
+                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                         } else {
                             $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by, ];
+                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                         }
                     }
                 }
-?>
-					<script>
-						var post_id = <?php echo wp_json_encode($post_id); ?>;
-						var selectorClass = `.mptbm_booking_item_${post_id}`;
-						jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
-						var vehicaleItemClass = `.mptbm_booking_item_${post_id}`;
-						document.cookie = vehicaleItemClass+'='+ vehicaleItemClass+";path=/";
-					</script>
-					<?php session_write_close();
+                ?>
+                <script>
+                    var post_id = <?php echo wp_json_encode($post_id); ?>;
+                    var selectorClass = `.mptbm_booking_item_${post_id}`;
+                    jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
+                    document.cookie = selectorClass + '=' + selectorClass + ";path=/";
+                </script>
+                <?php session_write_close();
             } elseif ($startInAreaOne == "true" && $endInAreaOne == "true") { ?>
-					<script>
-						var post_id = <?php echo wp_json_encode($post_id); ?>;
-						var selectorClass = `.mptbm_booking_item_${post_id}`;
-						jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
-						var vehicaleItemClass = `.mptbm_booking_item_${post_id}`;
-						document.cookie = vehicaleItemClass +'='+  vehicaleItemClass+";path=/";
-					</script>
-					<?php
-            }
+                <script>
+                    var post_id = <?php echo wp_json_encode($post_id); ?>;
+                    var selectorClass = `.mptbm_booking_item_${post_id}`;
+                    jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
+                    document.cookie = selectorClass + '=' + selectorClass + ";path=/";
+                </script>
+            <?php }
         } else {
             if ($startInAreaOne == "true" && $endInAreaTwo == "true") {
-                // set_transient( 'same_location','addValue' );
                 session_start();
                 $operation_area_id = get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true);
                 if ($operation_area_id > 0) {
@@ -124,24 +128,22 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
                         $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
                         if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
                             $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by, ];
+                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                         } else {
                             $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by, ];
+                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                         }
                     }
                 }
-?>
-					<script>
-						var post_id = <?php echo wp_json_encode($post_id); ?>;
-						var selectorClass = `.mptbm_booking_item_${post_id}`;
-						jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
-						var vehicaleItemClass = `.mptbm_booking_item_${post_id}`;
-						document.cookie = vehicaleItemClass +'='+  vehicaleItemClass+";path=/";
-					</script>
-					<?php session_write_close();
+                ?>
+                <script>
+                    var post_id = <?php echo wp_json_encode($post_id); ?>;
+                    var selectorClass = `.mptbm_booking_item_${post_id}`;
+                    jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
+                    document.cookie = selectorClass + '=' + selectorClass + ";path=/";
+                </script>
+                <?php session_write_close();
             } elseif ($startInAreaTwo == "true" && $endInAreaOne == "true") {
-                // set_transient( 'same_location','addValue' );
                 session_start();
                 $operation_area_id = get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true);
                 if ($operation_area_id > 0) {
@@ -150,50 +152,34 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
                         $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
                         if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
                             $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by, ];
+                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                         } else {
                             $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by, ];
+                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                         }
                     }
                 }
-                session_write_close();
-?>
-					<script>
-						var post_id = <?php echo wp_json_encode($post_id); ?>;
-						var selectorClass = `.mptbm_booking_item_${post_id}`;
-						jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
-						var vehicaleItemClass = `.mptbm_booking_item_${post_id}`;
-						document.cookie = vehicaleItemClass +'='+  vehicaleItemClass+";path=/";
-					</script>
-					<?php
-            } elseif ($startInAreaOne == "true" && $endInAreaOne == "true") { ?>
-					<script>
-						var post_id = <?php echo wp_json_encode($post_id); ?>;
-						var selectorClass = `.mptbm_booking_item_${post_id}`;
-						jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
-						var vehicaleItemClass = `.mptbm_booking_item_${post_id}`;
-						
-						document.cookie = vehicaleItemClass +'='+  vehicaleItemClass+";path=/";
-					</script>
-					<?php
-            } elseif ($startInAreaTwo == "true" && $endInAreaTwo == "true") { ?>
-					<script>
-						var post_id = <?php echo wp_json_encode($post_id); ?>;
-						var selectorClass = `.mptbm_booking_item_${post_id}`;
-						jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
-						var vehicaleItemClass = `.mptbm_booking_item_${post_id}`;
-						
-						document.cookie = vehicaleItemClass +'='+  vehicaleItemClass+";path=/";
-					</script>
-					<?php
+                ?>
+                <script>
+                    var post_id = <?php echo wp_json_encode($post_id); ?>;
+                    var selectorClass = `.mptbm_booking_item_${post_id}`;
+                    jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
+                    document.cookie = selectorClass + '=' + selectorClass + ";path=/";
+                </script>
+                <?php session_write_close();
             }
         }
     }
 }
 
 
-function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based) {
+
+function wptbm_get_schedule($post_id, $days_name, $selected_day,$start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based) {
+    
+    $timestamp = strtotime($selected_day);
+
+    $selected_day = date('l', $timestamp);
+    
     // Check & destroy transport session if exist
     session_start();
     if (isset($_SESSION["geo_fence_post_" . $post_id])) {
@@ -223,30 +209,43 @@ function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_
     
     $available_all_time = get_post_meta($post_id, 'mptbm_available_for_all_time');
     
+    
     if($available_all_time[0] == 'on'){
         return true;
     }
     foreach ($days_name as $name) {
         $start_time = get_post_meta($post_id, "mptbm_" . $name . "_start_time", true);
+        if($start_time == ''){
+            $start_time = get_post_meta($post_id, "mptbm_default_start_time", true);
+        }
         $end_time = get_post_meta($post_id, "mptbm_" . $name . "_end_time", true);
+        if($end_time == ''){
+            $end_time = get_post_meta($post_id, "mptbm_default_end_time", true);
+        }
         if ($start_time !== "" && $end_time !== "") {
             $schedule[$name] = [$start_time, $end_time];
         }
     }
-    // Check if $start_time_schedule is between start_time and end_time for any day
+    
     foreach ($schedule as $day => $times) {
         $day_start_time = $times[0];
         $day_end_time = $times[1];
-        if (isset($return_time_schedule) && $return_time_schedule !== "") {
-            if ($return_time_schedule >= $day_start_time && $return_time_schedule <= $day_end_time && ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time)) {
-                return true; // $start_time_schedule and $return_time_schedule are within the schedule for this day
-                
-            }
-        } else {
-            if ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time) {
-                return true;
+        $day = ucwords($day);
+        
+        if( $selected_day == $day){ 
+            
+            if (isset($return_time_schedule) && $return_time_schedule !== "") {
+                if ($return_time_schedule >= $day_start_time && $return_time_schedule <= $day_end_time && ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time)) {
+                    return true; 
+                    
+                }
+            } else {
+                if ($start_time_schedule >= $day_start_time && $start_time_schedule <= $day_end_time) {
+                    return true;
+                }
             }
         }
+        
     }
     // If all other days have empty start and end times, check the 'default' day
     $all_empty = true;
@@ -256,6 +255,7 @@ function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_
             break;
         }
     }
+    
     if ($all_empty) {
         $default_start_time = get_post_meta($post_id, "mptbm_default_start_time", true);
         $default_end_time = get_post_meta($post_id, "mptbm_default_end_time", true);
@@ -276,16 +276,44 @@ function wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_
     return false;
 }
 $start_date = isset($_POST["start_date"]) ? sanitize_text_field($_POST["start_date"]) : "";
+
 $start_time_schedule = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 $start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
 
+$start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_time"]) : "";
+
+// Define unique keys for each transient
+$transient_key_schedule = 'start_time_schedule_transient';
+$transient_key_date = 'start_date_transient';
+// Check and set the transient for start_time_schedule
+if (get_transient($start_time_schedule_transient)) {
+    delete_transient($transient_key_schedule); // Delete existing transient if found
+}
+set_transient($transient_key_schedule, $start_time); // Set new transient
+
+
+// Check and set the transient for start_time
+if (get_transient($transient_key_date)) {
+    delete_transient($transient_key_date); // Delete existing transient if found
+}
+set_transient($transient_key_date, $start_date); // Set new transient
+
 if ($start_time !== "") {
     if ($start_time !== "0") {
+        
         // Convert start time to hours and minutes
         list($hours, $decimal_part) = explode('.', $start_time);
         $interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time');
+        
         if ($interval_time == "5" || $interval_time == "15") {
-            $minutes = isset($decimal_part) ? (int) $decimal_part * 1 : 0; // Multiply by 1 to convert to minutes
+                if($decimal_part != 3){
+                    $minutes = isset($decimal_part) ? (int) $decimal_part * 1 : 0; // Multiply by 1 to convert to minutes
+                }else{
+                    $minutes = isset($decimal_part) ? (int) $decimal_part * 10 : 0; // Multiply by 1 to convert to minutes
+                }
+                
+                
+            
         }else {
             $minutes = isset($decimal_part) ? (int) $decimal_part * 10 : 0; // Multiply by 10 to convert to minutes
         }
@@ -423,12 +451,14 @@ $mptbm_passengers = max($mptbm_passengers);
 					<?php
 
 $all_posts = MPTBM_Query::query_transport_list($price_based);
+ 
 if ($all_posts->found_posts > 0) {
     $posts = $all_posts->posts;
     $vehicle_item_count = 0;
     foreach ($posts as $post) {
         $post_id = $post->ID;
-        $check_schedule = wptbm_get_schedule($post_id, $days_name, $start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based);
+        $check_schedule = wptbm_get_schedule($post_id, $days_name, $start_date,$start_time_schedule, $return_time_schedule, $start_place_coordinates, $end_place_coordinates, $price_based);
+        
         if ($check_schedule) {
             $vehicle_item_count = $vehicle_item_count + 1;
             include MPTBM_Function::template_path("registration/vehicle_item.php");
@@ -479,3 +509,5 @@ if ($all_posts->found_posts > 0) {
 	</div>
 </div>
 <?php
+
+?>

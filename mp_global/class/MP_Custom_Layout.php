@@ -13,6 +13,7 @@
 				add_action('add_mp_pagination_section', array($this, 'pagination'), 10, 3);
 			}
 			public function hidden_table($hook_name, $data = array()) {
+				
 				?>
 				<div class="mp_hidden_content">
 					<table>

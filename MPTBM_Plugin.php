@@ -4,7 +4,7 @@
  * Plugin Name: E-cab taxi booking manager
  * Plugin URI: http://mage-people.com
  * Description: A Complete Transportation Solution for WordPress by MagePeople.
- * Version: 1.0.9
+ * Version: 1.1.6
  * Author: MagePeople Team
  * Author URI: http://www.mage-people.com/
  * License: GPL v2 or later
@@ -28,32 +28,32 @@ if (!class_exists('MPTBM_Plugin')) {
         }
 
         private function load_plugin(): void
-		{
-			include_once(ABSPATH . 'wp-admin/includes/plugin.php');
-			if (!defined('MPTBM_PLUGIN_DIR')) {
-				define('MPTBM_PLUGIN_DIR', dirname(__FILE__));
-			}
-			if (!defined('MPTBM_PLUGIN_URL')) {
-				define('MPTBM_PLUGIN_URL', plugins_url() . '/' . plugin_basename(dirname(__FILE__)));
-			}
-			if (!defined('MPTBM_PLUGIN_DATA')) {
-				define('MPTBM_PLUGIN_DATA', get_plugin_data(__FILE__));
-			}
-			if (!defined('MPTBM_PLUGIN_VERSION')) {
-				define('MPTBM_PLUGIN_VERSION', '1.0.7');
-			}
-			require_once MPTBM_PLUGIN_DIR . '/mp_global/MP_Global_File_Load.php';
-			if (MP_Global_Function::check_woocommerce() == 1) {
-				add_action('activated_plugin', array($this, 'activation_redirect'), 90, 1);
-				self::on_activation_page_create();
-				require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Dependencies.php';
-				require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Geo_Lib.php';
-			} else {
-				require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_Quick_Setup.php';
-				//add_action('admin_notices', [$this, 'woocommerce_not_active']);
-				add_action('activated_plugin', array($this, 'activation_redirect_setup'), 90, 1);
-			}
-		}
+        {
+            include_once(ABSPATH . 'wp-admin/includes/plugin.php');
+            if (!defined('MPTBM_PLUGIN_DIR')) {
+                define('MPTBM_PLUGIN_DIR', dirname(__FILE__));
+            }
+            if (!defined('MPTBM_PLUGIN_URL')) {
+                define('MPTBM_PLUGIN_URL', plugins_url() . '/' . plugin_basename(dirname(__FILE__)));
+            }
+            if (!defined('MPTBM_PLUGIN_DATA')) {
+                // define('MPTBM_PLUGIN_DATA', get_plugin_data(__FILE__));
+            }
+            if (!defined('MPTBM_PLUGIN_VERSION')) {
+                define('MPTBM_PLUGIN_VERSION', '1.0.7');
+            }
+            require_once MPTBM_PLUGIN_DIR . '/mp_global/MP_Global_File_Load.php';
+            if (MP_Global_Function::check_woocommerce() == 1) {
+                add_action('activated_plugin', array($this, 'activation_redirect'), 90, 1);
+                self::on_activation_page_create();
+                require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Dependencies.php';
+                require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Geo_Lib.php';
+            } else {
+                require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_Quick_Setup.php';
+                //add_action('admin_notices', [$this, 'woocommerce_not_active']);
+                add_action('activated_plugin', array($this, 'activation_redirect_setup'), 90, 1);
+            }
+        }
 
         public function activation_redirect($plugin)
         {
@@ -81,49 +81,57 @@ if (!class_exists('MPTBM_Plugin')) {
         }
 
         public static function create_pages(): void
-        {
-            if (!MP_Global_Function::get_page_by_slug('transport_booking')) {
-                $transport_booking = array(
-                    'post_type' => 'page',
-                    'post_name' => 'transport_booking',
-                    'post_title' => 'Transport Booking',
-                    'post_content' => '[mptbm_booking]',
-                    'post_status' => 'publish',
-                );
-                wp_insert_post($transport_booking);
+{
+    $forbidden_slugs = array(
+        'transport_booking',
+        'transport_booking_manual',
+        'transport_booking_fixed_hourly',
+        'transport-result'
+    );
+
+    foreach ($forbidden_slugs as $slug) {
+        // Use get_page_by_path, which gets pages regardless of status
+        $existing_page = get_page_by_path($slug, OBJECT, 'page');
+
+        if (!$existing_page) {
+            $post_content = ''; // Default value
+
+            switch ($slug) {
+                case 'transport_booking':
+                    $post_title = 'Transport Booking';
+                    $post_content = '[mptbm_booking]';
+                    break;
+
+                case 'transport_booking_manual':
+                    $post_title = 'Transport Booking Manual';
+                    $post_content = '[mptbm_booking price_based="manual" form="inline"]';
+                    break;
+
+                case 'transport_booking_fixed_hourly':
+                    $post_title = 'Transport Booking Fixed Hourly';
+                    $post_content = '[mptbm_booking price_based="fixed_hourly"]';
+                    break;
+
+                case 'transport-result':
+                    $post_title = 'Transport Result';
+                    break;
             }
-            if (!MP_Global_Function::get_page_by_slug('transport_booking_manual')) {
-                $transport_booking_manual = array(
-                    'post_type' => 'page',
-                    'post_name' => 'transport_booking_manual',
-                    'post_title' => 'Transport Booking Manual',
-                    'post_content' => '[mptbm_booking price_based="manual" form="inline"]',
-                    'post_status' => 'publish',
-                );
-                wp_insert_post($transport_booking_manual);
-            }
-            if (!MP_Global_Function::get_page_by_slug('transport_booking_fixed_hourly')) {
-                $transport_booking_fixed_hourly = array(
-                    'post_type' => 'page',
-                    'post_name' => 'transport_booking_fixed_hourly',
-                    'post_title' => 'Transport Booking Fixed Hourly',
-                    'post_content' => '[mptbm_booking price_based="fixed_hourly"]',
-                    'post_status' => 'publish',
-                );
-                wp_insert_post($transport_booking_fixed_hourly);
-            }
-            if (!MP_Global_Function::get_page_by_slug('transport-result')) {
-                $transport_result = array(
-                    'post_type' => 'page',
-                    'post_name' => 'transport-result',
-                    'post_title' => 'Transport Result',
-                    'post_content' => '',
-                    'post_status' => 'publish',
-                );
-                wp_insert_post($transport_result);
-            }
-            flush_rewrite_rules();
+
+            // If there's no existing page with the same slug, create a new one
+            $page_data = array(
+                'post_type' => 'page',
+                'post_name' => $slug,
+                'post_title' => $post_title,
+                'post_content' => $post_content,
+                'post_status' => 'publish',
+            );
+            wp_insert_post($page_data);
         }
+    }
+
+    flush_rewrite_rules();
+}
+
 
         public function mptbm_on_activation_template_create($templates)
         {

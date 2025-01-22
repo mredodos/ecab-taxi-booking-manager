@@ -10,6 +10,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 	class MPTBM_Woocommerce
 	{
 		private $custom_order_data = array(); // Property to store the data
+		private $ordered_item_name;
 		public function __construct()
 		{
 			add_action('woocommerce_checkout_update_order_meta', array($this, 'product_custom_field_to_custom_order_notes'), 100, 2);
@@ -26,6 +27,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			add_action('wp_ajax_mptbm_add_to_cart', [$this, 'mptbm_add_to_cart']);
 			add_action('wp_ajax_nopriv_mptbm_add_to_cart', [$this, 'mptbm_add_to_cart']);
 		}
+		
 		public function product_custom_field_to_custom_order_notes($order_id, $data)
 		{
 			foreach ($data as $key => $value) {
@@ -111,6 +113,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function get_item_data($item_data, $cart_item)
 		{
+
 			$post_id = array_key_exists('mptbm_id', $cart_item) ? $cart_item['mptbm_id'] : 0;
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
 				ob_start();
@@ -134,6 +137,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function checkout_create_order_line_item($item, $cart_item_key, $values)
 		{
+			$this->ordered_item_name = $item->get_name();
 
 			$post_id = array_key_exists('mptbm_id', $values) ? $values['mptbm_id'] : 0;
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
@@ -150,7 +154,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$fixed_time = $values['mptbm_fixed_hours'] ?? 0;
 				$extra_service = $values['mptbm_extra_service_info'] ?? [];
 				$price = $values['mptbm_tp'] ?? '';
-				
+
 				$item->add_meta_data(esc_html__('Pickup Location ', 'ecab-taxi-booking-manager'), $start_location);
 				$item->add_meta_data(esc_html__('Drop-Off Location ', 'ecab-taxi-booking-manager'), $end_location);
 				$price_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
@@ -201,7 +205,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						if ($return_date_time && $return_time !== "") {
 							$return_date_time .= " " . $return_time_formatted;
 						}
-
+						
 
 						$item->add_meta_data(esc_html__('Return Date', 'ecab-taxi-booking-manager'), esc_html(MP_Global_Function::date_format($return_date_time)));
 						$item->add_meta_data(esc_html__('Return Time', 'ecab-taxi-booking-manager'), esc_html(MP_Global_Function::date_format($return_date_time, 'time')));
@@ -218,6 +222,62 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						$item->add_meta_data(esc_html__('Price ', 'ecab-taxi-booking-manager'), esc_html(' ( ') . wp_kses_post(wc_price($service['service_price'])) . esc_html(' X ') . esc_html($service['service_quantity']) . esc_html(') = ') . wp_kses_post(wc_price($service['service_price'] * $service['service_quantity'])));
 					}
 				}
+				if (class_exists('MPTBM_Plugin_Ecab_Calendar_Addon')) {
+					// Prepare date and time for Google Calendar format
+					$formatted_date = MP_Global_Function::date_format($date);
+					$formatted_time = MP_Global_Function::date_format($date, 'time');
+					// Combine the provided formatted date and time
+					$date_time_string = $formatted_date . ' ' . $formatted_time; // Combine date and time as a single string
+
+					// Get the WordPress time zone
+					$timezone = new DateTimeZone(wp_timezone_string());
+
+					// Create DateTime object with the combined date and time, and apply WordPress time zone
+					$start_date_time = new DateTime($date_time_string, $timezone);
+
+					// Convert to UTC (Google Calendar requires UTC time format)
+					$start_date_time->setTimezone(new DateTimeZone('UTC'));
+
+					// Format date and time for Google Calendar
+					$formatted_date_time = $start_date_time->format('Ymd\THis\Z'); // Start time in Google Calendar format
+
+					// For the event end time (assuming 1 hour duration)
+					$end_date_time = clone $start_date_time;
+					$end_date_time->modify('+2  hour'); // Set the end time to 1 hour later
+					$formatted_end_time = $end_date_time->format('Ymd\THis\Z'); // End time in Google Calendar format
+					$driver_id = get_post_meta($post_id, 'mptbm_selected_driver', true);
+					if ($driver_id) {
+						$driver_info = get_userdata($driver_id);
+						$driver_name = $driver_info->display_name;
+						$driver_email = $driver_info->user_email;
+					} else {
+						$driver_name = '';
+						$driver_email = '';
+					}
+
+					// Build the details string conditionally
+					$details = "Transport service from " . $start_location . " to " . $end_location;
+					if ($driver_email) {
+						$details .= ". Driver email: " . $driver_email;
+					}
+					if ($driver_name) {
+						$details .= ". Driver name: " . $driver_name;
+					}
+
+					// Create Google Calendar link
+					$google_calendar_link = "https://www.google.com/calendar/render?action=TEMPLATE&text="
+						. urlencode($this->ordered_item_name) // Event title
+						. "&dates=" . $formatted_date_time . "/" . $formatted_end_time // Start and end times
+						. "&details=" . urlencode($details)
+						. "&location=" . urlencode($start_location)
+						. "&sf=true&output=xml";
+
+					// Add Google Calendar link as meta data
+					$item->add_meta_data(
+						esc_html__('Add this event to your Google Calendar', 'ecab-taxi-booking-manager'),
+						'<a href="' . esc_url($google_calendar_link) . '" target="_blank">' . esc_html__('Add this event to your Google Calendar', 'ecab-taxi-booking-manager') . '</a>'
+					);
+				}
 				$item->add_meta_data('_mptbm_id', $post_id);
 				$item->add_meta_data('_mptbm_date', $date);
 				$item->add_meta_data('_mptbm_start_place', $start_location);
@@ -232,12 +292,14 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$item->add_meta_data('_mptbm_base_price', $base_price);
 				$item->add_meta_data('_mptbm_tp', $price);
 				$item->add_meta_data('_mptbm_service_info', $extra_service);
+
 				do_action('mptbm_checkout_create_order_line_item', $item, $values);
 			}
 		}
 		public function checkout_order_processed($order_id)
 		{
 
+			
 			if ($order_id) {
 
 				$order = wc_get_order($order_id);
@@ -329,8 +391,11 @@ if (!class_exists('MPTBM_Woocommerce')) {
 								'mptbm_billing_phone' => $order->get_billing_phone(),
 								'mptbm_target_pickup_interval_time' => MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30')
 							]);
-
+							
+							
 							$booking_data = apply_filters('add_mptbm_booking_data', $data, $post_id);
+							
+							
 							self::add_cpt_data('mptbm_booking', $booking_data['mptbm_billing_name'], $booking_data);
 
 							if (sizeof($service_info) > 0) {
@@ -352,6 +417,16 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						}
 					}
 				}
+				$data['mptbm_item_name'] = $this->ordered_item_name;
+
+				$driver_id = get_post_meta($post_id, 'mptbm_selected_driver', true);
+				if ($driver_id) {
+					$driver_info = get_userdata($driver_id);
+					$data['mptbm_item_driver_name'] = $driver_info->display_name;
+					$data['mptbm_item_driver_email'] = $driver_info->user_email;
+					$data['mptbm_item_driver_phone'] = get_user_meta($driver_id, 'user_phone', true);
+				}
+				do_action('mptbm_checkout_order_processed', $data);
 			}
 		}
 		public function order_status_changed($order_id)
@@ -490,7 +565,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							<h6 class="_mR_xs"><?php esc_html_e('Base Price : ', 'ecab-taxi-booking-manager'); ?></h6>
 							<span><?php echo wp_kses_post(wc_price($base_price)); ?></span>
 						</li>
-						<?php do_action('mptbm_cart_item_display',$cart_item, $post_id); ?>
+						<?php do_action('mptbm_cart_item_display', $cart_item, $post_id); ?>
 					</ul>
 				</div>
 				<?php if (sizeof($extra_service) > 0) { ?>
@@ -629,6 +704,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				'post_status' => $status,
 				'post_type' => $cpt_name
 			);
+			
 			$post_id = wp_insert_post($new_post);
 			if (sizeof($meta_data) > 0) {
 				foreach ($meta_data as $key => $value) {

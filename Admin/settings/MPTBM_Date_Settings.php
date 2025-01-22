@@ -24,14 +24,21 @@
 			public function time_slot($time, $stat_time = '', $end_time = '') {
 				if ($stat_time >= 0 || $stat_time == '') {
 					$time_count = $stat_time == '' ? 0 : $stat_time;
-					$end_time = $end_time != '' ? $end_time : 24;
-					for ($i = $time_count; $i <= $end_time; $i = $i + 0.5) {
-						if ($stat_time == 'yes' || $i > $time_count) {
-						?>
-						<option value="<?php echo esc_attr($i); ?>" <?php echo esc_attr($time != '' && $time == $i ? 'selected' : ''); ?>><?php echo esc_html(date_i18n('h:i A', $i * 3600)); ?></option>							
-						<?php
-						}
-					}
+					$end_time = $end_time != '' ? $end_time : 48*30;
+					
+					for ($i = 30; $i <= $end_time; $i += 30) {
+						// Calculate hours and minutes
+						$hours = floor($i / 60);
+						$minutes = $i % 60;
+
+						// Generate the data-value as hours + fraction (minutes / 60)
+						$data_value = $hours + ($minutes / 100);
+
+						// Format the time for display
+						$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+					?>
+						<option  value="<?php echo esc_attr($data_value);?>" <?php echo esc_attr($time != '' && $time == $data_value ? 'selected' : '');?>><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></option>
+					<?php }
 				}
 			}
 			
@@ -61,15 +68,18 @@
 			public function time_slot_tr($post_id, $day) {
 				$start_name = 'mptbm_' . $day . '_start_time';
 				$default_start_time = $day == 'default' ? 0.5 : '';
+				
 				$start_time = MP_Global_Function::get_post_info($post_id, $start_name, $default_start_time);
+				
 				$end_name = 'mptbm_' . $day . '_end_time';
 				$default_end_time = $day == 'default' ? 24 : '';
+				
 				$end_time = MP_Global_Function::get_post_info($post_id, $end_name, $default_end_time);
+				
 				?>
 				<tr>
 					<th style="text-transform: capitalize;"><?php echo esc_html($day); ?></th>
 					<td class="mptbm_start_time" data-day-name="<?php echo esc_attr($day); ?>">
-						<?php //echo '<pre>'; print_r( $start_time );echo '</pre>'; ?>
 						<label>
 							<select class="formControl" name="<?php echo esc_attr($start_name); ?>">
 								<option value="" <?php echo esc_attr($start_time == '' ? 'selected' : ''); ?>>
@@ -83,7 +93,13 @@
 						<strong><?php esc_html_e('To', 'ecab-taxi-booking-manager'); ?></strong>
 					</td>
 					<td class="mptbm_end_time">
-						<?php $this->end_time_slot($post_id, $day, $start_time); ?>
+					<select class="formControl" name="<?php echo esc_attr($end_name); ?>">
+								<option value="" <?php echo esc_attr($end_time == '' ? 'selected' : ''); ?>>
+									<?php $this->default_text($day); ?>
+								</option>
+								<?php $this->time_slot($end_time); ?>
+							</select>
+						
 					</td>
 					
 				</tr>
@@ -108,7 +124,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Date Type', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span class="desc"><?php _e('Here you can configure general date', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php _e('Specifies the date type: "Repeated" for recurring dates, or "Particular" for a specific date', "ecab-taxi-booking-manager"); ?></span>
 							</div>
 							<select class="formControl" name="mptbm_date_type" data-collapse-target required>
 								<option disabled selected><?php esc_html_e('Please select ...', 'ecab-taxi-booking-manager'); ?></option>
@@ -161,7 +177,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Repeated Start Date', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span class="desc"><?php esc_html_e('Repeated Start Date', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Sets the start date for recurring services', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<div >
 								<input type="hidden" name="mptbm_repeated_start_date" value="<?php echo esc_attr($hidden_repeated_start_date); ?>" required/>
@@ -174,7 +190,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Repeated after', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span class="desc"><?php esc_html_e('Repeated after', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Defines the number of days after which the service or event will repeat', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<input type="text" name="mptbm_repeated_after" class="formControl mp_number_validation" value="<?php echo esc_attr($repeated_after); ?>"/>
 						</label>
@@ -184,7 +200,7 @@
 						<label class="label">
 							<div>
 								<h6><?php esc_html_e('Maximum Advanced Day Booking', 'ecab-taxi-booking-manager'); ?><span class="textRequired">&nbsp;*</span></h6>
-								<span class="desc"><?php esc_html_e('Maximum Advanced Day Booking', 'ecab-taxi-booking-manager'); ?></span>
+								<span class="desc"><?php esc_html_e('Sets the maximum number of days in advance a booking can be made', 'ecab-taxi-booking-manager'); ?></span>
 							</div>
 							<input type="text" name="mptbm_active_days" class="formControl mp_number_validation" value="<?php echo esc_attr($active_days); ?>"/>
 						</label>
@@ -378,28 +394,19 @@
 				return $this->data_sanitize($_POST[$key] ?? $default);
 			}
 			public function data_sanitize($data) {
-				$data = maybe_unserialize($data);
 				if (is_string($data)) {
-					$data = maybe_unserialize($data);
-					if (is_array($data)) {
-						$data = $this->data_sanitize($data);
-					}
-					else {
-
+					// Attempt to unserialize safely
+					$unserialized = @unserialize($data, ['allowed_classes' => false]);
+					if ($unserialized !== false || $data === 'b:0;') {
+						$data = $this->data_sanitize($unserialized);
+					} else {
+						// Sanitize string
 						$data = sanitize_text_field(stripslashes(wp_strip_all_tags($data)));
-
 					}
-				}
-				elseif (is_array($data)) {
+				} elseif (is_array($data)) {
+					// Recursively sanitize arrays
 					foreach ($data as &$value) {
-						if (is_array($value)) {
-							$value = $this->data_sanitize($value);
-						}
-						else {
-							$value = sanitize_text_field(stripslashes(wp_strip_all_tags($value)));
-
-
-						}
+						$value = $this->data_sanitize($value);
 					}
 				}
 				return $data;
@@ -411,6 +418,7 @@
 				$end_name = 'mptbm_' . $day . '_end_time';
 				$end_time = $this->get_submit_info($end_name);
 				update_post_meta($post_id, $end_name, $end_time);
+				
 			}
 		}
 		new MPTBM_Date_Settings();

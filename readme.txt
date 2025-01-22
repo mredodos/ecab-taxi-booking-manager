@@ -1,31 +1,31 @@
 === Taxi Booking Manager for WooCommerce - WordPress plugin | Ecab ===
 Contributors: magepeopleteam, hamidxazad, aamahin
 Author URI : https://mage-people.com
-Tags: Taxi, Cab, Taxi Booking, Hire Car, Taxi Rental
+Tags: Taxi Service, Chauffeur Service, Ride Booking, Cab Booking, Transportation
 Requires at least: 5.3
 Stable tag: trunk
-Tested up to: 6.5.4
+Tested up to: 6.7.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 	
-A comprehensive solution for effective management of taxi bookings and fare calculations. Integrated with WooCommerce and the benefit of automation.
+A comprehensive taxi and chauffeur booking solution with fare calculations, integrated with WooCommerce, offering automation for seamless management.
 
 == Description ==
 
-[Taxi Booking Manager](https://mage-people.com/product/wordpress-taxi-cab-booking-plugin-for-woocommerce/) is a dynamic WordPress taxi booking plugin that enhances your website functionality to leverage your taxi booking business potential. It allows you to create a fully functional taxi booking system, providing a convenient way for customers to book rides online. Whether you run a taxi service or need to integrate booking capabilities for transportation services, this plugin has got you covered.
+[Taxi and Chauffeur Booking service Manager](https://mage-people.com/product/wordpress-taxi-cab-booking-plugin-for-woocommerce/) is a dynamic WordPress taxi and Chauffeur booking plugin that enhances your website functionality to leverage your taxi booking business potential. It allows you to create a fully functional taxi booking system, providing a convenient way for customers to book rides online. Whether you run a taxi service or need to integrate booking capabilities for transportation services, this plugin has got you covered.
 
 ## Make Yourself Comfortable With:
 🧶 [View Live Taxi Booking Demo](https://taxi.mage-people.com/)
 👉 [Plugin Documentation](https://docs.mage-people.com/ecab-taxi-booking-manager/)
 
-## Taxi Booking Solution that Changes the Game
-Since the taxi business has evolved in different shapes with time, online taxi booking has become increasingly popular. Ecab has taken your taxi booking hassle creating the taxi booking manager plugin solution for your WordPress website. It is powered by WooCommerce and known by WordPress user as taxi booking manager for WooCommerce.
+## Taxi and Chauffeur Booking Solution that Changes the Game
+Since the taxi business has evolved in different shapes with time, online taxi booking has become increasingly popular. Ecab has taken your taxi booking hassle creating the taxi booking manager plugin solution for your WordPress website. It is powered by WooCommerce and known by WordPress users as a taxi booking manager for WooCommerce.
  
-As a result of our efforts, we have successfully replaced a large number of manual taxi booking systems with the digital data-driven, fastest, most effective, and [easy-to-use digital solution](https://mage-people.com/product/wordpress-taxi-cab-booking-plugin-for-woocommerce/). That's why it is one the best taxi booking plugin in WordPress.
+As a result of our efforts, we have successfully replaced a large number of manual taxi booking systems with the digital data-driven, fastest, most effective, and [easy-to-use for Chauffeur booking solution](https://mage-people.com/product/wordpress-taxi-cab-booking-plugin-for-woocommerce/). That's why it is one of the best taxi booking plugins in WordPress.
 
 
-Let's take a look at the key features that make the plugin more acceptable in its category.
+Let's look at the key features that make the plugin more acceptable in its category.
 
 ## Key Features:
 
@@ -83,10 +83,18 @@ Create unique checkout experiences for customers, offering payment methods, orde
 Automatically generate PDF tickets or invoices after bookings, providing customers with convenient and secure invoices for accounting purposes.
 
 **🚩 Designating Transport Operation Areas**
-Set fixed area for transport by using  google map
+Set a fixed area for transport by using  Google map
 
 **🏬 Establish GEO FENCE Boundaries and Pricing**
-Utilize Google Maps to delineate both intercity and intracity zones, along with corresponding pricing 
+Utilize Google Maps to delineate both intercity and intracity zones, along with corresponding pricing
+
+**🧢 Driver Panel to track service status**
+Driver panel feature enables administrators to assign vehicles to drivers. Additionally, email notifications are automatically sent to relevant parties whenever there is a change in the service status of an order 
+
+## Available Addons:
+
+**📆 [Google Calendar Addon](https://mage-people.com/product/google-calendar-for-ecab-taxi-booking-addon/)**
+Get Google Calendar event creation on every new order and customers can set their event also in Google Calendar 
 
 **≣ Comprehensive Order List Section
 View and manage all bookings in a detailed order list
@@ -116,10 +124,10 @@ Once installed, click "Activate" to enable the Ecab Taxi Booking Manager WordPre
 
 == Frequently Asked Questions ==
 
-= Q.Is an API key required? =
+= Is an API key required? =
 Yes, you need to obtain a Google Maps API key. Follow the instructions in the plugin settings to set up and enter your API key.
 
-= Q.How do I get a Google Maps API key? =
+= How do I get a Google Maps API key? =
 Visit the [Google Cloud Console](https://console.cloud.google.com/), create a project, enable the Google Maps JavaScript API, and generate an API key.
 
 = Is Ecab Taxi Manager for WooCommerce Free? =
@@ -155,5 +163,5 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 4. Transport Schedule added
 5. Initial Price added 
 6. Location taxonomy added for manual pricing 
-7.Manual Pricing Slug issue fixed
+7. Manual Pricing Slug issue fixed
 8. Fixed Hourly Responsive issue Fixed

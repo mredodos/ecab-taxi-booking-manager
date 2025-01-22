@@ -92,7 +92,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                             <label class="label">
                                 <div>
                                     <h6><?php esc_html_e('Select Operation Type', 'ecab-taxi-booking-manager'); ?></h6>
-                                    <span class="desc"><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
+                                    <span class="desc"><?php MPTBM_Settings::info_text('mptbm_operation_area_type'); ?></span>
                                 </div>
                                 <select class="formControl" name="mptbm-operation-type" id="mptbm-operation-type" data-collapse-target>
                                     <option <?php echo esc_attr(empty($operation_type) || $operation_type == 'fixed-operation-area-type') ? 'selected' : ''; ?> data-option-target="#fixed-operation-area-type" value="fixed-operation-area-type"><?php esc_html_e('Single Operation Area', 'ecab-taxi-booking-manager'); ?></option>
@@ -133,7 +133,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                     <label class="label">
                                         <div>
                                             <h6><?php esc_html_e('Increase Price By', 'ecab-taxi-booking-manager'); ?></h6>
-                                            <span class="desc"><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
+                                            <span class="desc"><?php MPTBM_Settings::info_text('mptbm_operation_area_increase_price_by'); ?></span>
                                         </div>
                                         <select class="formControl" name="mptbm-geo-fence-increase-price-by" id="mptbm-geo-fence-increase-price-by" data-collapse-target>
                                             
@@ -146,7 +146,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                     <label class="label">
                                         <div>
                                             <h6><?php esc_html_e('Fixed Price', 'ecab-taxi-booking-manager'); ?></h6>
-                                            <span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+                                            <span class="desc"><?php MPTBM_Settings::info_text('mptbm_increase_price_fixed'); ?></span>
                                         </div>
                                         <input class="formControl mp_price_validation" name="mptbm-geo-fence-fixed-price-amount" id="mptbm-geo-fence-fixed-price-amount" value="<?php echo esc_attr(!empty($mptbm_geo_fence_fixed_price_amount) ? $mptbm_geo_fence_fixed_price_amount : ''); ?>" type="text" placeholder="<?php esc_html_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
                                     </label>
@@ -155,7 +155,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                     <label class="label">
                                         <div>
                                             <h6><?php esc_html_e('Percentage', 'ecab-taxi-booking-manager'); ?></h6>
-                                            <span class="desc"><?php MPTBM_Settings::info_text('mptbm_initial_price'); ?></span>
+                                            <span class="desc"><?php MPTBM_Settings::info_text('mptbm_increase_price_percentage'); ?></span>
                                         </div>
                                         <input class="formControl mp_price_validation" name="mptbm-geo-fence-percentage-amount" id="mptbm-geo-fence-percentage-amount" value="<?php echo esc_attr(!empty($mptbm_geo_fence_percentage_amount) ? $mptbm_geo_fence_percentage_amount : ''); ?>" type="number" min="1" max="100" placeholder="<?php esc_attr_e('EX:10', 'ecab-taxi-booking-manager'); ?>" />
                                     </label>
@@ -164,7 +164,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                     <label class="label">
                                         <div>
                                             <h6><?php esc_html_e('Direction', 'ecab-taxi-booking-manager'); ?></h6>
-                                            <span class="desc"><?php MPTBM_Settings::info_text('mptbm_price_based'); ?></span>
+                                            <span class="desc"><?php MPTBM_Settings::info_text('mptbm_increase_price_direction'); ?></span>
                                         </div>
                                         <select class="formControl" name="mptbm-geo-fence-direction" id="mptbm-geo-fence-direction">
                                             <option <?php echo esc_attr(empty($mptbm_geo_fence_direction) || $mptbm_geo_fence_direction == 'geo-fence-one-direction') ? 'selected' : ''; ?> value="geo-fence-one-direction"><?php esc_html_e('One Direction (Origin &rarr; Dest)', 'ecab-taxi-booking-manager'); ?></option>
@@ -273,7 +273,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                         <label class="label">
                             <div>
                                 <h6><?php esc_html_e('Select operation area', 'ecab-taxi-booking-manager'); ?></h6>
-                                <span class="desc"><?php MPTBM_Settings::info_text('mptbm_extra_services_id'); ?></span>
+                                <span class="desc"><?php MPTBM_Settings::info_text('mptbm_operation_area'); ?></span>
                             </div>
                             <select class="formControl" name="mptbm_tranport_selected_operation_area" id="mptbm_tranport_selected_operation_area" data-collapse-target>
                                 <option value=0>Please Select...</option>

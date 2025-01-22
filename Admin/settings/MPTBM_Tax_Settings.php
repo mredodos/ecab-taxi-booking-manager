@@ -24,7 +24,7 @@
 					?>
 					<section class="bg-light">
 						<h6><?php esc_html_e('Tax Settings Information', 'ecab-taxi-booking-manager'); ?></h6>
-						<span ><?php esc_html_e('Here you can On/Off feature list and create new feature.', 'ecab-taxi-booking-manager'); ?></span>
+						<span ><?php esc_html_e('Configure and manage tax settings', 'ecab-taxi-booking-manager'); ?></span>
 					</section>
 					<?php if (get_option('woocommerce_calc_taxes') == 'yes') { ?>
 						<div class="">

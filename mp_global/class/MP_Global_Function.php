@@ -60,28 +60,24 @@
 				return self::data_sanitize($_GET[$key] ?? $default);
 			}
 			public static function data_sanitize($data) {
-				$data = maybe_unserialize($data);
 				if (is_string($data)) {
-					$data = maybe_unserialize($data);
-					if (is_array($data)) {
-						$data = self::data_sanitize($data);
+					// Attempt to unserialize safely
+					$unserialized = @unserialize($data, ['allowed_classes' => false]);
+					if ($unserialized !== false || $data === 'b:0;') {
+						// Recursively sanitize unserialized data
+						return self::data_sanitize($unserialized);
+					} else {
+						// Sanitize string data
+						return sanitize_text_field(stripslashes(strip_tags($data)));
 					}
-					else {
-						$data = sanitize_text_field(stripslashes(strip_tags($data)));
-					}
+				} elseif (is_array($data)) {
+					// Recursively sanitize array values
+					return array_map([self::class, 'data_sanitize'], $data);
 				}
-				elseif (is_array($data)) {
-					foreach ($data as &$value) {
-						if (is_array($value)) {
-							$value = self::data_sanitize($value);
-						}
-						else {
-							$value = sanitize_text_field(stripslashes(strip_tags($value)));
-						}
-					}
-				}
+				// Return data as-is for unsupported types
 				return $data;
 			}
+			
 			//**************Date related*********************//
 			public static function date_picker_format_without_year($key = 'date_format'): string {
 				$format = MP_Global_Function::get_settings('mp_global_settings', $key, 'D d M , yy');
