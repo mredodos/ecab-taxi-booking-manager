@@ -54,14 +54,13 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 							if ($custom_post == 'mptbm_extra_services') {
 								$ex_id = $post_id;
 							}
-							
 							if (array_key_exists('post_data', $dummy_data)) {
-								
 								foreach ($dummy_data['post_data'] as $meta_key => $data) {
-									
-										update_post_meta($post_id,'mptbm_extra_services_id', 17);
-
+									if ($meta_key == 'mptbm_extra_services_id') {
+										update_post_meta($post_id, $meta_key, $ex_id);
+									} else {
 										update_post_meta($post_id, $meta_key, $data);
+									}
 								}
 							}
 						}
@@ -223,7 +222,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 									]
 								],
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => 16,
+								'mptbm_extra_services_id' => '',
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -334,7 +333,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 								],
 								//Extra Services
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => 16,
+								'mptbm_extra_services_id' => '',
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -445,7 +444,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 								],
 								//Extra Services
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => 16,
+								'mptbm_extra_services_id' => '',
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -556,7 +555,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 								],
 								//Extra Services
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => 16,
+								'mptbm_extra_services_id' => '',
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -666,7 +665,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 									]
 								],
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => 16,
+								'mptbm_extra_services_id' => '',
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -776,7 +775,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 									]
 								],
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => 16,
+								'mptbm_extra_services_id' => '',
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
@@ -886,7 +885,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 									]
 								],
 								'display_mptbm_extra_services' => 'on',
-								'mptbm_extra_services_id' => 16,
+								'mptbm_extra_services_id' => '',
 								//faq_settings
 								'mptbm_display_faq' => 'on',
 								'mptbm_faq' => [
