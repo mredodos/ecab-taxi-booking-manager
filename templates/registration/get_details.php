@@ -184,10 +184,11 @@ if (sizeof($all_dates) > 0) {
 									<?php } ?>
 								<?php } ?>
 							</select>
-							<i class="fas fa-map-marker-alt mptbm_left_icon allCenter"></i>
 						<?php } else { ?>
 							<input type="text" id="mptbm_map_start_place" class="formControl" placeholder="<?php esc_html_e('Enter Pick-Up Location', 'ecab-taxi-booking-manager'); ?>" value="" />
+							
 						<?php } ?>
+						<i class="fas fa-map-marker-alt mptbm_left_icon allCenter"></i>
 					</label>
 				</div>
 				<?php
@@ -306,15 +307,15 @@ if (sizeof($all_dates) > 0) {
 								<option value="5"><?php esc_html_e('5 Hours', 'ecab-taxi-booking-manager'); ?></option>
 								<option value="6"><?php esc_html_e('6 Hours', 'ecab-taxi-booking-manager'); ?></option>
 							</select>
-							<i class="fas fa-map-marker-alt mptbm_left_icon allCenter"></i>
+							<i class="far fa-clock mptbm_left_icon allCenter"></i>
 						</label>
 					</div>
 				<?php } ?>
 				<?php if ($price_based == 'fixed_hourly') { ?>
 					<div class="inputList">
 						<label class="fdColumn">
-							<span><i class="far fa-clock _textTheme_mR_xs"></i><?php esc_html_e('Select Hours', 'ecab-taxi-booking-manager'); ?></span>
-							<select class="formControl" name="mptbm_fixed_hours">
+							<span><?php esc_html_e('Select Hours', 'ecab-taxi-booking-manager'); ?></span>
+							<select class="formControl" name="mptbm_fixed_hours" id="mptbm_fixed_hours">
 								<option value="1" selected><?php esc_html_e('1 Hour', 'ecab-taxi-booking-manager'); ?></option>
 								<option value="2"><?php esc_html_e('2 Hours', 'ecab-taxi-booking-manager'); ?></option>
 								<option value="3"><?php esc_html_e('3 Hours', 'ecab-taxi-booking-manager'); ?></option>
@@ -328,6 +329,7 @@ if (sizeof($all_dates) > 0) {
 								<option value="11"><?php esc_html_e('11 Hours', 'ecab-taxi-booking-manager'); ?></option>
 								<option value="12"><?php esc_html_e('12 Hours', 'ecab-taxi-booking-manager'); ?></option>
 							</select>
+							<i class="far fa-clock mptbm_left_icon allCenter"></i>
 						</label>
 					</div>
 				<?php } ?>

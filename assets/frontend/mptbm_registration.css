@@ -42,12 +42,15 @@
 	}
 	div.mptbm_transport_search_area .mptbm_map_area {max-width: calc(65% - 30px);width: 65%;}
 	div.mptbm_form_details_area div.mptbm_map_area{max-width: 100%;width: 100%;}
-	div.mptbm_transport_search_area #mptbm_start_date.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
-	div.mptbm_transport_search_area #mptbm_return_date.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
-	div.mptbm_transport_search_area #mptbm_manual_start_place.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
-	div.mptbm_transport_search_area #mptbm_manual_end_place.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
-	div.mptbm_transport_search_area #mptbm_taxi_return.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
-	div.mptbm_transport_search_area div.mp_input_select .formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
+	div.mptbm_transport_search_area #mptbm_start_date.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
+	div.mptbm_transport_search_area #mptbm_return_date.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
+	div.mptbm_transport_search_area #mptbm_manual_start_place.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
+	div.mptbm_transport_search_area #mptbm_manual_end_place.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
+	div.mptbm_transport_search_area #mptbm_taxi_return.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
+	div.mptbm_transport_search_area #mptbm_map_start_place.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
+	div.mptbm_transport_search_area #mptbm_map_end_place.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
+	#mptbm_fixed_hours.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
+	div.mptbm_transport_search_area div.mp_input_select .formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 50px;}
 	div.mptbm_transport_search_area .mptbm_left_icon { position: absolute; left: 1px; bottom: 1px; width: 45px !important; font-size: 25px; color: var(--color_theme); background-color: transparent; border-radius: var(--dbr) 0 0 var(--dbr); height: 46px; margin: 0 !important;}
 	/*********************/
 	div.mptbm_transport_search_area .leftSidebar h3 {color: #152C5B; font-size: 24px;font-weight: 700;text-transform: uppercase;}
