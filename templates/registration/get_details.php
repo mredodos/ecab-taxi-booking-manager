@@ -115,7 +115,7 @@ if (sizeof($all_dates) > 0) {
 				<div class="inputList">
 					<label class="fdColumn">
 						<input type="hidden" id="mptbm_map_start_date" value="" />
-						<span><i class="fas fa-calendar-alt _textTheme_mR_xs"></i><?php esc_html_e('Pickup Date', 'ecab-taxi-booking-manager'); ?></span>
+						<span><?php esc_html_e('Pickup Date', 'ecab-taxi-booking-manager'); ?></span>
 						<input type="text" id="mptbm_start_date" class="formControl" placeholder="<?php esc_attr_e('Select Date', 'ecab-taxi-booking-manager'); ?>" value="" readonly />
 						<span class="far fa-calendar-alt mptbm_left_icon allCenter"></span>
 					</label>
@@ -124,7 +124,7 @@ if (sizeof($all_dates) > 0) {
 				<div class="inputList mp_input_select">
 					<input type="hidden" id="mptbm_map_start_time" value="" />
 					<label class="fdColumn">
-						<span><i class="far fa-clock _textTheme_mR_xs"></i><?php esc_html_e('Pickup Time', 'ecab-taxi-booking-manager'); ?></span>
+						<span><?php esc_html_e('Pickup Time', 'ecab-taxi-booking-manager'); ?></span>
 						<input type="text" id="mptbm_start_time" class="formControl" placeholder="<?php esc_html_e('Please Select Time', 'ecab-taxi-booking-manager'); ?>" value="" readonly />
 						<span class="far fa-clock mptbm_left_icon allCenter"></span>
 					</label>
@@ -172,7 +172,7 @@ if (sizeof($all_dates) > 0) {
 				</div>
 				<div class="inputList">
 					<label class="fdColumn ">
-						<span><i class="fas fa-map-marker-alt _textTheme_mR_xs"></i><?php esc_html_e('Pickup Location', 'ecab-taxi-booking-manager'); ?></span>
+						<span><?php esc_html_e('Pickup Location', 'ecab-taxi-booking-manager'); ?></span>
 						<?php if ($price_based == 'manual') {
 						?>
 							<?php $all_start_locations = MPTBM_Function::get_all_start_location(); ?>
@@ -184,6 +184,7 @@ if (sizeof($all_dates) > 0) {
 									<?php } ?>
 								<?php } ?>
 							</select>
+							<i class="fas fa-map-marker-alt mptbm_left_icon allCenter"></i>
 						<?php } else { ?>
 							<input type="text" id="mptbm_map_start_place" class="formControl" placeholder="<?php esc_html_e('Enter Pick-Up Location', 'ecab-taxi-booking-manager'); ?>" value="" />
 						<?php } ?>
@@ -199,7 +200,7 @@ if (sizeof($all_dates) > 0) {
 				?>
 				<div class="inputList">
 					<label class="fdColumn mptbm_manual_end_place">
-						<span><i class="fas fa-map-marker-alt _textTheme_mR_xs"></i><?php esc_html_e('Drop-Off Location', 'ecab-taxi-booking-manager'); ?></span>
+						<span><?php esc_html_e('Drop-Off Location', 'ecab-taxi-booking-manager'); ?></span>
 						<?php if ($price_based == 'manual') { ?>
 							<select class="formControl mptbm_map_end_place" id="mptbm_manual_end_place">
 								<option class="textCapitalize" selected disabled><?php esc_html_e(' Select Destination Location', 'ecab-taxi-booking-manager'); ?></option>
@@ -207,6 +208,7 @@ if (sizeof($all_dates) > 0) {
 						<?php } else { ?>
 							<input class="formControl textCapitalize" type="text" id="mptbm_map_end_place" class="formControl" placeholder="<?php esc_html_e(' Enter Drop-Off Location', 'ecab-taxi-booking-manager'); ?>" value="" />
 						<?php } ?>
+						<i class="fas fa-map-marker-alt mptbm_left_icon allCenter"></i>
 					</label>
 				</div>
 				<?php
@@ -222,11 +224,12 @@ if (sizeof($all_dates) > 0) {
 				<?php if ($taxi_return == 'enable' && $price_based != 'fixed_hourly') { ?>
 					<div class="inputList">
 						<label class="fdColumn">
-							<span><i class="fas fa-exchange-alt _textTheme_mR_xs"></i><?php esc_html_e('Transfer Type', 'ecab-taxi-booking-manager'); ?></span>
+							<span><?php esc_html_e('Transfer Type', 'ecab-taxi-booking-manager'); ?></span>
 							<select class="formControl" name="mptbm_taxi_return" id="mptbm_taxi_return" data-collapse-target>
 								<option value="1" selected><?php esc_html_e('One Way', 'ecab-taxi-booking-manager'); ?></option>
 								<option data-option-target="#different_date_return" value="2"><?php esc_html_e('Return', 'ecab-taxi-booking-manager'); ?></option>
 							</select>
+							<i class="fas fa-exchange-alt mptbm_left_icon allCenter"></i>
 						</label>
 					</div>
 					<?php
@@ -291,9 +294,9 @@ if (sizeof($all_dates) > 0) {
 
 				<?php } ?>
 				<?php if ($waiting_time_check == 'enable' && $price_based != 'fixed_hourly') { ?>
-					<div class="inputList">
+					<div class="inputList mp_input_select">
 						<label class="fdColumn">
-							<span><i class="far fa-clock _textTheme_mR_xs"></i><?php esc_html_e('Extra Waiting Hours', 'ecab-taxi-booking-manager'); ?></span>
+							<span><?php esc_html_e('Extra Waiting Hours', 'ecab-taxi-booking-manager'); ?></span>
 							<select class="formControl" name="mptbm_waiting_time">
 								<option value="0" selected><?php esc_html_e('No Waiting', 'ecab-taxi-booking-manager'); ?></option>
 								<option value="1"><?php esc_html_e('1 Hour', 'ecab-taxi-booking-manager'); ?></option>
@@ -303,6 +306,7 @@ if (sizeof($all_dates) > 0) {
 								<option value="5"><?php esc_html_e('5 Hours', 'ecab-taxi-booking-manager'); ?></option>
 								<option value="6"><?php esc_html_e('6 Hours', 'ecab-taxi-booking-manager'); ?></option>
 							</select>
+							<i class="fas fa-map-marker-alt mptbm_left_icon allCenter"></i>
 						</label>
 					</div>
 				<?php } ?>
