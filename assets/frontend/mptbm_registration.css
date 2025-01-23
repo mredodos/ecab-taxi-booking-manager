@@ -24,7 +24,8 @@
 	div.mptbm_transport_search_area .mpTabsNext .tabItemNext {min-height: 135px;}
 	div.mptbm_transport_search_area .circleIcon {width: 62px;height: 62px;font-size: 27px;font-weight: 600;color: #666666;background-color: #EAECEE; }
 	div.mptbm_transport_search_area .tabItemNext.active [class*="circleIcon"] {background-color: var(--color_theme);color: #FFF;}
-	div.mptbm_transport_search_area .tabItemNext.active [class*="circleIcon"].success {background-color: var(--color_success);}
+	div.mpTabsNext .tabItemNext.active .circleTitle.success { color: var(--color_theme); }
+	div.mptbm_transport_search_area .tabItemNext.active [class*="circleIcon"].success {background-color: var(--color_theme);}
 	div.mptbm_transport_search_area .tabItemNext .circleTitle {font-weight: 400;color: #A9A9A9;margin: 0 !important;top: 80px;font-size: 22px;text-transform: capitalize;}
 	div.mptbm_transport_search_area .tabItemNext.active .circleTitle {font-weight: 600;color: #152C5B;}
 	div.mptbm_transport_search_area .tabItemNext [class*="circleIcon"]::after {top: 31px;border-color: #EAECEE;left: calc(50% + 31px);}
@@ -43,6 +44,9 @@
 	div.mptbm_form_details_area div.mptbm_map_area{max-width: 100%;width: 100%;}
 	div.mptbm_transport_search_area #mptbm_start_date.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
 	div.mptbm_transport_search_area #mptbm_return_date.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
+	div.mptbm_transport_search_area #mptbm_manual_start_place.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
+	div.mptbm_transport_search_area #mptbm_manual_end_place.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
+	div.mptbm_transport_search_area #mptbm_taxi_return.formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
 	div.mptbm_transport_search_area div.mp_input_select .formControl {padding: var(--dmp_xs) 35px var(--dmp_xs) 60px;}
 	div.mptbm_transport_search_area .mptbm_left_icon { position: absolute; left: 1px; bottom: 1px; width: 45px !important; font-size: 25px; color: var(--color_theme); background-color: transparent; border-radius: var(--dbr) 0 0 var(--dbr); height: 46px; margin: 0 !important;}
 	/*********************/
@@ -97,4 +101,35 @@
 }
 .mpTabsNext .tabItemNext [class*="circleIcon"]::after{
 	border-width: 5px;
+}
+
+.mpStyle .inputInline .inputList{
+	margin: 20px var(--dmp_xs) 0 0;
+}
+
+.mpStyle .mpForm label span{
+	margin: 0 0 15px 0;
+}
+div.bg_image_area{
+	height: auto;
+	max-height: 200px;
+}
+
+.mpStyle ul.list_inline_two li span{
+	color: var(--color_theme);
+}
+
+.mpStyle button:hover span{
+    color: var(--color_theme);
+}
+.mpStyle button:focus span {
+    color: #fff;
+}
+
+div.mptbm_transport_search_area button.mptbm_transport_select{
+	border: 1px solid #EAECEE;
+	padding: 10px;
+}
+div.mptbm_transport_search_area button.mptbm_transport_select:hover{
+	border: 1px solid var(--color_theme);
 }
