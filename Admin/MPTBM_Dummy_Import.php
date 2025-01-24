@@ -20,7 +20,8 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 			$count_existing_event = wp_count_posts('mptbm_rent')->publish;
 			$plugin_active = MP_Global_Function::check_plugin('ecab-taxi-booking-manager', 'MPTBM_Plugin.php');
 			if ($count_existing_event == 0 && $plugin_active == 1 && $dummy_post_inserted != 'yes') {
-				$this->add_post($this->dummy_cpt());
+				$dummy_post_data = $this->dummy_post_data();
+				$this->add_post($dummy_post_data);
 				$this->location_taxonomy();
 				$this->driver_status_taxanomy();
 				flush_rewrite_rules();
@@ -109,7 +110,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 		}
 
 
-		public function dummy_cpt(): array
+		public function dummy_post_data(): array
 		{
 			return [
 				'custom_post' => [
