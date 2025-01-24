@@ -133,7 +133,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						0 => [
 							'name' => 'Pre-defined Extra Services',
 							'post_data' => array(
-								'feature_image' => 'https://img.freepik.com/free-photo/close-up-recording-video-with-smartphone-during-concert_1153-7310.jpg',
+								'feature_image' => 'https://img.freepik.com/free-photo/white-sport-sedan-with-colorful-tuning-road_114579-5044.jpg',
 								'mptbm_extra_service_infos' => array(
 									0 => array(
 										'service_icon' => 'fas fa-baby',
@@ -178,7 +178,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						0 => [
 							'name' => 'BMW 5 Series',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/close-up-recording-video-with-smartphone-during-concert_1153-7310.jpg',
+								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -289,7 +289,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						1 => [
 							'name' => 'Cadillac Escalade Limousine',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/close-up-recording-video-with-smartphone-during-concert_1153-7310.jpg',
+								'feature_image' => 'https://img.freepik.com/free-photo/vintage-bordeaux-sedan-drive-sunlight_114579-5070.jpg',
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -401,7 +401,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						2 => [
 							'name' => 'Hummer New York Limousine',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/close-up-recording-video-with-smartphone-during-concert_1153-7310.jpg',
+								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -513,7 +513,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						3 => [
 							'name' => 'Cadillac Escalade SUV',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/close-up-recording-video-with-smartphone-during-concert_1153-7310.jpg',
+								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -625,7 +625,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						4 => [
 							'name' => 'Ford Tourneo',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/close-up-recording-video-with-smartphone-during-concert_1153-7310.jpg',
+								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -736,7 +736,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						5 => [
 							'name' => 'Mercedes-Benz E220',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/close-up-recording-video-with-smartphone-during-concert_1153-7310.jpg',
+								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -847,7 +847,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						6 => [
 							'name' => 'Fiat Panda',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/close-up-recording-video-with-smartphone-during-concert_1153-7310.jpg',
+								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
