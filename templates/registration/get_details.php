@@ -357,9 +357,17 @@ if (sizeof($all_dates) > 0) {
 				<?php } ?>
 			</div>
 		</div>
-		<div class="mptbm_map_area fdColumn" style="display: <?php echo ($price_based != 'manual' && $map == 'yes') ? '' : 'none'; ?>;">
+		<?php $map_key = get_option('mptbm_map_api_settings',true);?>
+		<span class="mptbm-map-warning" style="display:none"><?php _e('Google Map Authentication Failed! Please contact site admin.','ecab-taxi-booking-manager'); ?></span>
+		<div class="mptbm_map_area fdColumn" style="display: <?php echo ($price_based != 'manual' && $map == 'yes') ? 'block' : 'none'; ?>;">
 			<div class="fullHeight">
-				<div id="mptbm_map_area"></div>
+				<?php if(!empty($map_key['gmap_api_key'])): ?>
+					<div id="mptbm_map_area"></div>
+				<?php else: ?>
+					<div class="mptbm-map-warning"><h6>
+						<?php _e('Google Map not working! Please contact site admin.','ecab-taxi-booking-manager'); ?></h6>
+					</div>
+				<?php endif; ?>
 			</div>
 			<div class="_dLayout mptbm_distance_time">
 				<div class="_equalChild_separatorRight">

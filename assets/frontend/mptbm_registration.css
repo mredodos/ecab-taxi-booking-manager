@@ -136,3 +136,11 @@ div.mptbm_transport_search_area button.mptbm_transport_select{
 div.mptbm_transport_search_area button.mptbm_transport_select:hover{
 	border: 1px solid var(--color_theme);
 }
+.mptbm-map-warning{
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #ddd;
+	border-radius: 10px;
+  }
