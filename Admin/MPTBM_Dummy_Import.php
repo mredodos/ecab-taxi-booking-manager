@@ -52,7 +52,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 							$args['post_status'] = 'publish';
 							$args['post_type'] = $custom_post;
 							$post_id = wp_insert_post($args);
-							$pre_extra_service_id = self::get_extra_service_last_id( 'mptbm_extra_services' );
+							$pre_extra_service_id = MPTBM_Dummy_Import::get_extra_service_last_id( 'mptbm_extra_services' );
 							if (array_key_exists('post_data', $dummy_data)) {
 								foreach ($dummy_data['post_data'] as $meta_key => $data) {
 									if ($meta_key == 'feature_image') {
@@ -127,13 +127,22 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 
 		public function dummy_post_data(): array
 		{
+
+			$feature_image[0] = 'https://img.freepik.com/free-photo/white-sport-sedan-with-colorful-tuning-road_114579-5044.jpg';
+			$feature_image[1] = 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg';
+			$feature_image[2] = 'https://img.freepik.com/free-photo/yellow-sport-car-with-black-autotuning-highway-front-view_114579-5060.jpg';
+			$feature_image[3] = 'https://img.freepik.com/free-photo/black-luxury-jeep-driving-road_114579-4058.jpg';
+			$feature_image[4] = 'https://img.freepik.com/free-photo/vintage-sedan-car-driving-road_114579-5065.jpg';
+			$feature_image[5] = 'https://img.freepik.com/free-photo/sport-car-with-black-white-autotuning-driving-forest_114579-4076.jpg';
+			$feature_image[6] = 'https://img.freepik.com/free-photo/black-luxury-jeep-driving-road_114579-4058.jpg';
+			$feature_image[7] = 'https://img.freepik.com/free-photo/grey-luxury-sedan-car-sunset_114579-4045.jpg';
 			return [
 				'custom_post' => [
 					'mptbm_extra_services' => [
 						0 => [
 							'name' => 'Pre-defined Extra Services',
 							'post_data' => array(
-								'feature_image' => 'https://img.freepik.com/free-photo/white-sport-sedan-with-colorful-tuning-road_114579-5044.jpg',
+								'feature_image' => $feature_image[0],
 								'mptbm_extra_service_infos' => array(
 									0 => array(
 										'service_icon' => 'fas fa-baby',
@@ -178,7 +187,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						0 => [
 							'name' => 'BMW 5 Series',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
+								'feature_image' => $feature_image[1],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -289,7 +298,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						1 => [
 							'name' => 'Cadillac Escalade Limousine',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/vintage-bordeaux-sedan-drive-sunlight_114579-5070.jpg',
+								'feature_image' => $feature_image[2],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -401,7 +410,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						2 => [
 							'name' => 'Hummer New York Limousine',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
+								'feature_image' => $feature_image[3],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -513,7 +522,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						3 => [
 							'name' => 'Cadillac Escalade SUV',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
+								'feature_image' => $feature_image[4],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -625,7 +634,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						4 => [
 							'name' => 'Ford Tourneo',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
+								'feature_image' => $feature_image[5],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -736,7 +745,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						5 => [
 							'name' => 'Mercedes-Benz E220',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
+								'feature_image' => $feature_image[6],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -847,7 +856,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						6 => [
 							'name' => 'Fiat Panda',
 							'post_data' => [
-								'feature_image' => 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg',
+								'feature_image' => $feature_image[7],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
