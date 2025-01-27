@@ -20,7 +20,8 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 			$count_existing_event = wp_count_posts('mptbm_rent')->publish;
 			$plugin_active = MP_Global_Function::check_plugin('ecab-taxi-booking-manager', 'MPTBM_Plugin.php');
 			if ($count_existing_event == 0 && $plugin_active == 1 && $dummy_post_inserted != 'yes') {
-				$this->add_post($this->dummy_cpt());
+				$dummy_post_data = $this->dummy_post_data();
+				$this->add_post($dummy_post_data);
 				$this->location_taxonomy();
 				$this->driver_status_taxanomy();
 				flush_rewrite_rules();
@@ -29,6 +30,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 		}
 		public static function add_post($dummy_cpt)
 		{
+			$pre_extra_service_id =0;
 			if (array_key_exists('custom_post', $dummy_cpt)) {
 				foreach ($dummy_cpt['custom_post'] as $custom_post => $dummy_post) {
 					unset($args);
@@ -50,14 +52,16 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 							$args['post_status'] = 'publish';
 							$args['post_type'] = $custom_post;
 							$post_id = wp_insert_post($args);
-							$ex_id = 0;
-							if ($custom_post == 'mptbm_extra_services') {
-								$ex_id = $post_id;
-							}
+							$pre_extra_service_id = MPTBM_Dummy_Import::get_extra_service_last_id( 'mptbm_extra_services' );
 							if (array_key_exists('post_data', $dummy_data)) {
 								foreach ($dummy_data['post_data'] as $meta_key => $data) {
+									if ($meta_key == 'feature_image') {
+										$url = $data;
+										$image = media_sideload_image($url, $post_id, null, 'id');
+										set_post_thumbnail($post_id, $image);
+									}
 									if ($meta_key == 'mptbm_extra_services_id') {
-										update_post_meta($post_id, $meta_key, $ex_id);
+										update_post_meta($post_id, $meta_key, $pre_extra_service_id);
 									} else {
 										update_post_meta($post_id, $meta_key, $data);
 									}
@@ -68,6 +72,18 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 				}
 			}
 		}
+		public function get_extra_service_last_id( $post_type ) {
+			$latest_post = get_posts([
+				'post_type'      => $post_type,
+				'posts_per_page' => 1,
+				'orderby'        => 'ID',
+				'order'          => 'DESC',
+				'fields'         => 'ids',
+			]);
+		
+			return ! empty( $latest_post ) ? $latest_post[0] : null;
+		}
+
 		public function location_taxonomy(): array
 		{
 			$taxonomy_data = array(
@@ -109,14 +125,24 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 		}
 
 
-		public function dummy_cpt(): array
+		public function dummy_post_data(): array
 		{
+
+			$feature_image[0] = 'https://img.freepik.com/free-photo/white-sport-sedan-with-colorful-tuning-road_114579-5044.jpg';
+			$feature_image[1] = 'https://img.freepik.com/free-photo/blue-car-driving-road_114579-4056.jpg';
+			$feature_image[2] = 'https://img.freepik.com/free-photo/yellow-sport-car-with-black-autotuning-highway-front-view_114579-5060.jpg';
+			$feature_image[3] = 'https://img.freepik.com/free-photo/black-luxury-jeep-driving-road_114579-4058.jpg';
+			$feature_image[4] = 'https://img.freepik.com/free-photo/vintage-sedan-car-driving-road_114579-5065.jpg';
+			$feature_image[5] = 'https://img.freepik.com/free-photo/sport-car-with-black-white-autotuning-driving-forest_114579-4076.jpg';
+			$feature_image[6] = 'https://img.freepik.com/free-photo/black-luxury-jeep-driving-road_114579-4058.jpg';
+			$feature_image[7] = 'https://img.freepik.com/free-photo/grey-luxury-sedan-car-sunset_114579-4045.jpg';
 			return [
 				'custom_post' => [
 					'mptbm_extra_services' => [
 						0 => [
 							'name' => 'Pre-defined Extra Services',
 							'post_data' => array(
+								'feature_image' => $feature_image[0],
 								'mptbm_extra_service_infos' => array(
 									0 => array(
 										'service_icon' => 'fas fa-baby',
@@ -161,6 +187,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						0 => [
 							'name' => 'BMW 5 Series',
 							'post_data' => [
+								'feature_image' => $feature_image[1],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -271,6 +298,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						1 => [
 							'name' => 'Cadillac Escalade Limousine',
 							'post_data' => [
+								'feature_image' => $feature_image[2],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -382,6 +410,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						2 => [
 							'name' => 'Hummer New York Limousine',
 							'post_data' => [
+								'feature_image' => $feature_image[3],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -493,6 +522,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						3 => [
 							'name' => 'Cadillac Escalade SUV',
 							'post_data' => [
+								'feature_image' => $feature_image[4],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -604,6 +634,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						4 => [
 							'name' => 'Ford Tourneo',
 							'post_data' => [
+								'feature_image' => $feature_image[5],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -714,6 +745,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						5 => [
 							'name' => 'Mercedes-Benz E220',
 							'post_data' => [
+								'feature_image' => $feature_image[6],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
@@ -824,6 +856,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 						6 => [
 							'name' => 'Fiat Panda',
 							'post_data' => [
+								'feature_image' => $feature_image[7],
 								//General_settings
 								'mptbm_features' => [
 									0 => array(
