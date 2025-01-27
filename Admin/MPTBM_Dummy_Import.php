@@ -28,7 +28,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 				update_option('mptbm_dummy_already_inserted', 'yes');
 			}
 		}
-		public static function add_post($dummy_cpt)
+		public function add_post($dummy_cpt)
 		{
 			$pre_extra_service_id =0;
 			if (array_key_exists('custom_post', $dummy_cpt)) {
@@ -52,7 +52,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 							$args['post_status'] = 'publish';
 							$args['post_type'] = $custom_post;
 							$post_id = wp_insert_post($args);
-							$pre_extra_service_id = MPTBM_Dummy_Import::get_extra_service_last_id( 'mptbm_extra_services' );
+							$pre_extra_service_id = $this->get_extra_service_last_id( 'mptbm_extra_services' );
 							if (array_key_exists('post_data', $dummy_data)) {
 								foreach ($dummy_data['post_data'] as $meta_key => $data) {
 									if ($meta_key == 'feature_image') {
