@@ -877,5 +877,6 @@ function mptbm_price_calculation(parent) {
     });
 }(jQuery));
 function gm_authFailure() {
-    alert('Admin use Invalid Google Api Key . So, Google Map not working !');
+    var warning = jQuery('.mptbm-map-warning').html();
+    jQuery('#mptbm_map_area').html('<div class="mptbm-map-warning"><h6>'+warning+'</h6></div>');
 }
