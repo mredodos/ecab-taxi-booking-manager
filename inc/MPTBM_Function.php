@@ -269,8 +269,7 @@ if (!class_exists('MPTBM_Function')) {
 					}
 				}
 			}
-
-
+			
 			if ($waiting_time > 0) {
 				$price += $waiting_price;
 			}
@@ -291,6 +290,10 @@ if (!class_exists('MPTBM_Function')) {
 				}
 			} elseif ($two_way > 1) {
 				$price = $price * 2;
+			}
+			
+			if ($waiting_time > 0) {
+				$price += $waiting_price;
 			}
 
 			if ($two_way > 1) {
