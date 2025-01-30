@@ -269,10 +269,6 @@ if (!class_exists('MPTBM_Function')) {
 					}
 				}
 			}
-			
-			if ($waiting_time > 0) {
-				$price += $waiting_price;
-			}
 
 			if ($initial_price > 0) {
 				$price += $initial_price;
