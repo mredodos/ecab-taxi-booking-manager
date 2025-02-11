@@ -124,6 +124,53 @@ Click the "Upload Plugin" button at the top of the page.
 Choose the ecab-taxi-booking-manager.zip file and click "Install Now."
 Once installed, click "Activate" to enable the Ecab Taxi Booking Manager WordPress plugin.
 
+== Guideline ==
+Shortcode:
+[mptbm_booking price_based='dynamic' form='horizontal' progressbar='yes' map='yes']
+
+Parameters:
+- **price_based**: Determines the pricing model.
+  - Options:
+    - `dynamic` (default): Pricing is based on Google Map distance.
+    - `manual`: Fixed pricing between two locations.
+    - `fixed_hourly`: Price by hour/time.
+  - Example: [mptbm_booking price_based='manual']
+
+- **form**: Sets the form layout.
+  - Options:
+    - `horizontal` (default): Standard form layout.
+    - `inline`: Minimal single-line form.
+
+- **progressbar**: Controls the display of the progress bar.
+  - Options:
+    - `yes` (default): Progress bar is visible.
+    - `no`: Progress bar is hidden.
+
+- **map**: Toggles the map display.
+  - Options:
+    - `yes` (default): Map is displayed.
+    - `no`: Map is hidden.
+
+- **tab**: Enables or disables tabbed options.
+  - Options:
+    - `no` (default): Tabs are disabled.
+    - `yes`: Displays tabs for different booking types (hourly, distance, manual).
+
+- **tabs** (used when `tab` is set to 'yes'): Specifies which tabs to display or exclude.
+  - To show all tabs: [mptbm_booking tab='yes' tabs='hourly,distance,manual']
+  - To show specific tabs: [mptbm_booking tab='yes' tabs='hourly,distance'] (hides 'manual')
+  - To show only one tab: [mptbm_booking tab='yes' tabs='manual'] (hides 'hourly' and 'distance')
+
+Examples:
+- Display all tabs:
+  [mptbm_booking tab='yes' tabs='hourly,distance,manual']
+
+- Display only 'hourly' and 'distance' tabs:
+  [mptbm_booking tab='yes' tabs='hourly,distance']
+
+- Display only the 'manual' tab:
+  [mptbm_booking tab='yes' tabs='manual']
+
 
 == Frequently Asked Questions ==
 
