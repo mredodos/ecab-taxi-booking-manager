@@ -97,62 +97,55 @@ function mptbmCreateMarker(place) {
         mptbm_map_window.open(map);
     });
 }
+function mptbm_map_area_init() {
+    mptbm_set_cookie_distance_duration();
+
+    if (
+        jQuery("#mptbm_map_start_place").length > 0 &&
+        jQuery("#mptbm_map_end_place").length > 0
+    ) {
+        let start_place = document.getElementById("mptbm_map_start_place");
+        let end_place = document.getElementById("mptbm_map_end_place");
+
+        let start_place_autoload = new google.maps.places.Autocomplete(start_place);
+        let mptbm_restrict_search_to_country = jQuery('[name="mptbm_restrict_search_country"]').val();
+        let mptbm_country = jQuery('[name="mptbm_country"]').val();
+
+        if (mptbm_restrict_search_to_country == 'yes') {
+            start_place_autoload.setComponentRestrictions({
+                country: [mptbm_country]
+            });
+        }
+
+        google.maps.event.addListener(start_place_autoload, "place_changed", function () {
+            mptbm_set_cookie_distance_duration(
+                start_place.value,
+                end_place.value
+            );
+        });
+
+        let end_place_autoload = new google.maps.places.Autocomplete(end_place);
+        if (mptbm_restrict_search_to_country == 'yes') {
+            end_place_autoload.setComponentRestrictions({
+                country: [mptbm_country]
+            });
+        }
+
+        google.maps.event.addListener(end_place_autoload, "place_changed", function () {
+            mptbm_set_cookie_distance_duration(
+                start_place.value,
+                end_place.value
+            );
+        });
+    }
+}
 (function ($) {
     "use strict";
     $(document).ready(function () {
         $(".mpStyle ul.mp_input_select_list").hide();
 
         if ($("#mptbm_map_area").length > 0) {
-            mptbm_set_cookie_distance_duration();
-            if (
-                $("#mptbm_map_start_place").length > 0 &&
-                $("#mptbm_map_end_place").length > 0
-            ) {
-                let start_place = document.getElementById("mptbm_map_start_place");
-                let end_place = document.getElementById("mptbm_map_end_place");
-    
-                let start_place_autoload = new google.maps.places.Autocomplete(
-                    start_place,
-                );
-                let mptbm_restrict_search_to_country = $('[name="mptbm_restrict_search_country"]').val();
-                let mptbm_country = $('[name="mptbm_country"]').val();
-                
-                if(mptbm_restrict_search_to_country == 'yes'){
-                    start_place_autoload.setComponentRestrictions({
-                        country: [mptbm_country]
-                    });
-                }
-                
-                google.maps.event.addListener(
-                    start_place_autoload,
-                    "place_changed",
-                    function () {
-                        mptbm_set_cookie_distance_duration(
-                            start_place.value,
-                            end_place.value
-                        );
-                    }
-                );
-                let end_place_autoload = new google.maps.places.Autocomplete(
-                    end_place,
-                );
-                if(mptbm_restrict_search_to_country == 'yes'){
-                    end_place_autoload.setComponentRestrictions({
-                        country: [mptbm_country]
-                    });
-                }
-                
-                google.maps.event.addListener(
-                    end_place_autoload,
-                    "place_changed",
-                    function () {
-                        mptbm_set_cookie_distance_duration(
-                            start_place.value,
-                            end_place.value
-                        );
-                    }
-                );
-            }
+            mptbm_map_area_init();
         }
     });
     $(document).on("click", "#mptbm_get_vehicle", function () {
@@ -414,7 +407,7 @@ function mptbmCreateMarker(place) {
         let mptbm_enable_return_in_different_date = $('[name="mptbm_enable_return_in_different_date"]').val();
         let mptbm_buffer_end_minutes = $('[name="mptbm_buffer_end_minutes"]').val();
         let mptbm_first_calendar_date = $('[name="mptbm_first_calendar_date"]').val();
-        
+
         var selectedDate = $('#mptbm_map_start_date').val();
         var formattedDate = $.datepicker.parseDate('yy-mm-dd', selectedDate);
 
@@ -424,7 +417,7 @@ function mptbmCreateMarker(place) {
         var month = String(today.getMonth() + 1).padStart(2, '0');
         var year = today.getFullYear();
         var currentDate = year + '-' + month + '-' + day;
-        
+
         if (selectedDate == currentDate) {
             var currentTime = new Date();
             var currentHour = currentTime.getHours();
@@ -442,7 +435,7 @@ function mptbmCreateMarker(place) {
                 }
             });
         } else {
-            if(selectedDate  == mptbm_first_calendar_date){
+            if (selectedDate == mptbm_first_calendar_date) {
                 console.log(mptbm_first_calendar_date);
                 $('.start_time_list-no-dsiplay li').each(function () {
                     const timeValue = parseFloat($(this).attr('data-value'));
@@ -450,13 +443,13 @@ function mptbmCreateMarker(place) {
                         $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
                     }
                 });
-            }else{
+            } else {
                 $('.start_time_list-no-dsiplay li').each(function () {
                     $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
                 });
             }
-            
-            
+
+
         }
 
         // Update the return date picker if needed
@@ -875,6 +868,76 @@ function mptbm_price_calculation(parent) {
             });
         }
     });
+
+
+
+    $(document).ready(function () {
+        let $tabs = $('.tab-link');
+        let count = $tabs.length;
+
+        // Reset previous border-radius styles
+        $tabs.css({
+            'border-radius': '', // Clears any previously applied styles
+        });
+
+        if (count === 1) {
+            // If only one element, apply radius to all sides
+            $tabs.eq(0).css('border-radius', 'var(--dbrl)');
+        } else if (count === 2) {
+            // If two elements, apply left radius to first and right radius to second
+            $tabs.eq(0).css({
+                'border-top-left-radius': 'var(--dbrl)',
+                'border-bottom-left-radius': 'var(--dbrl)'
+            });
+            $tabs.eq(1).css({
+                'border-top-right-radius': 'var(--dbrl)',
+                'border-bottom-right-radius': 'var(--dbrl)'
+            });
+        } else if (count >= 3) {
+            // If three or more, apply left radius to first and right radius to third
+            $tabs.eq(0).css({
+                'border-top-left-radius': 'var(--dbrl)',
+                'border-bottom-left-radius': 'var(--dbrl)'
+            });
+            $tabs.eq(2).css({
+                'border-top-right-radius': 'var(--dbrl)',
+                'border-bottom-right-radius': 'var(--dbrl)'
+            });
+        }
+        $('.mptb-tabs li').click(function () {
+            var tab_id = $(this).attr('mptbm-data-tab');
+
+            // Remove existing template before inserting the new one
+            $('.mptb-tab-content').empty().removeClass('current');
+            $('.mptbm-hide-gif').css('display', 'block');
+            // Mark the clicked tab as active
+            $('.mptb-tabs li').removeClass('current');
+            $(this).addClass('current');
+
+            // AJAX call to load the template
+            $.ajax({
+                type: "POST",
+                url: mp_ajax_url, // WordPress AJAX URL
+                data: {
+                    action: "load_get_details_page",
+                    tab_id: tab_id
+                },
+                beforeSend: function () {
+                    $("#" + tab_id).html('<p>Loading...</p>'); // Show loading message
+                },
+                success: function (data) {
+                    $("#" + tab_id).html(data).addClass('current'); // Load the template
+                    $('.mptbm-hide-gif').css('display', 'none');
+                    // **Reinitialize the map-related elements after template loads**
+                    mptbm_map_area_init();
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+            });
+        });
+    });
+
 }(jQuery));
 function gm_authFailure() {
     var warning = jQuery('.mptbm-map-warning').html();

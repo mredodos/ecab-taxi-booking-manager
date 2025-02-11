@@ -31,7 +31,7 @@
 	div.mptbm_transport_search_area .tabItemNext [class*="circleIcon"]::after {top: 31px;border-color: #EAECEE;left: calc(50% + 31px);}
 	/*********************/
 	div.mptbm_transport_search_area .mptbm_search_area {padding: 40px;border-radius: var(--dbrl);}
-	div.mptbm_transport_search_area .mptbm_search_area.inputHorizontal {max-width: 35%;}
+	div.mptbm_transport_search_area .mptbm_search_area.inputHorizontal {max-width: 37%;}
 	div.mptbm_transport_search_area .mptbm_search_area h3 {text-transform: uppercase;color: #152C5B;}
 	div.mptbm_transport_search_area .mptbm_search_area label {font-weight: 400;color: #152C5B;}
 	div.mptbm_transport_search_area .mptbm_search_area label .formControl {
@@ -105,6 +105,56 @@
 .mpTabsNext .tabItemNext [class*="circleIcon"]::after{
 	border-width: 5px;
 }
+.mptb-tab-container {
+    width: 100%;
+    margin: 50px auto;
+}
+
+.mptb-tabs {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    cursor: pointer;
+}
+
+.mptb-tabs li {
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    width: 100%;
+    text-align: center;
+    ;
+}
+
+.mptb-tabs .current {
+    background: var(--color_theme);
+    color: white;
+}
+
+.mptb-tab-content {
+    display: none;
+	width: 100%;
+	padding-top: 1%;
+}
+
+.mptb-tab-content.current {
+    display: block;
+}
+.tab-link{
+	padding: 2.3% 2.5%  !important;
+}
+
+
+.mptbm-gif{
+	padding-top: 10%;
+	width: 200px;
+	margin: 0 auto;
+}
+.mptb-tabs-loader{
+	width: 200px !important;
+}
+.mptbm-hide-gif{
+	display: none;
+}
 
 .mpStyle .inputInline .inputList{
 	margin: 20px var(--dmp_xs) 0 0;
@@ -144,3 +194,4 @@ div.mptbm_transport_search_area button.mptbm_transport_select:hover{
 	background: #ddd;
 	border-radius: 10px;
   }
+
