@@ -81,56 +81,61 @@ if (!class_exists('MPTBM_Plugin')) {
         }
 
         public static function create_pages(): void
-{
-    $forbidden_slugs = array(
-        'transport_booking',
-        'transport_booking_manual',
-        'transport_booking_fixed_hourly',
-        'transport-result'
-    );
+        {
+            $forbidden_slugs = array(
+                'transport_booking',
+                'transport_booking_manual',
+                'transport_booking_fixed_hourly',
+                'transport-result',
+                'transport-tabs' 
+            );
 
-    foreach ($forbidden_slugs as $slug) {
-        // Use get_page_by_path, which gets pages regardless of status
-        $existing_page = get_page_by_path($slug, OBJECT, 'page');
+            foreach ($forbidden_slugs as $slug) {
+                $existing_page = get_page_by_path($slug, OBJECT, 'page');
 
-        if (!$existing_page) {
-            $post_content = ''; // Default value
+                if (!$existing_page) {
+                    $post_content = ''; 
 
-            switch ($slug) {
-                case 'transport_booking':
-                    $post_title = 'Transport Booking';
-                    $post_content = '[mptbm_booking]';
-                    break;
+                    switch ($slug) {
+                        case 'transport_booking':
+                            $post_title = 'Transport Booking';
+                            $post_content = '[mptbm_booking]';
+                            break;
 
-                case 'transport_booking_manual':
-                    $post_title = 'Transport Booking Manual';
-                    $post_content = '[mptbm_booking price_based="manual" form="inline"]';
-                    break;
+                        case 'transport_booking_manual':
+                            $post_title = 'Transport Booking Manual';
+                            $post_content = '[mptbm_booking price_based="manual" form="inline"]';
+                            break;
 
-                case 'transport_booking_fixed_hourly':
-                    $post_title = 'Transport Booking Fixed Hourly';
-                    $post_content = '[mptbm_booking price_based="fixed_hourly"]';
-                    break;
+                        case 'transport_booking_fixed_hourly':
+                            $post_title = 'Transport Booking Fixed Hourly';
+                            $post_content = '[mptbm_booking price_based="fixed_hourly"]';
+                            break;
 
-                case 'transport-result':
-                    $post_title = 'Transport Result';
-                    break;
+                        case 'transport-result':
+                            $post_title = 'Transport Result';
+                            break;
+
+                        case 'transport-tabs':
+                            $post_title = 'Transport Tabs';
+                            $post_content = '[mptbm_booking tab="yes" tabs="hourly,distance,manual"]';
+                            break;
+                    }
+
+                    $page_data = array(
+                        'post_type'    => 'page',
+                        'post_name'    => $slug,
+                        'post_title'   => $post_title,
+                        'post_content' => $post_content,
+                        'post_status'  => 'publish',
+                    );
+                    wp_insert_post($page_data);
+                }
             }
 
-            // If there's no existing page with the same slug, create a new one
-            $page_data = array(
-                'post_type' => 'page',
-                'post_name' => $slug,
-                'post_title' => $post_title,
-                'post_content' => $post_content,
-                'post_status' => 'publish',
-            );
-            wp_insert_post($page_data);
+            flush_rewrite_rules();
         }
-    }
 
-    flush_rewrite_rules();
-}
 
 
         public function mptbm_on_activation_template_create($templates)
