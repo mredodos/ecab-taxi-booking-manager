@@ -164,6 +164,7 @@ if (!class_exists('MPTBM_Plugin')) {
 
         public function wptbm_assign_template_to_page()
         {
+            flush_rewrite_rules();
             // Check if the page 'transport-result' exists
             $page = get_page_by_path('transport-result');
             if ($page) {
