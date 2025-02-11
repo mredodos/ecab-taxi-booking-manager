@@ -71,6 +71,9 @@ Enhance the booking experience with auto-suggestive address suggestions for cust
 **⌚ Establish Operating Hours**
 Define the operational schedule for transportation services, or opt for 24-hour availability.
 
+**🛠️ Pricing Model Tabs**
+Easily switch between different pricing models using tabs for a seamless booking experience.
+
 ## Pro Features (Available in Pro Version):
 
 **🛒 Customizable Checkout Field**
