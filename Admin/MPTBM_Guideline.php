@@ -20,7 +20,7 @@
 				?>
 				<div class="wrap"></div>
 				<div class="mpStyle">
-					<div class=_dShadow_6_adminLayout">
+					<div class="_dShadow_6_adminLayout">
 						<h2 class="textCenter"><?php echo esc_html($label) . '  ' . esc_html__('available Shortcode', 'ecab-taxi-booking-manager'); ?></h2>
 						<div class="divider"></div>
 						<table class="table table-striped table-bordered" style="background:#EEF5E4;border-radius:10px;">

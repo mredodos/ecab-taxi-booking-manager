@@ -25,6 +25,9 @@
 				/*******************************/
 				add_action('wp_ajax_get_mptbm_extra_service_summary', [$this, 'get_mptbm_extra_service_summary']);
 				add_action('wp_ajax_nopriv_get_mptbm_extra_service_summary', [$this, 'get_mptbm_extra_service_summary']);
+				/**************************/
+				add_action('wp_ajax_load_get_details_page', [$this, 'load_get_details_page']);
+				add_action('wp_ajax_nopriv_load_get_details_page', [$this, 'load_get_details_page']);
 			}
 			public function transport_search($params) {
 				$display_map = MP_Global_Function::get_settings('mptbm_map_api_settings', 'display_map', 'enable');
@@ -34,11 +37,35 @@
 				$form_style= $params['form'] ?: 'horizontal';
 				$map= $params['map'] ?: 'yes';
 				$map = $display_map == 'disable' ? 'no' : $map;
+				$tab = $params['tab'] ?: 'no';
+				$tabs = $params['tabs'] ?: 'distance,hourly,manually';
 				ob_start();
 				do_shortcode('[shop_messages]');
 				echo ob_get_clean();
 				//echo '<pre>';print_r($params);echo '</pre>';
 				include(MPTBM_Function::template_path('registration/registration_layout.php'));
+			}
+			function load_get_details_page() {
+				if (isset($_POST['tab_id'])) {
+					$tab_id = sanitize_text_field($_POST['tab_id']); // Sanitize input
+			
+					// Include the correct template based on the tab
+					if ($tab_id === 'distance' || $tab_id === 'hourly' || $tab_id === 'flat-rate') {
+						ob_start(); // Start output buffering
+						if($tab_id === 'distance'){
+							$price_based = 'dynamic';
+						}else if($tab_id === 'hourly'){
+							$price_based = 'fixed_hourly';
+						}else{
+							$price_based = 'manual';
+							$form_style = 'inline';
+						}
+						include MPTBM_Function::template_path('registration/get_details.php');
+						$content = ob_get_clean(); // Get the template output
+						echo $content;
+					}
+				}
+				wp_die(); // End AJAX call
 			}
 			public function get_mptbm_map_search_result() {
 					$distance = isset($_COOKIE['mptbm_distance']) ? absint($_COOKIE['mptbm_distance']) : '';

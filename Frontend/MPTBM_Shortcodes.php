@@ -35,6 +35,8 @@
 					'progressbar'=>'yes',
 					'map'=>'yes',
 					'form'=>'horizontal',
+					'tab'=>'no',
+					'tabs'=>'distance,hourly,manual'
 				);
 			}
 		}

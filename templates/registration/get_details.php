@@ -66,11 +66,12 @@ $min_schedule_value = floatval($min_schedule_value);
 $max_schedule_value = floatval($max_schedule_value);
 
 if (!function_exists('convertToMinutes')) {
-    function convertToMinutes($schedule_value) {
-        $hours = floor($schedule_value); // Get the hour part
-        $minutes = ($schedule_value - $hours) * 100; // Convert decimal part to minutes
-        return $hours * 60 + $minutes;
-    }
+	function convertToMinutes($schedule_value)
+	{
+		$hours = floor($schedule_value); // Get the hour part
+		$minutes = ($schedule_value - $hours) * 100; // Convert decimal part to minutes
+		return $hours * 60 + $minutes;
+	}
 }
 
 $min_minutes = convertToMinutes($min_schedule_value);
@@ -78,9 +79,9 @@ $max_minutes = convertToMinutes($max_schedule_value);
 
 $buffer_time = (int) MP_Global_Function::get_settings('mptbm_general_settings', 'enable_buffer_time');
 
-$current_time = time(); 
-$current_hour = wp_date('H', $current_time); 
-$current_minute = wp_date('i', $current_time); 
+$current_time = time();
+$current_hour = wp_date('H', $current_time);
+$current_minute = wp_date('i', $current_time);
 
 // Convert to total minutes since midnight local time
 $current_minutes = intval($current_hour) * 60 + intval($current_minute);
@@ -98,7 +99,9 @@ if (sizeof($all_dates) > 0) {
 	$interval_hours = $interval_time / 60;
 	$waiting_time_check = MPTBM_Function::get_general_settings('taxi_waiting_time', 'enable');
 ?>
+
 	<div class="<?php echo esc_attr($area_class); ?> ">
+
 		<div class="_dLayout mptbm_search_area <?php echo esc_attr($form_style_class); ?> <?php echo esc_attr($price_based == 'manual' ? 'mAuto' : ''); ?>">
 			<div class="mpForm">
 				<input type="hidden" id="mptbm_km_or_mile" name="mptbm_km_or_mile" value="<?php echo esc_attr($km_or_mile); ?>" />
@@ -111,7 +114,6 @@ if (sizeof($all_dates) > 0) {
 				<input type='hidden' id="mptbm_first_calendar_date" name="mptbm_first_calendar_date" value="<?php echo $all_dates[0]; ?>" />
 				<input type='hidden' id="mptbm_country" name="mptbm_country" value="<?php echo $country; ?>" />
 				<input type='hidden' id="mptbm_restrict_search_country" name="mptbm_restrict_search_country" value="<?php echo $restrict_search_country; ?>" />
-				
 				<div class="inputList">
 					<label class="fdColumn">
 						<input type="hidden" id="mptbm_map_start_date" value="" />
@@ -132,8 +134,8 @@ if (sizeof($all_dates) > 0) {
 					<ul class="mp_input_select_list start_time_list">
 						<?php
 						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
-							
-							
+
+
 							// Calculate hours and minutes
 							$hours = floor($i / 60);
 							$minutes = $i % 60;
@@ -146,13 +148,13 @@ if (sizeof($all_dates) > 0) {
 						?>
 							<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 						<?php } ?>
-						
+
 					</ul>
 					<ul class="start_time_list-no-dsiplay" style="display:none">
 						<?php
 
 						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
-							
+
 							// Calculate hours and minutes
 							$hours = floor($i / 60);
 							$minutes = $i % 60;
@@ -166,7 +168,7 @@ if (sizeof($all_dates) > 0) {
 						?>
 							<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 						<?php } ?>
-						
+
 					</ul>
 
 				</div>
@@ -251,7 +253,7 @@ if (sizeof($all_dates) > 0) {
 								<?php
 
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
-									
+
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
@@ -269,7 +271,7 @@ if (sizeof($all_dates) > 0) {
 							<ul class="mp_input_select_list return_time_list">
 								<?php
 								for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
-									
+
 									// Calculate hours and minutes
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
