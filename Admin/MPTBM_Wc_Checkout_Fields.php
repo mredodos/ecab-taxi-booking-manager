@@ -26,7 +26,11 @@
 				add_action('wp_ajax_nopriv_mptbm_disable_field', [$this, 'mptbm_disable_field']);
 			}
 			public function mptbm_disable_field() {
-				
+				// Check if user is logged in and has the correct capability
+				if ( !current_user_can( 'manage_options' ) ) {
+					wp_send_json_error( array( 'message' => 'Unauthorized action' ), 403 );
+					wp_die();
+				}
 				$response = 'failed';
 				$key = isset($_POST['key']) ? sanitize_text_field($_POST['key']) : null;
 				$name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : null;
