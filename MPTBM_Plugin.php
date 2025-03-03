@@ -4,7 +4,7 @@
  * Plugin Name: E-cab taxi booking manager
  * Plugin URI: http://mage-people.com
  * Description: A Complete Transportation Solution for WordPress by MagePeople.
- * Version: 1.1.6
+ * Version: 1.2.1
  * Author: MagePeople Team
  * Author URI: http://www.mage-people.com/
  * License: GPL v2 or later
@@ -48,6 +48,16 @@ if (!class_exists('MPTBM_Plugin')) {
                 self::on_activation_page_create();
                 require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Dependencies.php';
                 require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Geo_Lib.php';
+
+                // Load Block Editor Integration
+                if (function_exists('register_block_type')) {
+                    require_once MPTBM_PLUGIN_DIR . '/Frontend/MPTBM_Block.php';
+                    add_action('enqueue_block_editor_assets', array($this, 'enqueue_block_editor_assets'));
+                }
+
+                // Load Elementor Integration
+                add_action('elementor/widgets/register', array($this, 'register_elementor_widget'));
+                add_action('elementor/elements/categories_registered', array($this, 'add_elementor_widget_category'));
             } else {
                 require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_Quick_Setup.php';
                 //add_action('admin_notices', [$this, 'woocommerce_not_active']);
@@ -171,6 +181,50 @@ if (!class_exists('MPTBM_Plugin')) {
                 // Update the page meta to assign the template
                 update_post_meta($page->ID, '_wp_page_template', 'transport_result.php');
             }
+        }
+
+        /**
+         * Enqueue Block Editor assets
+         */
+        public function enqueue_block_editor_assets() {
+            // Enqueue block editor script
+            wp_enqueue_script(
+                'mptbm-block-editor',
+                MPTBM_PLUGIN_URL . '/assets/js/block.js',
+                array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n'),
+                MPTBM_PLUGIN_VERSION
+            );
+
+            // Enqueue block editor styles
+            wp_enqueue_style(
+                'mptbm-block-editor',
+                MPTBM_PLUGIN_URL . '/assets/css/block-editor.css',
+                array(),
+                MPTBM_PLUGIN_VERSION
+            );
+        }
+
+        /**
+         * Register Elementor widget
+         */
+        public function register_elementor_widget($widgets_manager) {
+            if (class_exists('\\Elementor\\Widget_Base')) {
+                require_once MPTBM_PLUGIN_DIR . '/Frontend/MPTBM_Elementor_Widget.php';
+                $widgets_manager->register(new MPTBM_Elementor_Widget());
+            }
+        }
+
+        /**
+         * Add Elementor widget category
+         */
+        public function add_elementor_widget_category($elements_manager) {
+            $elements_manager->add_category(
+                'mptbm',
+                [
+                    'title' => esc_html__('E-Cab Taxi Booking', 'ecab-taxi-booking-manager'),
+                    'icon' => 'fa fa-car',
+                ]
+            );
         }
     }
 
