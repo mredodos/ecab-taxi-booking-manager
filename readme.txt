@@ -35,35 +35,28 @@ Enjoy a user-friendly interface that simplifies taxi booking management for admi
 **⏱ Flexible Booking Options** 
 Provide customers with the flexibility to choose immediate pickups or pre-scheduled rides according to their preferences.
 
-**💵 Fare Calculation** 
+💵 Fare Calculation
 Automatic fare calculation based on distance, time, or any custom criteria you define.
 
-**📰 Customizable Rates**
+📰 Customizable Rates
 Set up custom rate plans, allowing you to tailor pricing based on different zones, distances, or other factors.
 
-**💰 Multiple Payment Gateways**
+💰 Multiple Payment Gateways
 Easily integrate with popular payment gateways to offer secure and diverse payment options for customers.
 
-**🤹 Booking Management**
+🤹 Booking Management
 Efficiently manage all taxi bookings from your WordPress dashboard, with the ability to view, modify, or cancel bookings as needed.
 
-**🗺 Google Maps API** 
+🗺 Google Maps API
 Google Maps API is integrated for route mapping, enhancing the navigation experience for both customers and drivers.
 
-**💦 Responsive Design** 
+💦 Responsive Design
 The plugin is designed to be fully responsive, offering a smooth booking experience across various devices.
 
+🛠 Gutenberg & Elementor Support
+Easily add booking forms using the Site Editor (Gutenberg) block or an Elementor widget, providing seamless customization for different page builders.
 
-**📧 Email Customization**
-Receive order confirmations and deliver PDF receipts easily after successful payments with dual email functions.
 
-
-**🛒 Customize Checkout**
-Transform your checkout page effortlessly, collecting rider details and departure information while enhancing functionality and appearance.
-Most of your basic business needs will be covered with the action of the above features but when your business requires more dynamic solutions in terms of meeting the business need and functionality then the pro features will be handy for you.
-
-**⏳ Wait Time Option With Extra Payment**
-Offer extra waiting time for users with convenient pricing, ensuring a smooth traveling journey.
 
 **📍 API For Autocomplete Of Google Addresses**
 Enhance the booking experience with auto-suggestive address suggestions for customers during the booking process.
@@ -75,6 +68,12 @@ Define the operational schedule for transportation services, or opt for 24-hour 
 Easily switch between different pricing models using tabs for a seamless booking experience.
 
 ## Pro Features (Available in Pro Version):
+
+**📧 Email Customization**
+Receive order confirmations and deliver PDF receipts easily after successful payments with dual email functions.
+
+**⏳ Wait Time Option With Extra Payment**
+Offer extra waiting time for users with convenient pricing, ensuring a smooth traveling journey.
 
 **🛒 Customizable Checkout Field**
 Add, edit, or delete necessary fields for personal information collection before boarding a car or taxi cab, ensuring all needed data is securely stored.
@@ -202,11 +201,14 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 
 
 == Changelog ==
-= 1.4.6 =
+= 1.2.2 = 
+1. Gutenberg block added for booking form
+2. Elementor widget added for booking form
+= 1.2.1 =
 1. Manual Pricing Slug is fixed
 2. Fixed Hourly Responsive issue Fixed
 3. KM to mile feature added
-= 1.4.5 =
+= 1.2.0 =
 1. Geo Fence fixed and intercity with extra pricing added for pro version 
 2. Return Time and date added
 3. Filter by bag and passenger added
@@ -215,3 +217,4 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 6. Location taxonomy added for manual pricing 
 7. Manual Pricing Slug issue fixed
 8. Fixed Hourly Responsive issue Fixed
+
