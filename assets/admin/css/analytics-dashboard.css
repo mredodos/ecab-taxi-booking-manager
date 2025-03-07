@@ -103,6 +103,39 @@
     color: #FF9800;
 }
 
+/* Cancellation Summary Cards */
+.mptbm-cancelled-bookings .mptbm-card-icon {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #F44336;
+}
+
+.mptbm-failed-bookings .mptbm-card-icon {
+    background-color: rgba(233, 30, 99, 0.1);
+    color: #E91E63;
+}
+
+.mptbm-lost-revenue .mptbm-card-icon {
+    background-color: rgba(121, 85, 72, 0.1);
+    color: #795548;
+}
+
+.mptbm-cancellation-rate .mptbm-card-icon {
+    background-color: rgba(96, 125, 139, 0.1);
+    color: #607D8B;
+}
+
+.mptbm-cancellation-summary {
+    margin-bottom: 20px;
+}
+
+.mptbm-cancellation-summary h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+}
+
 .mptbm-card-content {
     flex-grow: 1;
 }

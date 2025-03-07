@@ -137,6 +137,52 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
                         </div>
                     </div>
 
+                    <!-- Cancellation & Lost Revenue Summary -->
+                    <div class="mptbm-cancellation-summary">
+                        <h2><?php esc_html_e('Cancellation & Lost Revenue Summary', 'ecab-taxi-booking-manager'); ?></h2>
+                        <div class="mptbm-summary-cards">
+                            <div class="mptbm-card mptbm-cancelled-bookings">
+                                <div class="mptbm-card-icon">
+                                    <span class="dashicons dashicons-dismiss"></span>
+                                </div>
+                                <div class="mptbm-card-content">
+                                    <h3><?php esc_html_e('Cancelled Bookings', 'ecab-taxi-booking-manager'); ?></h3>
+                                    <div class="mptbm-card-value" id="mptbm-cancelled-bookings">0</div>
+                                </div>
+                            </div>
+
+                            <div class="mptbm-card mptbm-failed-bookings">
+                                <div class="mptbm-card-icon">
+                                    <span class="dashicons dashicons-warning"></span>
+                                </div>
+                                <div class="mptbm-card-content">
+                                    <h3><?php esc_html_e('Failed Bookings', 'ecab-taxi-booking-manager'); ?></h3>
+                                    <div class="mptbm-card-value" id="mptbm-failed-bookings">0</div>
+                                </div>
+                            </div>
+
+                            <div class="mptbm-card mptbm-lost-revenue">
+                                <div class="mptbm-card-icon">
+                                    <span class="dashicons dashicons-money-alt"></span>
+                                </div>
+                                <div class="mptbm-card-content">
+                                    <h3><?php esc_html_e('Lost Revenue', 'ecab-taxi-booking-manager'); ?></h3>
+                                    <div class="mptbm-card-value" id="mptbm-lost-revenue">0</div>
+                                </div>
+                            </div>
+
+                            <div class="mptbm-card mptbm-cancellation-rate">
+                                <div class="mptbm-card-icon">
+                                    <span class="dashicons dashicons-chart-pie"></span>
+                                </div>
+                                <div class="mptbm-card-content">
+                                    <h3><?php esc_html_e('Cancellation Rate', 'ecab-taxi-booking-manager'); ?></h3>
+                                    <div class="mptbm-card-value" id="mptbm-cancellation-rate">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Charts Row 1 -->
                     <div class="mptbm-charts-row">
                         <div class="mptbm-chart-container mptbm-chart-bookings">
@@ -311,6 +357,9 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
             $total_bookings = count($bookings);
             $total_revenue = 0;
             $completed_bookings = 0;
+            $cancelled_bookings = 0;
+            $failed_bookings = 0;
+            $lost_revenue = 0; // Track revenue lost due to cancellations and failures
             $recent_bookings = array();
 
             // Process each booking from the SQL query
@@ -318,12 +367,16 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
                 // Format booking date
                 $booking_date_formatted = date('Y-m-d', strtotime($booking->booking_date));
 
-                // Add to revenue data
+                // Add to revenue data - only count revenue for non-cancelled and non-failed orders
                 if (!isset($revenue_data[$booking_date_formatted])) {
                     $revenue_data[$booking_date_formatted] = 0;
                 }
-                $revenue_data[$booking_date_formatted] += (float)$booking->price;
-                $total_revenue += (float)$booking->price;
+
+                // Only add to revenue if the order is not cancelled or failed
+                if (!in_array($booking->order_status, array('cancelled', 'failed', 'refunded'))) {
+                    $revenue_data[$booking_date_formatted] += (float)$booking->price;
+                    $total_revenue += (float)$booking->price;
+                }
 
                 // Add to bookings data
                 if (!isset($bookings_data[$booking_date_formatted])) {
@@ -338,6 +391,14 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
 
                 if ($booking->order_status === 'completed') {
                     $completed_bookings++;
+                } elseif ($booking->order_status === 'cancelled') {
+                    $cancelled_bookings++;
+                    $lost_revenue += (float)$booking->price; // Add to lost revenue
+                } elseif ($booking->order_status === 'failed') {
+                    $failed_bookings++;
+                    $lost_revenue += (float)$booking->price; // Add to lost revenue
+                } elseif ($booking->order_status === 'refunded') {
+                    $lost_revenue += (float)$booking->price; // Add to lost revenue
                 }
 
                 // Get route information
@@ -407,6 +468,9 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
                 'total_revenue' => $total_revenue,
                 'avg_booking_value' => $avg_booking_value,
                 'completion_rate' => $completion_rate,
+                'cancelled_bookings' => $cancelled_bookings,
+                'failed_bookings' => $failed_bookings,
+                'lost_revenue' => $lost_revenue,
                 'bookings_data' => $formatted_bookings_data,
                 'revenue_data' => $formatted_revenue_data,
                 'popular_routes' => $formatted_popular_routes,

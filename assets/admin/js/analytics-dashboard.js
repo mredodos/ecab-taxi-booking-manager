@@ -369,14 +369,23 @@
         // Format numbers
         const formattedRevenue = mptbm_analytics.currency_symbol + data.total_revenue.toFixed(2);
         const formattedAvgValue = mptbm_analytics.currency_symbol + data.avg_booking_value.toFixed(2);
-        
-        // Update card values
+        const formattedLostRevenue = mptbm_analytics.currency_symbol + data.lost_revenue.toFixed(2);
+
+        // Update main card values
         $('#mptbm-total-bookings').text(data.total_bookings);
         $('#mptbm-total-revenue').text(formattedRevenue);
         $('#mptbm-avg-booking-value').text(formattedAvgValue);
         $('#mptbm-completion-rate').text(data.completion_rate + '%');
-        
-        // You could add trend indicators here if you have historical data to compare
+
+        // Update cancellation and lost revenue cards
+        $('#mptbm-cancelled-bookings').text(data.cancelled_bookings);
+        $('#mptbm-failed-bookings').text(data.failed_bookings);
+        $('#mptbm-lost-revenue').text(formattedLostRevenue);
+
+        // Calculate and display cancellation rate
+        const totalProblematicBookings = data.cancelled_bookings + data.failed_bookings;
+        const cancellationRate = data.total_bookings > 0 ? Math.round((totalProblematicBookings / data.total_bookings) * 100) : 0;
+        $('#mptbm-cancellation-rate').text(cancellationRate + '%');
     }
 
     /**
