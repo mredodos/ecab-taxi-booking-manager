@@ -9,6 +9,7 @@ if (!class_exists('MPTBM_API_Documentation')) {
             add_action('admin_menu', array($this, 'add_api_documentation_menu'));
             add_action('admin_enqueue_scripts', array($this, 'enqueue_documentation_assets'));
         }
+		
 
         public function add_api_documentation_menu() {
             add_submenu_page(

@@ -28,6 +28,8 @@
 				require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_Status.php';
 				require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_Guideline.php';
 				require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_License.php';
+				require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_Analytics_Dashboard.php';
+				
 				//****************Global settings************************//
 				require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_Settings_Global.php';
 				//****************Taxi settings************************//

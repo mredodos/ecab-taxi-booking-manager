@@ -14,6 +14,7 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 add_action('rest_api_init', array($this, 'register_routes'));
             }
         }
+		
 
         private function is_api_enabled() {
             return MP_Global_Function::get_settings('mp_global_settings', 'enable_rest_api', 'off') === 'on';

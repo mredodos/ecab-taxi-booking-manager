@@ -1,3 +1,4 @@
+
 jQuery(document).ready(function($) {
     // Initialize all endpoint sections as collapsed
     $('.endpoint-section .endpoint-details').hide();

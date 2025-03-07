@@ -62,6 +62,7 @@ if (!class_exists('MPTBM_Plugin')) {
                 require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Geo_Lib.php';
                 require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Rest_Api.php';
                 require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_API_Documentation.php';
+				
 
                 // Load Block Editor Integration
                 if (function_exists('register_block_type')) {
