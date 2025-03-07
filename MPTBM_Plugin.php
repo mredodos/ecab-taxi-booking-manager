@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: E-cab taxi booking manager
  * Plugin URI: http://mage-people.com
@@ -40,14 +39,29 @@ if (!class_exists('MPTBM_Plugin')) {
                 // define('MPTBM_PLUGIN_DATA', get_plugin_data(__FILE__));
             }
             if (!defined('MPTBM_PLUGIN_VERSION')) {
-                define('MPTBM_PLUGIN_VERSION', '1.0.7');
+                define('MPTBM_PLUGIN_VERSION', '1.2.1');
             }
+
+            // Create required directories if they don't exist
+            $dirs = array(
+                MPTBM_PLUGIN_DIR . '/assets/admin/css',
+                MPTBM_PLUGIN_DIR . '/assets/admin/js'
+            );
+            
+            foreach ($dirs as $dir) {
+                if (!file_exists($dir)) {
+                    wp_mkdir_p($dir);
+                }
+            }
+
             require_once MPTBM_PLUGIN_DIR . '/mp_global/MP_Global_File_Load.php';
             if (MP_Global_Function::check_woocommerce() == 1) {
                 add_action('activated_plugin', array($this, 'activation_redirect'), 90, 1);
                 self::on_activation_page_create();
                 require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Dependencies.php';
                 require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Geo_Lib.php';
+                require_once MPTBM_PLUGIN_DIR . '/inc/MPTBM_Rest_Api.php';
+                require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_API_Documentation.php';
 
                 // Load Block Editor Integration
                 if (function_exists('register_block_type')) {
@@ -60,7 +74,6 @@ if (!class_exists('MPTBM_Plugin')) {
                 add_action('elementor/elements/categories_registered', array($this, 'add_elementor_widget_category'));
             } else {
                 require_once MPTBM_PLUGIN_DIR . '/Admin/MPTBM_Quick_Setup.php';
-                //add_action('admin_notices', [$this, 'woocommerce_not_active']);
                 add_action('activated_plugin', array($this, 'activation_redirect_setup'), 90, 1);
             }
         }
@@ -145,8 +158,6 @@ if (!class_exists('MPTBM_Plugin')) {
 
             flush_rewrite_rules();
         }
-
-
 
         public function mptbm_on_activation_template_create($templates)
         {
