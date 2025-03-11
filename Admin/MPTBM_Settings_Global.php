@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
 if (!class_exists('MPTBM_Settings_Global')) {
 	class MPTBM_Settings_Global
 	{
+		
 		protected $settings_api;
 		public function __construct()
 		{

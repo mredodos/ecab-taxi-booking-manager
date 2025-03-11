@@ -88,6 +88,7 @@ if (!class_exists('MPTBM_Dependencies')) {
             </script>
             <?php
         }
+		
         public function map_api_not_active()
         {
             $display_map = MP_Global_Function::get_settings('mptbm_map_api_settings', 'display_map', 'enable');

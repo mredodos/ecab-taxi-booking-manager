@@ -183,10 +183,26 @@
 				?>
 				<fieldset>
 					<label class="roundSwitchLabel">
-						<input type="checkbox" name="<?php echo esc_attr($name); ?>" value="on" <?php echo esc_attr($checked); ?>>
+						<input type="hidden" name="<?php echo esc_attr($name); ?>" value="off">
+						<input type="checkbox" class="switch_button" 
+							name="<?php echo esc_attr($name); ?>" 
+							value="on" 
+							<?php echo esc_attr($checked); ?>>
 						<span class="roundSwitch"></span>
 					</label>
 				</fieldset>
+				<script>
+					jQuery(document).ready(function($) {
+						$('.switch_button').on('change', function() {
+							var hiddenInput = $(this).prev('input[type="hidden"]');
+							if ($(this).is(':checked')) {
+								hiddenInput.prop('disabled', true);
+							} else {
+								hiddenInput.prop('disabled', false);
+							}
+						}).trigger('change');
+					});
+				</script>
 				<?php
 			}
 			function callback_multicheck($args) {
