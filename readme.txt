@@ -69,6 +69,10 @@ Easily switch between different pricing models using tabs for a seamless booking
 
 ## Pro Features (Available in Pro Version):
 
+**📧 📅 Google Calendar Integration **
+Automatically add booking details to the admin's Google Calendar.
+Provide a link after booking so customers can easily add the event to their own calendar.
+
 **📧 Email Customization**
 Receive order confirmations and deliver PDF receipts easily after successful payments with dual email functions.
 
@@ -95,8 +99,8 @@ Driver panel feature enables administrators to assign vehicles to drivers. Addit
 
 ## Available Addons:
 
-**📆 [Google Calendar Addon](https://mage-people.com/product/google-calendar-for-ecab-taxi-booking-addon/)**
-Get Google Calendar event creation on every new order and customers can set their event also in Google Calendar 
+**⏰ [Peak Hour Addon](https://mage-people.com/product/taxi-peak-hour-pricing-addon/)**
+Set peak hour pricing by date range and specific time range
 
 **≣ Comprehensive Order List Section
 View and manage all bookings in a detailed order list
@@ -201,6 +205,10 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 
 
 == Changelog ==
+= 1.2.3 =
+1. Google calendar integration added
+2. Woocommerce order analytics added
+3. Rest Api documentation added
 = 1.2.2 = 
 1. Gutenberg block added for booking form
 2. Elementor widget added for booking form
