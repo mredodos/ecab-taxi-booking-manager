@@ -34,7 +34,7 @@ if (!class_exists('MPTBM_Settings_Global')) {
 					<div class="mpPanelBody mp_zero">
 						<div class="mpTabs leftTabs">
 							<?php $this->settings_api->show_navigation(); ?>
-							<div class="tabsContent">
+							<div class="tabsContent " style= "padding: 1% !important;" >
 								<?php $this->settings_api->show_forms(); ?>
 							</div>
 						</div>
