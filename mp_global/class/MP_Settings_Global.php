@@ -47,10 +47,13 @@
 					'mp_global_settings' => apply_filters('filter_mp_global_settings', array(
 						array(
 							'name' => 'enable_rest_api',
-							'label' => esc_html__('Enable REST API', 'ecab-taxi-booking-manager'),
-							'desc' => esc_html__('Enable or disable the REST API functionality', 'ecab-taxi-booking-manager'),
-							'type' => 'switch_button',
-                            'default' => 'off'
+							'label' => esc_html__('Enable Rest API', 'ecab-taxi-booking-manager'),
+							'type' => 'select',
+							'default' => 'off',
+							'options' => array(
+								'on' => esc_html__('On', 'ecab-taxi-booking-manager'),
+								'off' => esc_html__('Off', 'ecab-taxi-booking-manager')
+							)
 						),
 						array(
 							'name' => 'api_authentication_type',
