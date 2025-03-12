@@ -287,7 +287,7 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
 
             // Get analytics data
             $data = $this->generate_analytics_data($start_date, $end_date);
-
+            
             // Send response
             wp_send_json_success($data);
             wp_die();
@@ -411,7 +411,7 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
                 }
 
                 // Add to recent bookings (limit to 10)
-                if (count($recent_bookings) < 10) {
+                if (count($recent_bookings) < 5) {
                     $recent_bookings[] = array(
                         'order_id' => $booking->order_id,
                         'customer' => $booking->customer_name,
@@ -480,8 +480,26 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
 
             // Log the data being returned
             error_log('MPTBM Analytics: Returning data: ' . json_encode($return_data));
-
-            return $return_data;
+            if (class_exists('MPTBM_Plugin_Pro')){
+                return $return_data;
+            }else{
+                $return_data = array(
+                    'total_bookings' => $total_bookings,
+                    'total_revenue' => $total_revenue,
+                    'avg_booking_value' => $avg_booking_value,
+                    'completion_rate' => $completion_rate,
+                    'cancelled_bookings' => $cancelled_bookings,
+                    'failed_bookings' => $failed_bookings,
+                    'lost_revenue' => $lost_revenue,
+                    'bookings_data' => $formatted_bookings_data,
+                    'revenue_data' => $formatted_revenue_data,
+                    'popular_routes' => $formatted_popular_routes,
+                    'booking_status' => $formatted_booking_status,
+                    'recent_bookings' => 'pro_not_active',
+                );
+                return $return_data;
+            }
+            
         }
     }
 

@@ -37,7 +37,6 @@
         let defaultStartDate = moment().subtract(30, 'days');
         let defaultEndDate = moment().add(1, 'days'); // Include today and tomorrow to ensure today's orders are included
 
-        console.log('Default date range:', defaultStartDate.format('YYYY-MM-DD'), 'to', defaultEndDate.format('YYYY-MM-DD'));
 
         $('#mptbm-date-range').daterangepicker({
             startDate: defaultStartDate,
@@ -57,7 +56,6 @@
         }, function(start, end) {
             startDate = start.format('YYYY-MM-DD');
             endDate = end.format('YYYY-MM-DD');
-            console.log('Date range changed to:', startDate, 'to', endDate);
             loadAnalyticsData();
         });
 
@@ -288,8 +286,6 @@
         // Show loading indicators
         showLoadingIndicators();
 
-        console.log('Loading analytics data for date range:', startDate, 'to', endDate);
-
         // Make AJAX request
         $.ajax({
             url: mptbm_analytics.ajax_url,
@@ -301,13 +297,10 @@
                 end_date: endDate
             },
             success: function(response) {
-                console.log('AJAX response received:', response);
 
                 if (response.success && response.data) {
-                    console.log('Analytics data:', response.data);
                     updateDashboard(response.data);
                 } else {
-                    console.error('Error loading analytics data:', response);
                     hideLoadingIndicators();
 
                     // Show more helpful error message
@@ -321,9 +314,6 @@
                 }
             },
             error: function(xhr, status, error) {
-                console.error('AJAX error:', error);
-                console.error('Status:', status);
-                console.error('Response:', xhr.responseText);
                 hideLoadingIndicators();
                 alert('Error loading analytics data. Please check the browser console for more details.');
             }
@@ -392,7 +382,6 @@
      * Update all charts
      */
     function updateCharts(data) {
-        console.log('Updating charts with data:', data);
 
         // Check if we have any bookings data
         if (data.total_bookings === 0) {
@@ -441,13 +430,20 @@
      * Update recent bookings table
      */
     function updateRecentBookings(bookings) {
+        
         if (!bookings || bookings.length === 0) {
             $('#mptbm-recent-bookings-table').html('<tr><td colspan="7" style="text-align: center;">No bookings found in the selected date range.</td></tr>');
             return;
         }
+        if(bookings && bookings == 'pro_not_active'){
+            $('#mptbm-recent-bookings-table').html('<tr><td colspan="7" style="text-align: center;">Please activate the pro version to view the bookings.</td></tr>');
+            return;
+        }
+        
+        
         
         let html = '';
-        
+        console.log(bookings);
         bookings.forEach(function(booking) {
             html += '<tr>';
             html += '<td>#' + booking.order_id + '</td>';
