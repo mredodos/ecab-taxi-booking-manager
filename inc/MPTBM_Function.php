@@ -220,7 +220,7 @@ if (!class_exists('MPTBM_Function')) {
 			return $all_dates;
 		}
 		//*************Price*********************************//
-			public static function get_price($post_id, $distance = 1000, $duration = 3600, $start_place = '', $destination_place = '', $waiting_time = 0, $two_way = 1, $fixed_time = 0)
+		public static function get_price($post_id, $distance = 1000, $duration = 3600, $start_place = '', $destination_place = '', $waiting_time = 0, $two_way = 1, $fixed_time = 0)
 		{
 			$price = 0.0;  // Initialize price as a float
 
@@ -275,9 +275,7 @@ if (!class_exists('MPTBM_Function')) {
 			}
 
 			if ($min_price > 0 && $min_price > $price) {
-
 				$price = $min_price;
-
 
 				if ($return_min_price > 0 && $two_way > 1) {
 					$price = $price + $return_min_price;
@@ -292,83 +290,94 @@ if (!class_exists('MPTBM_Function')) {
 				$price += $waiting_price;
 			}
 
-		            if ($two_way > 1) {
-		                $return_discount = MP_Global_Function::get_post_info($post_id, 'mptbm_return_discount', 0);
-		
-		                if (is_string($return_discount) && strpos($return_discount, '%') !== false) {
-		                    $percentage = floatval(rtrim($return_discount, '%'));
-		                    $discount_amounts = ($percentage / 100) * $price;
-		
-		                    $price -= $discount_amounts;
-		
-		                } elseif (is_numeric($return_discount)) {
-		                    // Apply fixed discount
-		                    $price -= (float)$return_discount;
-		                }
-		            }
+			if ($two_way > 1) {
+				$return_discount = MP_Global_Function::get_post_info($post_id, 'mptbm_return_discount', 0);
+
+				if (is_string($return_discount) && strpos($return_discount, '%') !== false) {
+					$percentage = floatval(rtrim($return_discount, '%'));
+					$discount_amounts = ($percentage / 100) * $price;
+					$price -= $discount_amounts;
+				} elseif (is_numeric($return_discount)) {
+					$price -= (float)$return_discount;
+				}
+			}
+
 			if (class_exists('MPTBM_Datewise_Discount_Addon')) {
-		                    $selected_start_date = get_transient('start_date_transient');
-		                    $selected_start_time = get_transient('start_time_schedule_transient');
-		                
-		                    if (strpos($selected_start_time, '.') !== false) {
-		                        $selected_start_time = sprintf('%02d:%02d', floor($selected_start_time), ($selected_start_time - floor($selected_start_time)) * 60);
-		                    } else {
-		                        $selected_start_time = sprintf('%02d:00', $selected_start_time);
-		                    }
-		                
-		                    $discounts = MP_Global_Function::get_post_info($post_id, 'mptbm_discounts', []);
-		                
-		                    if (!empty($discounts)) {
-		                        foreach ($discounts as $discount) {
-		                            $start_date = isset($discount['start_date']) ? date('Y-m-d', strtotime($discount['start_date'])) : '';
-		                            $end_date = isset($discount['end_date']) ? date('Y-m-d', strtotime($discount['end_date'])) : '';
-		                            $time_slots = isset($discount['time_slots']) ? $discount['time_slots'] : [];
-		                
-		                            if (strtotime($selected_start_date) >= strtotime($start_date) && strtotime($selected_start_date) <= strtotime($end_date)) {
-		                                foreach ($time_slots as $slot) {
-		                                    $start_time = isset($slot['start_time']) ? sanitize_text_field($slot['start_time']) : '';
-		                                    $end_time = isset($slot['end_time']) ? sanitize_text_field($slot['end_time']) : '';
-		                
-		                                    if (strpos($start_time, '.') !== false) {
-		                                        $start_time = sprintf('%02d:%02d', floor($start_time), ($start_time - floor($start_time)) * 60);
-		                                    }
-		                                    if (strpos($end_time, '.') !== false) {
-		                                        $end_time = sprintf('%02d:%02d', floor($end_time), ($end_time - floor($end_time)) * 60);
-		                                    }
-		                
-		                                    if (strtotime($start_time) > strtotime($end_time)) {
-		                                        if (strtotime($selected_start_time) >= strtotime($start_time) || strtotime($selected_start_time) <= strtotime($end_time)) {
-		                                            $percentage = floatval(rtrim($slot['percentage'], '%'));
-		                                            $type = isset($slot['type']) ? $slot['type'] : 'increase';
-		                
-		                                            $discount_amount = ($percentage / 100) * $price;
-		                
-		                                            if ($type === 'decrease') {
-		                                                $price -= abs($discount_amount);
-		                                            } else {
-		                                                $price += $discount_amount;
-		                                            }
-		                                        }
-		                                    } else {
-		                                        if (strtotime($selected_start_time) >= strtotime($start_time) && strtotime($selected_start_time) <= strtotime($end_time)) {
-		                                            $percentage = floatval(rtrim($slot['percentage'], '%'));
-		                                            $type = isset($slot['type']) ? $slot['type'] : 'increase';
-		                
-		                                            $discount_amount = ($percentage / 100) * $price;
-		                
-		                                            if ($type === 'decrease') {
-		                                                $price -= abs($discount_amount);
-		                                            } else {
-		                                                $price += $discount_amount;
-		                                            }
-		                                        }
-		                                    }
-		                                }
-		                            }
-		                        }
-		                    }
-		                }
-			// Check if session key exists for the specific post_id
+				$selected_start_date = get_transient('start_date_transient');
+				$selected_start_time = get_transient('start_time_schedule_transient');
+				$discount_applied = false; // Track if any discount has been applied
+			
+				if (strpos($selected_start_time, '.') !== false) {
+					$selected_start_time = sprintf('%02d:%02d', floor($selected_start_time), ($selected_start_time - floor($selected_start_time)) * 60);
+				} else {
+					$selected_start_time = sprintf('%02d:00', $selected_start_time);
+				}
+			
+				$discounts = MP_Global_Function::get_post_info($post_id, 'mptbm_discounts', []);
+			
+				// First priority: Date and Time Wise Discount Configuration
+				if (!empty($discounts)) {
+					foreach ($discounts as $discount) {
+						$start_date = isset($discount['start_date']) ? date('Y-m-d', strtotime($discount['start_date'])) : '';
+						$end_date = isset($discount['end_date']) ? date('Y-m-d', strtotime($discount['end_date'])) : '';
+						$time_slots = isset($discount['time_slots']) ? $discount['time_slots'] : [];
+			
+						if (strtotime($selected_start_date) >= strtotime($start_date) && strtotime($selected_start_date) <= strtotime($end_date)) {
+							foreach ($time_slots as $slot) {
+								$start_time = isset($slot['start_time']) ? sanitize_text_field($slot['start_time']) : '';
+								$end_time = isset($slot['end_time']) ? sanitize_text_field($slot['end_time']) : '';
+			
+								if (strpos($start_time, '.') !== false) {
+									$start_time = sprintf('%02d:%02d', floor($start_time), ($start_time - floor($start_time)) * 60);
+								}
+								if (strpos($end_time, '.') !== false) {
+									$end_time = sprintf('%02d:%02d', floor($end_time), ($end_time - floor($end_time)) * 60);
+								}
+			
+								if (strtotime($start_time) > strtotime($end_time)) {
+									if (strtotime($selected_start_time) >= strtotime($start_time) || strtotime($selected_start_time) <= strtotime($end_time)) {
+										$percentage = floatval(rtrim($slot['percentage'], '%'));
+										$type = isset($slot['type']) ? $slot['type'] : 'increase';
+			
+										$discount_amount = ($percentage / 100) * $price;
+			
+										if ($type === 'decrease') {
+											$price -= abs($discount_amount);
+										} else {
+											$price += $discount_amount;
+										}
+										$discount_applied = true; // Mark that a date/time discount was applied
+									}
+								} else {
+									if (strtotime($selected_start_time) >= strtotime($start_time) && strtotime($selected_start_time) <= strtotime($end_time)) {
+										$percentage = floatval(rtrim($slot['percentage'], '%'));
+										$type = isset($slot['type']) ? $slot['type'] : 'increase';
+			
+										$discount_amount = ($percentage / 100) * $price;
+			
+										if ($type === 'decrease') {
+											$price -= abs($discount_amount);
+										} else {
+											$price += $discount_amount;
+										}
+										$discount_applied = true; // Mark that a date/time discount was applied
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				
+				// Second priority: Day-based discount (only apply if no date/time discount was applied)
+				if (!$discount_applied && function_exists('apply_day_based_discount') && !empty($selected_start_date)) {
+					// Get the day of the week from the selected date
+					$day_of_week = strtolower(date('l', strtotime($selected_start_date)));
+					// Apply day-based discount
+					$price = apply_day_based_discount($price, $post_id, $day_of_week);
+				}
+			}
+
 			if (isset($_SESSION['geo_fence_post_' . $post_id])) {
 				$session_data = $_SESSION['geo_fence_post_' . $post_id];
 				if (isset($session_data[0])) {
@@ -381,9 +390,9 @@ if (!class_exists('MPTBM_Function')) {
 			}
 
 			session_write_close();
-			//delete_transient('original_price_based');
 			return $price;
 		}
+
 		public static function get_extra_service_price_by_name($post_id, $service_name)
 		{
 			$display_extra_services = MP_Global_Function::get_post_info($post_id, 'display_mptbm_extra_services', 'on');
