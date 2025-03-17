@@ -368,6 +368,7 @@ if (!class_exists('MPTBM_Function')) {
 					}
 				}
 				
+				
 				// Second priority: Day-based discount (only apply if no date/time discount was applied)
 				if (!$discount_applied && function_exists('apply_day_based_discount') && !empty($selected_start_date)) {
 					// Get the day of the week from the selected date
