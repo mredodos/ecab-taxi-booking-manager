@@ -270,71 +270,6 @@
 							"placeholder" => __("Notes about your order, e.g. special notes for delivery.",'ecab-taxi-booking-manager'),
 						)
 					),
-					"additional" => array(
-						"additional_passenger_count" => array(
-							"type" => "number",
-							"label" => __("Number of Passengers", 'ecab-taxi-booking-manager'),
-							"required" => "1",
-							"class" => array("form-row-wide"),
-							"priority" => "10",
-							"custom_field" => "1",
-							"min" => "1",
-							"max" => "10"
-						),
-						"additional_pickup_time" => array(
-							"type" => "time",
-							"label" => __("Preferred Pickup Time", 'ecab-taxi-booking-manager'),
-							"required" => "1",
-							"class" => array("form-row-wide"),
-							"priority" => "20",
-							"custom_field" => "1"
-						),
-						"additional_pickup_date" => array(
-							"type" => "date",
-							"label" => __("Pickup Date", 'ecab-taxi-booking-manager'),
-							"required" => "1",
-							"class" => array("form-row-wide"),
-							"priority" => "30",
-							"custom_field" => "1",
-							"min" => "today"
-						),
-						"additional_luggage" => array(
-							"type" => "select",
-							"label" => __("Luggage Size", 'ecab-taxi-booking-manager'),
-							"required" => "1",
-							"class" => array("form-row-wide"),
-							"priority" => "40",
-							"custom_field" => "1",
-							"options" => array(
-								"" => __("Select luggage size", 'ecab-taxi-booking-manager'),
-								"small" => __("Small (1-2 bags)", 'ecab-taxi-booking-manager'),
-								"medium" => __("Medium (3-4 bags)", 'ecab-taxi-booking-manager'),
-								"large" => __("Large (5+ bags)", 'ecab-taxi-booking-manager')
-							)
-						),
-						"additional_special_requirements" => array(
-							"type" => "textarea",
-							"label" => __("Special Requirements", 'ecab-taxi-booking-manager'),
-							"required" => "0",
-							"class" => array("form-row-wide"),
-							"priority" => "50",
-							"custom_field" => "1",
-							"placeholder" => __("Any special requirements or requests?", 'ecab-taxi-booking-manager')
-						),
-						"additional_preferred_car" => array(
-							"type" => "radio",
-							"label" => __("Preferred Car Type", 'ecab-taxi-booking-manager'),
-							"required" => "1",
-							"class" => array("form-row-wide"),
-							"priority" => "60",
-							"custom_field" => "1",
-							"options" => array(
-								"sedan" => __("Sedan", 'ecab-taxi-booking-manager'),
-								"suv" => __("SUV", 'ecab-taxi-booking-manager'),
-								"van" => __("Van", 'ecab-taxi-booking-manager')
-							)
-						)
-					)
 				);
 			}
 			public function init() {
@@ -392,56 +327,42 @@
 				return $fields;
 			}
 			public function get_checkout_fields_for_checkout() {
-				$checkout_fields = array();
-				$default_fields = self::woocommerce_default_checkout_fields();
-				$custom_fields = get_option('mptbm_custom_checkout_fields', array());
-
-				foreach ($default_fields as $key => $fields) {
-					if (!isset($checkout_fields[$key])) {
-						$checkout_fields[$key] = array();
-					}
-					
-					foreach ($fields as $field_key => $field) {
-						// Skip if field is deleted
-						if (isset($custom_fields[$key][$field_key]['deleted']) && $custom_fields[$key][$field_key]['deleted'] === 'deleted') {
-							continue;
-						}
-						
-						// Check if we have a custom field setting
-						if (isset($custom_fields[$key][$field_key])) {
-							$custom_field = $custom_fields[$key][$field_key];
-							
-							// Skip if field is disabled
-							if (isset($custom_field['disabled']) && $custom_field['disabled'] === '1') {
-								continue;
-							}
-							
-							// Use custom field settings
-							$checkout_fields[$key][$field_key] = $custom_field;
-						} else {
-							// Use default field if no custom setting exists
-							$checkout_fields[$key][$field_key] = $field;
-						}
-					}
-
-					// Add any new custom fields that don't exist in defaults
-					if (isset($custom_fields[$key]) && is_array($custom_fields[$key])) {
-						foreach ($custom_fields[$key] as $field_key => $field) {
-							// Skip if field is deleted or disabled
-							if ((isset($field['deleted']) && $field['deleted'] === 'deleted') || 
-								(isset($field['disabled']) && $field['disabled'] === '1')) {
-								continue;
-							}
-							
-							// Add new custom field if it doesn't exist in defaults
-							if (!isset($checkout_fields[$key][$field_key])) {
-								$checkout_fields[$key][$field_key] = $field;
+				$fields = array();
+				$checkout_fields = WC()->checkout->get_checkout_fields();
+				$fields['billing'] = $checkout_fields['billing'];
+				$fields['shipping'] = $checkout_fields['shipping'];
+				$fields['order'] = $checkout_fields['order'];
+				if (isset($checkout_fields) && is_array($checkout_fields)) {
+					foreach ($checkout_fields as $key => $key_fields) {
+						if (is_array($key_fields)) {
+							foreach ($key_fields as $name => $field_array) {
+								if (self::check_deleted_field($key, $name) || self::check_disabled_field($key, $name)) {
+									unset($fields[$key][$name]);
+								}
 							}
 						}
 					}
 				}
-
-				return apply_filters('mptbm_checkout_fields', $checkout_fields);
+				if (isset(self::$settings_options) && is_array(self::$settings_options)) {
+					foreach (self::$settings_options as $key => $key_fields) {
+						if (is_array($key_fields)) {
+							foreach ($key_fields as $name => $field_array) {
+								if (self::check_deleted_field($key, $name) || self::check_disabled_field($key, $name)) {
+									unset($fields[$key][$name]);
+								} else {
+									$fields[$key][$name] = $field_array;
+								}
+							}
+						}
+					}
+				}
+				if (self::hide_checkout_order_review_section()) {
+					remove_action('woocommerce_checkout_order_review', 'woocommerce_order_review', 10);
+				}
+				if (self::hide_checkout_order_additional_information_section() || (isset($fields['order']) && is_array($fields['order']) && count($fields['order']) == 0)) {
+					add_filter('woocommerce_enable_order_notes_field', '__return_false');
+				}
+				return $fields;
 			}
 			public static function hide_checkout_order_additional_information_section() {
 				if (!self::$settings_options || (is_array(self::$settings_options) && ((!array_key_exists('hide_checkout_order_additional_information', self::$settings_options)) || (array_key_exists('hide_checkout_order_additional_information', self::$settings_options) && self::$settings_options['hide_checkout_order_additional_information'] == 'on')))) {
@@ -511,111 +432,14 @@
 			}
 			public function file_upload_field_element($fields) {
 				foreach ($fields as $key => $field) {
-					$type = isset($field['type']) ? $field['type'] : 'text';
-					$required = isset($field['required']) && $field['required'] == '1' ? 'required' : '';
-					$placeholder = isset($field['placeholder']) ? $field['placeholder'] : '';
-					$min = isset($field['min']) ? $field['min'] : '';
-					$max = isset($field['max']) ? $field['max'] : '';
-					$options = isset($field['options']) ? $field['options'] : array();
 					?>
-					<p class="form-row form-row-wide <?php echo esc_attr(esc_html(isset($field['required']) && $field['required'] == '1' ? ' validate-required ' : '')); ?> <?php echo esc_attr(esc_html(isset($field['validate']) && is_array($field['validate']) && count($field['validate']) ? implode(' validate-', $field['validate']) : '')); ?>" 
-					   id="<?php echo esc_attr(esc_html($key . '_field')); ?>" 
-					   data-priority="<?php echo esc_attr(esc_html(isset($field['priority']) ? $field['priority'] : '')); ?>">
-						
-						<label for="<?php echo esc_attr(esc_html($key)); ?>">
-							<?php echo $field['label']; ?>
-							<?php echo isset($field['required']) && $field['required'] == '1' ? ' <abbr class="required" title="required">*</abbr>' : ''; ?>
-						</label>
-						
-						<span class="woocommerce-input-wrapper">
-							<?php switch($type) {
-								case 'file':
-									?>
-									<input type="file" 
-										   id="<?php echo esc_attr(esc_html($key . '_file')); ?>" 
-										   name="<?php echo esc_attr(esc_html($key . '_file')); ?>" 
-										   <?php echo $required; ?> 
-										   accept=".jpe?g,.png,.pdf"/>
-									<input type="hidden" 
-										   id="<?php echo esc_attr(esc_html($key)); ?>" 
-										   name="<?php echo esc_attr(esc_html($key)); ?>" 
-										   <?php echo $required; ?> 
-										   value=""/>
-									<?php
-									break;
-								case 'number':
-									?>
-									<input type="number" 
-										   id="<?php echo esc_attr(esc_html($key)); ?>" 
-										   name="<?php echo esc_attr(esc_html($key)); ?>" 
-										   <?php echo $required; ?> 
-										   <?php echo $min ? "min='" . esc_attr($min) . "'" : ''; ?> 
-										   <?php echo $max ? "max='" . esc_attr($max) . "'" : ''; ?> 
-										   placeholder="<?php echo esc_attr($placeholder); ?>" />
-									<?php
-									break;
-								case 'date':
-									?>
-									<input type="date" 
-										   id="<?php echo esc_attr(esc_html($key)); ?>" 
-										   name="<?php echo esc_attr(esc_html($key)); ?>" 
-										   <?php echo $required; ?> 
-										   <?php echo $min === 'today' ? "min='" . date('Y-m-d') . "'" : ''; ?> />
-									<?php
-									break;
-								case 'time':
-									?>
-									<input type="time" 
-										   id="<?php echo esc_attr(esc_html($key)); ?>" 
-										   name="<?php echo esc_attr(esc_html($key)); ?>" 
-										   <?php echo $required; ?> />
-									<?php
-									break;
-								case 'select':
-									?>
-									<select id="<?php echo esc_attr(esc_html($key)); ?>" 
-											name="<?php echo esc_attr(esc_html($key)); ?>" 
-											<?php echo $required; ?>>
-										<?php foreach($options as $value => $label): ?>
-											<option value="<?php echo esc_attr($value); ?>"><?php echo esc_html($label); ?></option>
-										<?php endforeach; ?>
-									</select>
-									<?php
-									break;
-								case 'radio':
-									?>
-									<span class="radio-group">
-										<?php foreach($options as $value => $label): ?>
-											<label class="radio-option">
-												<input type="radio" 
-													   name="<?php echo esc_attr(esc_html($key)); ?>" 
-													   value="<?php echo esc_attr($value); ?>" 
-													   <?php echo $required; ?>>
-												<?php echo esc_html($label); ?>
-											</label>
-										<?php endforeach; ?>
-									</span>
-									<?php
-									break;
-								case 'textarea':
-									?>
-									<textarea id="<?php echo esc_attr(esc_html($key)); ?>" 
-											  name="<?php echo esc_attr(esc_html($key)); ?>" 
-											  <?php echo $required; ?> 
-											  placeholder="<?php echo esc_attr($placeholder); ?>"></textarea>
-									<?php
-									break;
-								default:
-									?>
-									<input type="text" 
-										   id="<?php echo esc_attr(esc_html($key)); ?>" 
-										   name="<?php echo esc_attr(esc_html($key)); ?>" 
-										   <?php echo $required; ?> 
-										   placeholder="<?php echo esc_attr($placeholder); ?>" />
-									<?php
-							} ?>
-						</span>
-					</p>
+                    <p class="form-row form-row-wide <?php echo esc_attr(esc_html(isset($field['required']) && $field['required'] == '1' ? ' validate-required ' : '')); ?> <?php echo esc_attr(esc_html(isset($field['validate']) && is_array($field['validate']) && count($field['validate']) ? implode(' validate-', $field['validate']) : '')); ?>" id="<?php echo esc_attr(esc_html($key . '_field')); ?>" data-priority="<?php echo esc_attr(esc_html(isset($field['priority']) ? $field['priority'] : '')); ?>">
+                        <label for="<?php echo esc_attr(esc_html($key)); ?>"><?php echo $field['label']; ?><?php echo isset($field['required']) && $field['required'] == '1' ? ' <abbr class="required" title="required">*</abbr>' : ''; ?></label>
+                        <span class="woocommerce-input-wrapper">
+                    <input type="file" id="<?php echo esc_attr(esc_html($key . '_file')); ?>" name="<?php echo esc_attr(esc_html($key . '_file')); ?>" <?php echo esc_attr(esc_html(isset($field['required']) && $field['required'] == '1' ? 'required' : '')); ?> accept=".jpe?g,.png,.pdf"/>
+                    <input type="hidden" id="<?php echo esc_attr(esc_html($key)); ?>" name="<?php echo esc_attr(esc_html($key)); ?>" <?php echo esc_attr(esc_html(isset($field['required']) && $field['required'] == '1' ? 'required' : '')); ?> value=""/>
+                    </span>
+                    </p>
 					<?php
 				}
 			}
@@ -714,10 +538,10 @@
 			}
 			function prepare_other_field($custom_fields, $key, $order) {
 				?>
-				<div class="order_data_column_container">
+                <div class="order_data_column_container">
 					<?php if (is_array($custom_fields) && count($custom_fields)) : ?>
-						<div class="order_data_column">
-							<h3><?php echo esc_html('Custom ' . $key); ?></h3>
+                        <div class="order_data_column">
+                            <h3><?php echo esc_html('Custom ' . $key); ?></h3>
 							<?php foreach ($custom_fields as $name => $field_array): ?>
 								<?php
 								unset($key_value);
@@ -726,22 +550,22 @@
 								$field_label = isset($field_array['label']) ? esc_html($field_array['label'] . ' :') : '';
 								$field_name = esc_attr($name);
 								?>
-								<p class="form-field form-field-wide">
-									<strong><?php echo $field_label; ?></strong>
-									<label for="<?php echo $field_name; ?>"><?php echo $key_value; ?></label>
-								</p>
+                                <p class="form-field form-field-wide">
+                                    <strong><?php echo $field_label; ?></strong>
+                                    <label for="<?php echo $field_name; ?>"><?php echo $key_value; ?></label>
+                                </p>
 							<?php endforeach; ?>
-						</div>
+                        </div>
 					<?php endif; ?>
-				</div>
+                </div>
 				<?php
 			}
 			function prepare_file_field($custom_fields, $key, $order) {
 				?>
-				<div class="order_data_column_container">
+                <div class="order_data_column_container">
 					<?php if (is_array($custom_fields) && count($custom_fields)) : ?>
-						<div class="order_data_column">
-							<h3><?php echo esc_html('Custom ' . $key . ' File'); ?></h3>
+                        <div class="order_data_column">
+                            <h3><?php echo esc_html('Custom ' . $key . ' File'); ?></h3>
 							<?php foreach ($custom_fields as $name => $field_array) : ?>
 								<?php
 								unset($key_value);
@@ -752,21 +576,21 @@
 								$file_extension = strtolower(pathinfo($key_value, PATHINFO_EXTENSION));
 								$file_type = wp_check_filetype($key_value, $this->allowed_mime_types);
 								?>
-								<p class="form-field form-field-wide">
-									<strong><?php echo $field_label; ?></strong>
+                                <p class="form-field form-field-wide">
+                                    <strong><?php echo $field_label; ?></strong>
 									<?php if (in_array($file_extension, $this->allowed_extensions) && $file_type['type']) : ?>
 										<?php if ($file_extension !== 'pdf') : ?>
-											<img src="<?php echo $key_value; ?>" alt="<?php echo $field_name; ?> image" width="100" height="100">
-											<a class="button button-tiny button-primary" href="<?php echo $key_value; ?>" download>Download</a>
+                                            <img src="<?php echo $key_value; ?>" alt="<?php echo $field_name; ?> image" width="100" height="100">
+                                            <a class="button button-tiny button-primary" href="<?php echo $key_value; ?>" download>Download</a>
 										<?php else : ?>
-											<a class="button button-tiny button-primary" href="<?php echo $key_value; ?>" download>Download PDF</a>
+                                            <a class="button button-tiny button-primary" href="<?php echo $key_value; ?>" download>Download PDF</a>
 										<?php endif; ?>
 									<?php endif; ?>
-								</p>
+                                </p>
 							<?php endforeach; ?>
-						</div>
+                        </div>
 					<?php endif; ?>
-				</div>
+                </div>
 				<?php
 			}
 		}
