@@ -145,9 +145,29 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		{
 			global $woocommerce;
 			$items = $woocommerce->cart->get_cart();
+			
+			// Optional fields that should not trigger validation errors
+			$optional_fields = array(
+				'mptbm_passengers',
+				'mptbm_pickup_time',
+				'mptbm_pickup_date',
+				'mptbm_luggage_size',
+				'mptbm_car_type'
+			);
+
 			foreach ($items as $values) {
 				$post_id = array_key_exists('mptbm_id', $values) ? $values['mptbm_id'] : 0;
 				if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
+					// Remove validation for optional fields
+					add_filter('woocommerce_checkout_required_field_notice', function($message, $field_label) use ($optional_fields) {
+						foreach ($optional_fields as $optional_field) {
+							if (strpos($field_label, $optional_field) !== false) {
+								return '';
+							}
+						}
+						return $message;
+					}, 10, 2);
+					
 					do_action('mptbm_validate_cart_item', $values, $post_id);
 				}
 			}
@@ -278,7 +298,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						$details .= ". Driver email: " . $driver_email;
 					}
 					if ($driver_name) {
-						$details .= ". Driver name: " . $driver_name;
+						$driver_name = $driver_name;
 					}
 
 					// Create Google Calendar link
