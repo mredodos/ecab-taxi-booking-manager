@@ -243,8 +243,8 @@
 				$('.mpStyles .checkout #field-modal input[name="key"]').val($(this).data('key'));
 				if($(this).data('action')=='add')
 				{
-					$('.mpStyles .checkout #field-modal #mpwpb_pro_checkout_field_edit_nonce').prop( "disabled", true );
-					$('.mpStyles .checkout #field-modal #mpwpb_pro_checkout_field_add_nonce').prop( "disabled", false );
+					$('.mpStyles .checkout .edit-nonce input').prop("disabled", true);
+					$('.mpStyles .checkout .add-nonce input').prop("disabled", false);
 					$('.mpStyles .checkout input[name="old_name"]').val('');
 					$('.mpStyles .checkout input[name="new_name"]').val('');
 					$('.mpStyles .checkout input[name="new_type"]').val('');
@@ -261,8 +261,8 @@
 				}
 				else if($(this).data('action')=='edit')
 				{
-					$('.mpStyles .checkout #field-modal #mpwpb_pro_checkout_field_edit_nonce').prop( "disabled", false );
-					$('.mpStyles .checkout #field-modal #mpwpb_pro_checkout_field_add_nonce').prop( "disabled", true );
+					$('.mpStyles .checkout .edit-nonce input').prop("disabled", false);
+					$('.mpStyles .checkout .add-nonce input').prop("disabled", true);
 					let field = JSON.parse($('input[name="'+$(this).data('name')+'"]').val());
 					$('.mpStyles .checkout input[name="old_name"]').val(field.name);
 					$('.mpStyles .checkout input[name="new_name"]').val(field.name);
@@ -350,6 +350,18 @@
 					}
 				});
 				
+			});
+
+			// Handle form submission
+			$('.mpStyles .checkout form').on('submit', function(e) {
+				// Make sure nonces are properly enabled based on the action
+				if ($('.mpStyles .checkout #field-modal input[name="action"]').val() == 'add') {
+					$('.mpStyles .checkout .edit-nonce input').prop("disabled", true);
+					$('.mpStyles .checkout .add-nonce input').prop("disabled", false);
+				} else if ($('.mpStyles .checkout #field-modal input[name="action"]').val() == 'edit') {
+					$('.mpStyles .checkout .edit-nonce input').prop("disabled", false);
+					$('.mpStyles .checkout .add-nonce input').prop("disabled", true);
+				}
 			});
 
 		}

@@ -20,7 +20,16 @@
 				?>
                 <div class="tab-content active" id="mptbm_wc_billing_field_settings">
                     <h2>Woocommerce Billing Fields</h2>
-					<?php do_action('mptbm_wc_checkout_add', 'billing'); ?>
+					<?php if (is_plugin_active('service-booking-manager-pro/MPTBM_Plugin_Pro.php')): ?>
+						<?php do_action('mptbm_wc_checkout_add', 'billing'); ?>
+					<?php else: ?>
+						<div class="action-button">
+							<a class="button open-modal" data-action="add" data-key="billing">
+								<i class="dashicons dashicons-plus-alt2"></i>
+								Add Field
+							</a>
+						</div>
+					<?php endif; ?>
                     <!-- <table class="wc_gateways wp-list-table widefat striped"> -->
                     <div>
                         <table class="wc_gateways widefat striped">
@@ -54,6 +63,10 @@
 											<?php do_action('mptbm_wc_checkout_action', 'billing', $key, $checkout_field); ?>
 										<?php else: ?>
 											<?php MPTBM_Wc_Checkout_Fields::switch_button($key, 'checkoutSwitchButton', $key, $status, array('key' => 'billing', 'name' => $key)); ?>
+											<?php if(isset($checkout_field['custom_field']) && !isset(MPTBM_Wc_Checkout_Fields_Helper::$default_woocommerce_checkout_fields['billing'][$key])): ?>
+												<a class="button button-small button-secondary open-modal" data-action="edit" data-key="billing" data-name="<?php echo esc_attr(esc_html($key))?>">Edit</a>
+												<a class="button button-small button-link-delete" href="<?php echo esc_attr(wp_nonce_url(admin_url('edit.php?post_type='.MPTBM_Function::get_cpt().'&page=mptbm_wc_checkout_fields&action=delete&key=billing&name=' . esc_html($key)), 'mptbm_checkout_field_delete', 'mptbm_checkout_field_delete_nonce')); ?>" class="delete" onclick="return confirm(esc_attr('Are you sure you want to delete this field?'))">Delete</a>
+											<?php endif; ?>
 										<?php endif; ?>
                                     </td>
                                 </tr>
