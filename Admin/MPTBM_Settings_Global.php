@@ -200,7 +200,8 @@ if (!class_exists('MPTBM_Settings_Global')) {
 						'desc' => esc_html__('Enter page slug. Leave blank if you dont want to enable this setting', 'ecab-taxi-booking-manager'),
 						'ecab-taxi-booking-manager' . '<strong> ' . esc_html__('Yes', 'ecab-taxi-booking-manager') . '</strong>' . esc_html__('or to make it hidden, select', 'ecab-taxi-booking-manager') . '<strong> ' . esc_html__('No', 'ecab-taxi-booking-manager') . '</strong>' . esc_html__('. Default is', 'ecab-taxi-booking-manager') . '<strong>' . esc_html__('No', 'ecab-taxi-booking-manager') . '</strong>',
 						'type' => 'text',
-						'placeholder' => 'transport-result'
+						'placeholder' => 'transport-result',
+						'default' => 'transport-result',
 					),
 					array(
 						'name' => 'enable_view_find_location_page',
@@ -255,17 +256,17 @@ if (!class_exists('MPTBM_Settings_Global')) {
 							'no' => esc_html__('No', 'ecab-taxi-booking-manager')
 						)
 					),
-					array(
-						'name' => 'single_page_checkout',
-						'label' => esc_html__('Disable single page checkout', 'ecab-taxi-booking-manager'),
-						'desc' => esc_html__('If you want to disable single page checkout, please select Yes.That means active woocommerce checkout page active', 'ecab-taxi-booking-manager'),
-						'type' => 'select',
-						'default' => 'no',
-						'options' => array(
-							'yes' => esc_html__('Yes', 'ecab-taxi-booking-manager'),
-							'no' => esc_html__('No', 'ecab-taxi-booking-manager')
-						)
-					)
+					// array(
+					// 	'name' => 'single_page_checkout',
+					// 	'label' => esc_html__('Disable single page checkout', 'ecab-taxi-booking-manager'),
+					// 	'desc' => esc_html__('If you want to disable single page checkout, please select Yes.That means active woocommerce checkout page active', 'ecab-taxi-booking-manager'),
+					// 	'type' => 'select',
+					// 	'default' => 'yes',
+					// 	'options' => array(
+					// 		'yes' => esc_html__('Yes', 'ecab-taxi-booking-manager'),
+					// 		'no' => esc_html__('No', 'ecab-taxi-booking-manager')
+					// 	)
+					// )
 				)),
 				'mptbm_map_api_settings' => apply_filters('filter_mptbm_map_api_settings', array(
 					array(

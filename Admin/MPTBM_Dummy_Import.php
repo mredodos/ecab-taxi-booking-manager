@@ -183,6 +183,7 @@ if (!class_exists('MPTBM_Dummy_Import')) {
 							)
 						],
 					],
+					
 					'mptbm_rent' => [
 						0 => [
 							'name' => 'BMW 5 Series',

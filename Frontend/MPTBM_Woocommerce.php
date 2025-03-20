@@ -764,7 +764,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			WC()->cart->empty_cart();
 			ob_start();
 			if ($passed_validation && WC()->cart->add_to_cart($product_id, $quantity) && 'publish' === $product_status) {
-				$checkout_system = MP_Global_Function::get_settings('mptbm_general_settings', 'single_page_checkout', 'no');
+				$checkout_system = MP_Global_Function::get_settings('mptbm_general_settings', 'single_page_checkout', 'yes');
 				if ($checkout_system == 'yes') {
 					echo wc_get_checkout_url();
 				} else {
