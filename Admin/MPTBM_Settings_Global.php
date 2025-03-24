@@ -201,7 +201,7 @@ if (!class_exists('MPTBM_Settings_Global')) {
 						'ecab-taxi-booking-manager' . '<strong> ' . esc_html__('Yes', 'ecab-taxi-booking-manager') . '</strong>' . esc_html__('or to make it hidden, select', 'ecab-taxi-booking-manager') . '<strong> ' . esc_html__('No', 'ecab-taxi-booking-manager') . '</strong>' . esc_html__('. Default is', 'ecab-taxi-booking-manager') . '<strong>' . esc_html__('No', 'ecab-taxi-booking-manager') . '</strong>',
 						'type' => 'text',
 						'placeholder' => 'transport-result',
-						'default' => 'transport-result',
+						'default' => '',
 					),
 					array(
 						'name' => 'enable_view_find_location_page',
