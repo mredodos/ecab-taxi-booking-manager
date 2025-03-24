@@ -488,8 +488,11 @@ if ($all_posts->found_posts > 0) {
 							}
 						});
 					</script>
-					<div class="_dLayout_mT_bgWarning geo-fence-no-transport">
-						<h3><?php esc_html_e("No Transport Available !", "ecab-taxi-booking-manager"); ?></h3>
+					<div class="geo-fence-no-transport">
+						<?php 
+							$custom_message = MP_Global_Function::get_settings('mptbm_general_settings', 'no_transport_message', '<h3>' . esc_html__("No Transport Available !", "ecab-taxi-booking-manager") . '</h3>');
+							echo wp_kses_post($custom_message);
+						?>
 					</div>
 					<div class="mptbm_extra_service"></div>
 				</div>

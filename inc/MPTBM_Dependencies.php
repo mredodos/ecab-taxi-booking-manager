@@ -52,6 +52,9 @@ if (!class_exists('MPTBM_Dependencies')) {
             wp_enqueue_style('admin_style', MPTBM_PLUGIN_URL . '/assets/admin/admin_style.css', array(), time());
             wp_enqueue_script('mptbm_admin', MPTBM_PLUGIN_URL . '/assets/admin/mptbm_admin.js', array('jquery'), time(), true);
             wp_enqueue_script('mptbm_tooltip', MPTBM_PLUGIN_URL . '/assets/admin/mptbm_tooltip.js', array('jquery'), time(), true);
+            
+            // No transport templates
+            wp_enqueue_script('mptbm-no-transport-templates', MPTBM_PLUGIN_URL . '/assets/admin/js/no-transport-templates.js', array('jquery'), time(), true);
            
             // Trigger the action hook to add additional scripts if needed
             do_action('add_mptbm_admin_script');
@@ -59,8 +62,6 @@ if (!class_exists('MPTBM_Dependencies')) {
 
         public function frontend_enqueue()
         {
-
-
             $this->global_enqueue();
             wp_enqueue_script('wc-checkout');
             //
@@ -68,6 +69,13 @@ if (!class_exists('MPTBM_Dependencies')) {
             wp_enqueue_script('mptbm_script', MPTBM_PLUGIN_URL . '/assets/frontend/mptbm_script.js', array('jquery'), time(), true);
             wp_enqueue_script('mptbm_registration', MPTBM_PLUGIN_URL . '/assets/frontend/mptbm_registration.js', array('jquery'), time(), true);
             wp_enqueue_style('mptbm_registration', MPTBM_PLUGIN_URL . '/assets/frontend/mptbm_registration.css', array(), time());
+            
+            // Font Awesome for template icons
+            wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', array(), '5.15.4');
+            
+            // No transport templates styles
+            wp_enqueue_style('mptbm-no-transport-templates', MPTBM_PLUGIN_URL . '/assets/frontend/css/no-transport-templates.css', array(), time());
+            
             do_action('add_mptbm_frontend_script');
         }
         public function js_constant()

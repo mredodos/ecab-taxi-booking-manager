@@ -17,6 +17,12 @@
 				$theme_color     = MP_Global_Function::get_style_settings( 'theme_color', '#F12971' );
 				$alternate_color = MP_Global_Function::get_style_settings( 'theme_alternate_color', '#fff' );
 				$warning_color   = MP_Global_Function::get_style_settings( 'warning_color', '#E67C30' );
+				$no_transport_bg = MP_Global_Function::get_style_settings( 'no_transport_bg_color', '#fff5f5' );
+				$no_transport_text = MP_Global_Function::get_style_settings( 'no_transport_text_color', '#333333' );
+				$no_transport_icon = MP_Global_Function::get_style_settings( 'no_transport_icon_color', '#ff4d4d' );
+				$no_transport_link = MP_Global_Function::get_style_settings( 'no_transport_link_color', '#007bff' );
+				$no_transport_contact_bg = MP_Global_Function::get_style_settings( 'no_transport_contact_bg', '#f8f9fa' );
+				$no_transport_contact_icon = MP_Global_Function::get_style_settings( 'no_transport_contact_icon', '#28a745' );
 				$default_fs      = MP_Global_Function::get_style_settings( 'default_font_size', '14' ) . 'px';
 				$fs_h1           = MP_Global_Function::get_style_settings( 'font_size_h1', '35' ) . 'px';
 				$fs_h2           = MP_Global_Function::get_style_settings( 'font_size_h2', '30' ) . 'px';
@@ -105,6 +111,12 @@
 						--color_3: #FAFCFE;
 						--color_4: #6148BA;
 						--color_5: #BCB;
+						--no_transport_bg: <?php echo esc_attr($no_transport_bg); ?>;
+						--no_transport_text: <?php echo esc_attr($no_transport_text); ?>;
+						--no_transport_icon: <?php echo esc_attr($no_transport_icon); ?>;
+						--no_transport_link: <?php echo esc_attr($no_transport_link); ?>;
+						--no_transport_contact_bg: <?php echo esc_attr($no_transport_contact_bg); ?>;
+						--no_transport_contact_icon: <?php echo esc_attr($no_transport_contact_icon); ?>;
 					}
 					@media only screen and (max-width: 1100px) {
 						:root {

@@ -247,6 +247,48 @@
 							'type' => 'color',
 							'default' => '#FAFCFE'
 						),
+						array(
+							'name' => 'no_transport_bg_color',
+							'label' => esc_html__('No Transport Message Background', 'ecab-taxi-booking-manager'),
+							'desc' => esc_html__('Select background color for no transport message', 'ecab-taxi-booking-manager'),
+							'type' => 'color',
+							'default' => '#fff5f5'
+						),
+						array(
+							'name' => 'no_transport_text_color',
+							'label' => esc_html__('No Transport Message Text', 'ecab-taxi-booking-manager'),
+							'desc' => esc_html__('Select text color for no transport message', 'ecab-taxi-booking-manager'),
+							'type' => 'color',
+							'default' => '#333333'
+						),
+						array(
+							'name' => 'no_transport_icon_color',
+							'label' => esc_html__('No Transport Message Icon', 'ecab-taxi-booking-manager'),
+							'desc' => esc_html__('Select icon color for no transport message', 'ecab-taxi-booking-manager'),
+							'type' => 'color',
+							'default' => '#ff4d4d'
+						),
+						array(
+							'name' => 'no_transport_link_color',
+							'label' => esc_html__('No Transport Message Link', 'ecab-taxi-booking-manager'),
+							'desc' => esc_html__('Select link color for no transport message', 'ecab-taxi-booking-manager'),
+							'type' => 'color',
+							'default' => '#007bff'
+						),
+						array(
+							'name' => 'no_transport_contact_bg',
+							'label' => esc_html__('No Transport Contact Background', 'ecab-taxi-booking-manager'),
+							'desc' => esc_html__('Select background color for contact section', 'ecab-taxi-booking-manager'),
+							'type' => 'color',
+							'default' => '#f8f9fa'
+						),
+						array(
+							'name' => 'no_transport_contact_icon',
+							'label' => esc_html__('No Transport Contact Icon', 'ecab-taxi-booking-manager'),
+							'desc' => esc_html__('Select icon color for contact section', 'ecab-taxi-booking-manager'),
+							'type' => 'color',
+							'default' => '#28a745'
+						),
 					)),
 					'mp_add_custom_css' => apply_filters('filter_mp_add_custom_css', array(
 						array(
