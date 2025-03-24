@@ -205,6 +205,11 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 
 
 == Changelog ==
+= 1.2.5 =
+1. No transport available section can be changed Now
+2. Issue fixed with transport-result page slug
+= 1.2.4 =
+1. Documentation changed
 = 1.2.3 =
 1. Google calendar integration added
 2. Woocommerce order analytics added
