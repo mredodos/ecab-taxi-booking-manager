@@ -256,6 +256,26 @@ if (!class_exists('MPTBM_Settings_Global')) {
 							'no' => esc_html__('No', 'ecab-taxi-booking-manager')
 						)
 					),
+					array(
+						'name' => 'no_transport_message',
+						'label' => esc_html__('No Transport Available Message', 'ecab-taxi-booking-manager'),
+						'desc' => esc_html__('Customize the message shown when no transport is available. You can use HTML tags for styling or select from predefined templates below.', 'ecab-taxi-booking-manager'),
+						'type' => 'textarea',
+						'default' => '<h3>No Transport Available !</h3>'
+					),
+					array(
+						'name' => 'no_transport_templates',
+						'label' => esc_html__('Predefined Templates', 'ecab-taxi-booking-manager'),
+						'desc' => esc_html__('Select a predefined template for the No Transport message', 'ecab-taxi-booking-manager'),
+						'type' => 'select',
+						'default' => 'default',
+						'options' => array(
+							'default' => esc_html__('Default', 'ecab-taxi-booking-manager'),
+							'template1' => esc_html__('Template 1 - With Icon', 'ecab-taxi-booking-manager'),
+							'template2' => esc_html__('Template 2 - With Description', 'ecab-taxi-booking-manager'),
+							'template3' => esc_html__('Template 3 - With Contact Info', 'ecab-taxi-booking-manager')
+						)
+					),
 					// array(
 					// 	'name' => 'single_page_checkout',
 					// 	'label' => esc_html__('Disable single page checkout', 'ecab-taxi-booking-manager'),
