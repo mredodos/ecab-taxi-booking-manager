@@ -275,24 +275,26 @@
 			public function init() {
 				self::$settings_options = get_option('mptbm_custom_checkout_fields');
 				self::$default_woocommerce_checkout_fields = self::woocommerce_default_checkout_fields();
-				//self::$default_woocommerce_checkout_required_fields = self::default_woocommerce_checkout_required_fields();
-				//self::$default_app_required_fields = self::default_app_required_fields();
 				$this->allowed_extensions = array('jpg', 'jpeg', 'png', 'pdf');
 				$this->allowed_mime_types = array(
 					"jpg|jpeg|jpe" => "image/jpeg",
 					"png" => "image/png",
 					"pdf" => "application/pdf"
 				);
-				//add_filter('woocommerce_add_cart_item_data', array($this, 'add_cart_item_data'), 99, 3);
-				add_filter('woocommerce_checkout_fields', array($this, 'get_checkout_fields_for_checkout'), 10);
-				add_action('woocommerce_after_checkout_billing_form', array($this, 'file_upload_field'));
-				add_action('woocommerce_after_checkout_shipping_form', array($this, 'file_upload_field'));
-				add_action('woocommerce_after_checkout_order_form', array($this, 'file_upload_field'));
+
+				// Check if pro version is active
+				if (!class_exists('MPTBM_Pro_Wc_Checkout_Fields')) {
+					// Only add these hooks if pro version is not active
+					add_filter('woocommerce_checkout_fields', array($this, 'remove_file_fields_from_checkout'), 5);
+					add_action('woocommerce_after_checkout_billing_form', array($this, 'file_upload_field'));
+					add_action('woocommerce_after_checkout_shipping_form', array($this, 'file_upload_field'));
+					add_action('woocommerce_after_checkout_order_form', array($this, 'file_upload_field'));
+				}
+				
 				add_action('woocommerce_checkout_update_order_meta', array($this, 'save_custom_checkout_fields_to_order'), 99, 2);
 				add_action('woocommerce_before_order_details', array($this, 'order_details'), 99, 1);
 				add_action('woocommerce_admin_order_data_after_billing_address', array($this, 'order_details'), 99, 1);
 				add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'order_details'), 99, 1);
-				//add_filter('woocommerce_available_payment_gateways', array($this, 'custom_filter_payment_gateways'),10);
 			}
 			public static function get_checkout_fields_for_list() {
 				$fields = array();
@@ -329,39 +331,45 @@
 			public function get_checkout_fields_for_checkout() {
 				$fields = array();
 				$checkout_fields = WC()->checkout->get_checkout_fields();
-				$fields['billing'] = $checkout_fields['billing'];
-				$fields['shipping'] = $checkout_fields['shipping'];
-				$fields['order'] = $checkout_fields['order'];
-				if (isset($checkout_fields) && is_array($checkout_fields)) {
-					foreach ($checkout_fields as $key => $key_fields) {
-						if (is_array($key_fields)) {
-							foreach ($key_fields as $name => $field_array) {
-								if (self::check_deleted_field($key, $name) || self::check_disabled_field($key, $name)) {
-									unset($fields[$key][$name]);
-								}
+				
+				// Initialize sections
+				$fields['billing'] = isset($checkout_fields['billing']) ? $checkout_fields['billing'] : array();
+				$fields['shipping'] = isset($checkout_fields['shipping']) ? $checkout_fields['shipping'] : array();
+				$fields['order'] = isset($checkout_fields['order']) ? $checkout_fields['order'] : array();
+				
+				// Remove deleted or disabled fields
+				foreach ($fields as $key => $section_fields) {
+					if (is_array($section_fields)) {
+						foreach ($section_fields as $field_key => $field) {
+							if (self::check_deleted_field($key, $field_key) || self::check_disabled_field($key, $field_key)) {
+								unset($fields[$key][$field_key]);
 							}
 						}
 					}
 				}
+				
+				// Add custom fields from settings
 				if (isset(self::$settings_options) && is_array(self::$settings_options)) {
-					foreach (self::$settings_options as $key => $key_fields) {
-						if (is_array($key_fields)) {
-							foreach ($key_fields as $name => $field_array) {
-								if (self::check_deleted_field($key, $name) || self::check_disabled_field($key, $name)) {
-									unset($fields[$key][$name]);
-								} else {
-									$fields[$key][$name] = $field_array;
+					foreach (self::$settings_options as $key => $section_fields) {
+						if (is_array($section_fields)) {
+							foreach ($section_fields as $field_key => $field) {
+								if (!self::check_deleted_field($key, $field_key) && !self::check_disabled_field($key, $field_key)) {
+									$fields[$key][$field_key] = $field;
 								}
 							}
 						}
 					}
 				}
+				
+				// Handle section visibility
 				if (self::hide_checkout_order_review_section()) {
 					remove_action('woocommerce_checkout_order_review', 'woocommerce_order_review', 10);
 				}
+				
 				if (self::hide_checkout_order_additional_information_section() || (isset($fields['order']) && is_array($fields['order']) && count($fields['order']) == 0)) {
 					add_filter('woocommerce_enable_order_notes_field', '__return_false');
 				}
+				
 				return $fields;
 			}
 			public static function hide_checkout_order_additional_information_section() {
@@ -401,26 +409,42 @@
 					'shipping' => array(),
 				);
 			}
-			function file_upload_field() {
+			public function file_upload_field() {
 				$checkout_fields = $this->get_checkout_fields_for_checkout();
-				$billing_fields = $checkout_fields['billing'];
-				$shipping_fields = $checkout_fields['shipping'];
-				$order_fields = $checkout_fields['order'];
 				$current_action = current_filter();
-				if ($current_action == 'woocommerce_after_checkout_billing_form') {
-					if (in_array('file', array_column($billing_fields, 'type'))) {
-						$billing_file_fields = array_filter($billing_fields, array($this, 'get_file_fields'));
-						$this->file_upload_field_element($billing_file_fields);
-					}
-				} else if ($current_action == 'woocommerce_after_checkout_shipping_form') {
-					if (in_array('file', array_column($shipping_fields, 'type'))) {
-						$shipping_file_fields = array_filter($shipping_fields, array($this, 'get_file_fields'));
-						$this->file_upload_field_element($shipping_file_fields);
-					}
-				} else if ($current_action == 'woocommerce_after_checkout_order_form') {
-					if (in_array('file', array_column($order_fields, 'type'))) {
-						$order_file_fields = array_filter($order_fields, array($this, 'get_file_fields'));
-						$this->file_upload_field_element($order_file_fields);
+				
+				// Debug log
+				error_log('MPTBM Debug - Current Action: ' . $current_action);
+				
+				switch ($current_action) {
+					case 'woocommerce_after_checkout_billing_form':
+						$section = 'billing';
+						break;
+					case 'woocommerce_after_checkout_shipping_form':
+						$section = 'shipping';
+						break;
+					case 'woocommerce_after_checkout_order_form':
+						$section = 'order';
+						break;
+					default:
+						return;
+				}
+				
+				if (isset($checkout_fields[$section]) && is_array($checkout_fields[$section])) {
+					$fields = $checkout_fields[$section];
+					
+					// Debug log
+					error_log('MPTBM Debug - Section: ' . $section . ' - Fields: ' . print_r($fields, true));
+					
+					if (in_array('file', array_column($fields, 'type'))) {
+						$file_fields = array_filter($fields, array($this, 'get_file_fields'));
+						
+						// Debug log
+						error_log('MPTBM Debug - File Fields Found: ' . print_r($file_fields, true));
+						
+						if (!empty($file_fields)) {
+							$this->file_upload_field_element($file_fields);
+						}
 					}
 				}
 			}
@@ -428,34 +452,74 @@
 				return (is_array($field) && isset($field['custom_field']) && $field['custom_field'] == '1' && isset($field['type']) && $field['type'] != 'file');
 			}
 			public function get_file_fields($field) {
-				return (is_array($field) && isset($field['custom_field']) && $field['custom_field'] == '1' && isset($field['type']) && $field['type'] == 'file');
+				$is_file_field = (is_array($field) && 
+					isset($field['custom_field']) && 
+					$field['custom_field'] == '1' && 
+					isset($field['type']) && 
+					$field['type'] == 'file'
+				);
+				
+				// Debug log
+				if ($is_file_field) {
+					error_log('MPTBM Debug - Found File Field: ' . print_r($field, true));
+				}
+				
+				return $is_file_field;
 			}
 			public function file_upload_field_element($fields) {
 				foreach ($fields as $key => $field) {
 					?>
-                    <p class="form-row form-row-wide <?php echo esc_attr(esc_html(isset($field['required']) && $field['required'] == '1' ? ' validate-required ' : '')); ?> <?php echo esc_attr(esc_html(isset($field['validate']) && is_array($field['validate']) && count($field['validate']) ? implode(' validate-', $field['validate']) : '')); ?>" id="<?php echo esc_attr(esc_html($key . '_field')); ?>" data-priority="<?php echo esc_attr(esc_html(isset($field['priority']) ? $field['priority'] : '')); ?>">
-                        <label for="<?php echo esc_attr(esc_html($key)); ?>"><?php echo $field['label']; ?><?php echo isset($field['required']) && $field['required'] == '1' ? ' <abbr class="required" title="required">*</abbr>' : ''; ?></label>
+                    <p class="form-row form-row-wide <?php echo esc_attr(isset($field['required']) && $field['required'] == '1' ? ' validate-required ' : ''); ?> <?php echo esc_attr(isset($field['validate']) && is_array($field['validate']) && count($field['validate']) ? implode(' validate-', $field['validate']) : ''); ?>" id="<?php echo esc_attr($key . '_field'); ?>" data-priority="<?php echo esc_attr(isset($field['priority']) ? $field['priority'] : ''); ?>">
+                        <label for="<?php echo esc_attr($key); ?>"><?php echo wp_kses_post($field['label']); ?><?php echo isset($field['required']) && $field['required'] == '1' ? ' <abbr class="required" title="' . esc_attr__('required', 'ecab-taxi-booking-manager') . '">*</abbr>' : ''; ?></label>
                         <span class="woocommerce-input-wrapper">
-                    <input type="file" id="<?php echo esc_attr(esc_html($key . '_file')); ?>" name="<?php echo esc_attr(esc_html($key . '_file')); ?>" <?php echo esc_attr(esc_html(isset($field['required']) && $field['required'] == '1' ? 'required' : '')); ?> accept=".jpe?g,.png,.pdf"/>
-                    <input type="hidden" id="<?php echo esc_attr(esc_html($key)); ?>" name="<?php echo esc_attr(esc_html($key)); ?>" <?php echo esc_attr(esc_html(isset($field['required']) && $field['required'] == '1' ? 'required' : '')); ?> value=""/>
-                    </span>
+                            <input type="file" 
+                                id="<?php echo esc_attr($key); ?>" 
+                                name="<?php echo esc_attr($key); ?>" 
+                                class="input-text" 
+                                <?php echo isset($field['required']) && $field['required'] == '1' ? 'required' : ''; ?> 
+                                accept=".jpg,.jpeg,.png,.pdf"
+                            />
+                        </span>
                     </p>
 					<?php
 				}
 			}
 			function save_custom_checkout_fields_to_order($order_id, $data) {
+				error_log('MPTBM Debug - Starting save_custom_checkout_fields_to_order for order: ' . $order_id);
+				
 				$checkout_key_fields = $this->get_checkout_fields_for_checkout();
+				error_log('MPTBM Debug - Checkout fields: ' . print_r($checkout_key_fields, true));
+				
 				foreach ($checkout_key_fields as $key => $checkout_fields) {
 					if (is_array($checkout_fields) && count($checkout_fields)) {
 						$checkout_other_fields = array_filter($checkout_fields, array($this, 'get_other_fields'));
-						foreach ($checkout_other_fields as $key => $file_fields) {
-							update_post_meta($order_id, sanitize_text_field('_' . $key), sanitize_text_field($_POST[$key]));
+						foreach ($checkout_other_fields as $key => $field) {
+							if (isset($_POST[$key])) {
+								update_post_meta($order_id, sanitize_text_field('_' . $key), sanitize_text_field($_POST[$key]));
+								error_log('MPTBM Debug - Saved other field: ' . $key . ' with value: ' . $_POST[$key]);
+							}
 						}
+						
 						if (in_array('file', array_column($checkout_fields, 'type'))) {
+							error_log('MPTBM Debug - Found file fields in section: ' . $key);
 							$checkout_file_fields = array_filter($checkout_fields, array($this, 'get_file_fields'));
-							foreach ($checkout_file_fields as $key => $file_fields) {
-								$image_url = $this->get_uploaded_image_link($key . '_file');
-								update_post_meta($order_id, '_' . $key, esc_url($image_url));
+							error_log('MPTBM Debug - File fields to process: ' . print_r($checkout_file_fields, true));
+							
+							foreach ($checkout_file_fields as $key => $field) {
+								error_log('MPTBM Debug - Processing file field: ' . $key);
+								$image_url = $this->get_uploaded_image_link($key);
+								error_log('MPTBM Debug - Got image URL: ' . ($image_url ? $image_url : 'false'));
+								
+								if ($image_url) {
+									update_post_meta($order_id, '_' . $key, esc_url($image_url));
+									error_log('MPTBM Debug - Saved file URL to order meta: ' . $key . ' = ' . $image_url);
+								} else {
+									error_log('MPTBM Debug - No file URL to save for field: ' . $key);
+									if (isset($field['required']) && $field['required'] == '1') {
+										error_log('MPTBM Debug - Required file field ' . $key . ' is missing');
+										wc_add_notice(sprintf(__('Please upload a file for %s', 'ecab-taxi-booking-manager'), $field['label']), 'error');
+									}
+								}
 							}
 						}
 					}
@@ -485,25 +549,84 @@
 				return $post_ids;
 			}
 			function get_uploaded_image_link($file_field_name) {
+				error_log('MPTBM Debug - Starting get_uploaded_image_link for field: ' . $file_field_name);
+				
 				$file_field_name = sanitize_key($file_field_name);
 				$upload_dir = wp_upload_dir();
 				$image_url = '';
+				
+				error_log('MPTBM Debug - FILES array: ' . print_r($_FILES, true));
+				
 				if (isset($_FILES[$file_field_name]) && !empty($_FILES[$file_field_name]['name'])) {
 					$file = $_FILES[$file_field_name];
+					error_log('MPTBM Debug - Processing file: ' . print_r($file, true));
+					
+					// Basic error checking
+					if ($file['error'] !== UPLOAD_ERR_OK) {
+						$error_message = $this->get_file_error_message($file['error']);
+						error_log('MPTBM Debug - File upload error: ' . $error_message);
+						wc_add_notice($error_message, 'error');
+						return false;
+					}
+					
 					$file_name = sanitize_file_name($file['name']);
 					$file_extension = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
 					$file_type = wp_check_filetype($file_name, $this->allowed_mime_types);
-					if (in_array($file_extension, $this->allowed_extensions) && $file_type['type']) {
-						$path = $upload_dir['path'] . '/' . $file_name;
-						if (move_uploaded_file($file['tmp_name'], $path)) {
-							$image_url = $upload_dir['url'] . '/' . $file_name;
-						}
+					
+					error_log('MPTBM Debug - File extension: ' . $file_extension);
+					error_log('MPTBM Debug - File type: ' . print_r($file_type, true));
+					
+					if (!in_array($file_extension, $this->allowed_extensions)) {
+						$error_message = sprintf(__('Invalid file type. Allowed types are: %s', 'ecab-taxi-booking-manager'), implode(', ', $this->allowed_extensions));
+						error_log('MPTBM Debug - ' . $error_message);
+						wc_add_notice($error_message, 'error');
+						return false;
 					}
-				}
-				if ($image_url) {
-					return $image_url;
+					
+					if (!$file_type['type']) {
+						error_log('MPTBM Debug - Invalid file type detected');
+						wc_add_notice(__('Invalid file type.', 'ecab-taxi-booking-manager'), 'error');
+						return false;
+					}
+					
+					// Generate unique filename
+					$file_name = wp_unique_filename($upload_dir['path'], $file_name);
+					$path = $upload_dir['path'] . '/' . $file_name;
+					
+					error_log('MPTBM Debug - Attempting to move file to: ' . $path);
+					
+					if (!move_uploaded_file($file['tmp_name'], $path)) {
+						error_log('MPTBM Debug - Failed to move uploaded file');
+						wc_add_notice(__('Error saving file. Please try again.', 'ecab-taxi-booking-manager'), 'error');
+						return false;
+					}
+					
+					$image_url = $upload_dir['url'] . '/' . $file_name;
+					error_log('MPTBM Debug - File successfully uploaded. URL: ' . $image_url);
 				} else {
-					return false;
+					error_log('MPTBM Debug - No file uploaded for field: ' . $file_field_name);
+				}
+				
+				return $image_url ? $image_url : false;
+			}
+			private function get_file_error_message($error_code) {
+				switch ($error_code) {
+					case UPLOAD_ERR_INI_SIZE:
+						return __('The uploaded file exceeds the upload_max_filesize directive in php.ini', 'ecab-taxi-booking-manager');
+					case UPLOAD_ERR_FORM_SIZE:
+						return __('The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form', 'ecab-taxi-booking-manager');
+					case UPLOAD_ERR_PARTIAL:
+						return __('The uploaded file was only partially uploaded', 'ecab-taxi-booking-manager');
+					case UPLOAD_ERR_NO_FILE:
+						return __('No file was uploaded', 'ecab-taxi-booking-manager');
+					case UPLOAD_ERR_NO_TMP_DIR:
+						return __('Missing a temporary folder', 'ecab-taxi-booking-manager');
+					case UPLOAD_ERR_CANT_WRITE:
+						return __('Failed to write file to disk', 'ecab-taxi-booking-manager');
+					case UPLOAD_ERR_EXTENSION:
+						return __('File upload stopped by extension', 'ecab-taxi-booking-manager');
+					default:
+						return __('Unknown upload error', 'ecab-taxi-booking-manager');
 				}
 			}
 			function order_details($order_id) {
@@ -592,6 +715,25 @@
 					<?php endif; ?>
                 </div>
 				<?php
+			}
+			// Prevent WooCommerce from rendering file fields
+			public function prevent_default_file_field_render($field, $key, $args, $value) {
+				if (isset($args['type']) && $args['type'] === 'file') {
+					return ''; // Return empty string to prevent default rendering
+				}
+				return $field;
+			}
+			public function remove_file_fields_from_checkout($fields) {
+				foreach ($fields as $section => $section_fields) {
+					if (is_array($section_fields)) {
+						foreach ($section_fields as $key => $field) {
+							if (isset($field['type']) && $field['type'] === 'file') {
+								unset($fields[$section][$key]);
+							}
+						}
+					}
+				}
+				return $fields;
 			}
 		}
 		new MPTBM_Wc_Checkout_Fields_Helper();
