@@ -24,6 +24,7 @@ if (!class_exists('MPTBM_Plugin')) {
             add_filter('theme_page_templates', array($this, 'mptbm_on_activation_template_create'), 10, 3);
             add_filter('template_include', array($this, 'mptbm_change_page_template'), 99);
             add_action('admin_init', array($this, 'wptbm_assign_template_to_page'));
+            add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
         }
 
         private function load_plugin(): void
@@ -237,6 +238,20 @@ if (!class_exists('MPTBM_Plugin')) {
                     'icon' => 'fa fa-car',
                 ]
             );
+        }
+
+        /**
+         * Enqueue frontend assets
+         */
+        public function enqueue_frontend_assets() {
+            if (is_checkout()) {
+                wp_enqueue_style(
+                    'mptbm-file-upload',
+                    MPTBM_PLUGIN_URL . '/assets/css/file-upload.css',
+                    array(),
+                    MPTBM_PLUGIN_VERSION
+                );
+            }
         }
     }
 
