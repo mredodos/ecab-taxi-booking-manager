@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
 
 $post_id = $post_id ?? '';
 $original_price_based = $price_based ?? '';
+$feature_class = ''; // Default empty value
 if (MP_Global_Function::get_settings('mptbm_general_settings', 'enable_filter_via_features') == 'yes') {
     $max_passenger = MP_Global_Function::get_post_info($post_id, 'mptbm_maximum_passenger');
     $max_bag = MP_Global_Function::get_post_info($post_id, 'mptbm_maximum_bag');

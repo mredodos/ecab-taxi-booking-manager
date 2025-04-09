@@ -286,7 +286,7 @@ $start_time = isset($_POST["start_time"]) ? sanitize_text_field($_POST["start_ti
 $transient_key_schedule = 'start_time_schedule_transient';
 $transient_key_date = 'start_date_transient';
 // Check and set the transient for start_time_schedule
-if (get_transient($start_time_schedule_transient)) {
+if (get_transient($transient_key_schedule)) {
     delete_transient($transient_key_schedule); // Delete existing transient if found
 }
 set_transient($transient_key_schedule, $start_time); // Set new transient
@@ -302,7 +302,9 @@ if ($start_time !== "") {
     if ($start_time !== "0") {
         
         // Convert start time to hours and minutes
-        list($hours, $decimal_part) = explode('.', $start_time);
+        $time_parts = explode('.', $start_time);
+        $hours = isset($time_parts[0]) ? $time_parts[0] : 0;
+        $decimal_part = isset($time_parts[1]) ? $time_parts[1] : 0;
         $interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time');
         
         if ($interval_time == "5" || $interval_time == "15") {
@@ -354,7 +356,9 @@ if ($two_way > 1 && MP_Global_Function::get_settings("mptbm_general_settings", "
     if ($return_time !== "") {
         if ($return_time !== "0") {
             // Convert start time to hours and minutes
-            list($hours, $decimal_part) = explode('.', $return_time);
+            $time_parts = explode('.', $return_time);
+            $hours = isset($time_parts[0]) ? $time_parts[0] : 0;
+            $decimal_part = isset($time_parts[1]) ? $time_parts[1] : 0;
             $interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time');
             if ($interval_time == "5" || $interval_time == "15") {
                 $minutes = isset($decimal_part) ? (int) $decimal_part * 1 : 0; // Multiply by 1 to convert to minutes

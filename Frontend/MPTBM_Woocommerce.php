@@ -24,7 +24,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			//************//
 			add_action('woocommerce_after_checkout_validation', array($this, 'after_checkout_validation'));
 			add_action('woocommerce_checkout_create_order_line_item', array($this, 'checkout_create_order_line_item'), 90, 4);
-			add_action('woocommerce_checkout_order_processed', array($this, 'checkout_order_processed'));
+			add_action('woocommerce_thankyou', array($this, 'checkout_order_processed'), 10, 1);
 			add_filter('woocommerce_order_status_changed', array($this, 'order_status_changed'));
 			/*****************************/
 			add_action('wp_ajax_mptbm_add_to_cart', [$this, 'mptbm_add_to_cart']);
@@ -335,8 +335,15 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function checkout_order_processed($order_id)
 		{
-
+			// Log the start of the function
+			error_log('MPTBM: checkout_order_processed function called with order_id: ' . $order_id);
 			
+			// Send email notification
+			$admin_email = get_option('admin_email');
+			wp_mail($admin_email, 'MPTBM Order Processed', 'Order ID: ' . $order_id);
+			
+			// Log a simpler backtrace with limited depth
+			error_log('MPTBM: Simple backtrace - ' . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3), true));
 			if ($order_id) {
 
 				$order = wc_get_order($order_id);
