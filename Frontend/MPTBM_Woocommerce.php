@@ -24,7 +24,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			//************//
 			add_action('woocommerce_after_checkout_validation', array($this, 'after_checkout_validation'));
 			add_action('woocommerce_checkout_create_order_line_item', array($this, 'checkout_create_order_line_item'), 90, 4);
-			add_action('woocommerce_thankyou', array($this, 'checkout_order_processed'), 10, 1);
+			add_action('woocommerce_checkout_order_processed', array($this, 'checkout_order_processed'), 90, 3);
+			add_action('woocommerce_store_api_checkout_order_processed', array($this, 'checkout_order_processed'), 90, 3);
 			add_filter('woocommerce_order_status_changed', array($this, 'order_status_changed'));
 			/*****************************/
 			add_action('wp_ajax_mptbm_add_to_cart', [$this, 'mptbm_add_to_cart']);
@@ -335,6 +336,12 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function checkout_order_processed($order_id)
 		{
+
+			$result   = ! is_numeric( $order_id ) ? json_decode( $order_id ) : [ 0 ];
+			$order_id = ! is_numeric( $order_id ) ? $result->id : $order_id;
+			if ( ! $order_id ) {
+				return;
+			}
 			// Log the start of the function
 			error_log('MPTBM: checkout_order_processed function called with order_id: ' . $order_id);
 			
