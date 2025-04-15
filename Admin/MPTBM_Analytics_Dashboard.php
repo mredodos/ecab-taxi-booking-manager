@@ -269,12 +269,8 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
          * AJAX handler for getting analytics data
          */
         public function get_analytics_data() {
-            // Log AJAX request for debugging
-            error_log('MPTBM Analytics: AJAX request received');
-
             // Check nonce for security
             if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mptbm_analytics_nonce')) {
-                error_log('MPTBM Analytics: Invalid nonce');
                 wp_send_json_error(array('message' => 'Invalid security token'));
                 wp_die();
             }
@@ -282,8 +278,6 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
             // Get date range parameters
             $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : date('Y-m-d', strtotime('-30 days'));
             $end_date = isset($_POST['end_date']) ? sanitize_text_field($_POST['end_date']) : date('Y-m-d', strtotime('+1 day'));
-
-            error_log('MPTBM Analytics: Received date range: ' . $start_date . ' to ' . $end_date);
 
             // Get analytics data
             $data = $this->generate_analytics_data($start_date, $end_date);
@@ -322,10 +316,6 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
                 'failed' => 0
             );
 
-            // Debug the date range
-            error_log('MPTBM Analytics: Date range from ' . $start_date . ' to ' . $end_date);
-            error_log('MPTBM Analytics: Timestamp range from ' . $start_timestamp . ' to ' . $end_timestamp);
-
             // COMPLETELY NEW APPROACH: Use direct SQL query to get exact count of ECAB taxi bookings
             // This is the most accurate way to get the data
             $query = $wpdb->prepare(
@@ -350,8 +340,6 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
             );
 
             $bookings = $wpdb->get_results($query);
-
-            error_log('MPTBM Analytics: Found ' . count($bookings) . ' ECAB taxi bookings via SQL query');
 
             // Initialize counters
             $total_bookings = count($bookings);
@@ -459,9 +447,6 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
                 'values' => array_values($booking_status)
             );
 
-            // Debug total bookings found
-            error_log('MPTBM Analytics: Total ECAB taxi bookings found: ' . $total_bookings);
-
             // Return all data
             $return_data = array(
                 'total_bookings' => $total_bookings,
@@ -478,8 +463,6 @@ if (!class_exists('MPTBM_Analytics_Dashboard')) {
                 'recent_bookings' => $recent_bookings
             );
 
-            // Log the data being returned
-            error_log('MPTBM Analytics: Returning data: ' . json_encode($return_data));
             if (class_exists('MPTBM_Plugin_Pro')){
                 return $return_data;
             }else{

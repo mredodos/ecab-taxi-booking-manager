@@ -39,6 +39,9 @@
 						<p class="_textLight_1 mptbm_manual_start_place"><?php echo esc_html($start_place); ?></p>
 					<?php } ?>
 					<div class="dividerL"></div>
+					<h6 class="_mB_xs"><?php esc_html_e('Number of Passengers', 'ecab-taxi-booking-manager'); ?></h6>
+					<p class="_textLight_1 mptbm_passengers"><?php echo esc_html(isset($_POST['mptbm_passengers']) ? $_POST['mptbm_passengers'] : 1); ?></p>
+					<div class="dividerL"></div>
 					<h6 class="_mB_xs"><?php esc_html_e('Drop-Off Location', 'ecab-taxi-booking-manager'); ?></h6>
 					<?php if($price_based == 'manual'){ ?>
 						<p class="_textLight_1 mptbm_map_end_place"><?php echo esc_html(MPTBM_Function::get_taxonomy_name_by_slug( $end_place,'locations' )); ?></p>

@@ -335,6 +335,13 @@ if (sizeof($all_dates) > 0) {
 						</label>
 					</div>
 				<?php } ?>
+				<div class="inputList">
+					<label class="fdColumn">
+						<span><?php esc_html_e('Number of Passengers', 'ecab-taxi-booking-manager'); ?></span>
+						<input type="number" class="formControl" name="mptbm_passengers" id="mptbm_passengers" min="1" value="1" />
+						<i class="fas fa-users mptbm_left_icon allCenter"></i>
+					</label>
+				</div>
 				<?php if ($form_style == 'horizontal') { ?>
 					<div class="divider"></div>
 				<?php } ?>

@@ -98,51 +98,51 @@
 				if (!current_user_can('administrator')) {
 					wp_die(esc_html__('You do not have sufficient permissions to access this page.'));
 				}
-				
+
 				// Handle form submissions
 				$post_action = isset($_POST['action']) ? sanitize_text_field($_POST['action']) : null;
 				$get_action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : null;
-				
+
 				if ($post_action == 'add' || $post_action == 'edit') {
 					$this->process_checkout_field_form();
 				} else if ($get_action == 'delete') {
 					$this->process_checkout_field_delete();
 				}
-				
+
 				do_action('mptbm_save_checkout_fields_settings');
 				do_action('mptbm_wc_checkout_fields');
 				self::checkout_field_list();
 			}
-			
+
 			/**
 			 * Process the checkout field form (add/edit)
 			 */
 			private function process_checkout_field_form() {
 				$action = isset($_POST['action']) ? sanitize_text_field($_POST['action']) : '';
-				
+
 				if ($action == 'add') {
 					// Check nonce for security
 					if (!isset($_POST['mptbm_checkout_field_add_nonce']) || !wp_verify_nonce($_POST['mptbm_checkout_field_add_nonce'], 'mptbm_checkout_field_add')) {
 						return;
 					}
-					
+
 					$key = isset($_POST['key']) ? sanitize_text_field($_POST['key']) : null;
 					$type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : null;
 					$name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : null;
-					
+
 					if (isset($name)) {
 						$options = get_option('mptbm_custom_checkout_fields');
-						
+
 						if (!is_array($options)) {
 							$options = array();
 						}
-						
+
 						if (substr($name, 0, strlen($key . '_')) !== $key . '_') {
 							$name = $key . '_' . $name;
 						}
-						
-						if (!isset(MPTBM_Wc_Checkout_Fields_Helper::$default_woocommerce_checkout_fields[$key][$name]) && 
-							(!isset($options[$key][$name]) || (isset($options[$key][$name]) && $options[$key][$name]['deleted'] == 'deleted'))) {
+
+						if (!isset(MPTBM_Wc_Checkout_Fields_Helper::$default_woocommerce_checkout_fields[$key][$name]) &&
+							(!isset($options[$key][$name]) || (isset($options[$key][$name]) && isset($options[$key][$name]['deleted']) && $options[$key][$name]['deleted'] == 'deleted'))) {
 							$options[$key][$name] = $this->prepare_field_data($type);
 							update_option('mptbm_custom_checkout_fields', $options);
 						}
@@ -152,33 +152,33 @@
 					if (!isset($_POST['mptbm_checkout_field_edit_nonce']) || !wp_verify_nonce($_POST['mptbm_checkout_field_edit_nonce'], 'mptbm_checkout_field_edit')) {
 						return;
 					}
-					
+
 					$key = isset($_POST['key']) ? sanitize_text_field($_POST['key']) : null;
 					$type = isset($_POST['new_type']) ? sanitize_text_field($_POST['new_type']) : null;
 					$name = isset($_POST['new_name']) ? sanitize_text_field($_POST['new_name']) : null;
 					$old_name = isset($_POST['old_name']) ? sanitize_text_field($_POST['old_name']) : null;
-					
+
 					if (isset($name)) {
 						$options = get_option('mptbm_custom_checkout_fields');
-						
+
 						if (!is_array($options)) {
 							$options = array();
 						}
-						
+
 						if (substr($name, 0, strlen($key . '_')) !== $key . '_') {
 							$name = $key . '_' . $name;
 						}
-						
+
 						if (isset($options[$key][$old_name]) && $old_name != $name) {
 							unset($options[$key][$old_name]);
 						}
-						
+
 						$options[$key][$name] = $this->prepare_field_data($type);
 						update_option('mptbm_custom_checkout_fields', $options);
 					}
 				}
 			}
-			
+
 			/**
 			 * Process checkout field delete action
 			 */
@@ -187,29 +187,29 @@
 				if (!isset($_GET['mptbm_checkout_field_delete_nonce']) || !wp_verify_nonce($_GET['mptbm_checkout_field_delete_nonce'], 'mptbm_checkout_field_delete')) {
 					return;
 				}
-				
+
 				$key = isset($_GET['key']) ? sanitize_text_field($_GET['key']) : null;
 				$name = isset($_GET['name']) ? sanitize_text_field($_GET['name']) : null;
-				
+
 				if (isset($name)) {
 					$options = get_option('mptbm_custom_checkout_fields');
-					
+
 					if (!is_array($options)) {
 						$options = array();
 					}
-					
+
 					$new_options = array(
 						'deleted' => 'deleted',
 					);
-					
+
 					if (isset($options[$key][$name])) {
 						$options[$key][$name] = array_merge($options[$key][$name], $new_options);
 					}
-					
+
 					update_option('mptbm_custom_checkout_fields', $options);
 				}
 			}
-			
+
 			/**
 			 * Prepare field data based on type
 			 */
@@ -221,7 +221,7 @@
 				$priority = isset($_POST['priority']) ? sanitize_text_field($_POST['priority']) : null;
 				$required = isset($_POST['required']) ? sanitize_text_field($_POST['required']) : null;
 				$disabled = isset($_POST['disabled']) ? sanitize_text_field($_POST['disabled']) : null;
-				
+
 				$field_data = array(
 					'type' => $type,
 					'label' => $label,
@@ -233,12 +233,12 @@
 					'disabled' => $disabled == 'on' ? '1' : '',
 					'custom_field' => '1',
 				);
-				
+
 				// Add options if type is select
 				if ($type == 'select' && isset($_POST['option_value']) && isset($_POST['option_text'])) {
 					$array_option_text = array_map('sanitize_text_field', $_POST['option_text']);
 					$array_option_value = array_map('sanitize_text_field', $_POST['option_value']);
-					
+
 					if (is_array($array_option_value)) {
 						$select_options = array();
 						foreach ($array_option_value as $index => $value) {
@@ -247,7 +247,7 @@
 						$field_data['options'] = $select_options;
 					}
 				}
-				
+
 				return $field_data;
 			}
 			public function checkout_field_list() {
