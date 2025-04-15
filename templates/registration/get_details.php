@@ -335,13 +335,18 @@ if (sizeof($all_dates) > 0) {
 						</label>
 					</div>
 				<?php } ?>
+				<?php 
+				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'yes');
+				if ($show_passengers === 'yes') { 
+				?>
 				<div class="inputList">
 					<label class="fdColumn">
 						<span><?php esc_html_e('Number of Passengers', 'ecab-taxi-booking-manager'); ?></span>
 						<input type="number" class="formControl" name="mptbm_passengers" id="mptbm_passengers" min="1" value="1" />
-						<i class="fas fa-users mptbm_left_icon allCenter"></i>
+						<i class="fas fa-users mptbm_left_icon allCenter" style="position: absolute; left: 87%;"></i>
 					</label>
 				</div>
+				<?php } ?>
 				<?php if ($form_style == 'horizontal') { ?>
 					<div class="divider"></div>
 				<?php } ?>
