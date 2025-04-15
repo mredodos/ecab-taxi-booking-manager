@@ -16,7 +16,6 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
     $operation_area_type = get_post_meta($operation_area_id, "mptbm-operation-type", true);
 
     if ($operation_area_type === "fixed-operation-area-type") {
-
         $flat_operation_area_coordinates = get_post_meta($operation_area_id, "mptbm-coordinates-three", true);
         
         // Ensure it's an array before processing
@@ -88,19 +87,13 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
         if ($operation_area_geo_direction == "geo-fence-one-direction") {
             if ($startInAreaOne == "true" && $endInAreaTwo == "true") {
                 session_start();
-                $operation_area_id = get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true);
-                if ($operation_area_id > 0) {
-                    $operation_area_type = get_post_meta($operation_area_id, "mptbm-operation-type", true);
-                    if ($operation_area_type == "geo-fence-operation-area-type") {
-                        $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
-                        if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
-                            $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
-                        } else {
-                            $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
-                        }
-                    }
+                $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
+                if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
+                    $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
+                    $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
+                } else {
+                    $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
+                    $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                 }
                 ?>
                 <script>
@@ -121,19 +114,13 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
         } else {
             if ($startInAreaOne == "true" && $endInAreaTwo == "true") {
                 session_start();
-                $operation_area_id = get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true);
-                if ($operation_area_id > 0) {
-                    $operation_area_type = get_post_meta($operation_area_id, "mptbm-operation-type", true);
-                    if ($operation_area_type == "geo-fence-operation-area-type") {
-                        $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
-                        if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
-                            $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
-                        } else {
-                            $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
-                        }
-                    }
+                $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
+                if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
+                    $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
+                    $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
+                } else {
+                    $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
+                    $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                 }
                 ?>
                 <script>
@@ -145,19 +132,13 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
                 <?php session_write_close();
             } elseif ($startInAreaTwo == "true" && $endInAreaOne == "true") {
                 session_start();
-                $operation_area_id = get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true);
-                if ($operation_area_id > 0) {
-                    $operation_area_type = get_post_meta($operation_area_id, "mptbm-operation-type", true);
-                    if ($operation_area_type == "geo-fence-operation-area-type") {
-                        $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
-                        if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
-                            $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
-                        } else {
-                            $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
-                            $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
-                        }
-                    }
+                $mptbm_geo_fence_increase_price_by = get_post_meta($operation_area_id, "mptbm-geo-fence-increase-price-by", true);
+                if ($mptbm_geo_fence_increase_price_by == "geo-fence-fixed-price") {
+                    $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-fixed-price-amount", true);
+                    $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
+                } else {
+                    $mptbm_geo_fence_price_amount = get_post_meta($operation_area_id, "mptbm-geo-fence-percentage-amount", true);
+                    $_SESSION["geo_fence_post_" . $post_id] = [$mptbm_geo_fence_price_amount, $mptbm_geo_fence_increase_price_by];
                 }
                 ?>
                 <script>
@@ -187,24 +168,69 @@ function wptbm_get_schedule($post_id, $days_name, $selected_day,$start_time_sche
     }
     session_write_close();
     //Get operation area id
-    $operation_area_id = get_post_meta($post_id, "mptbm_tranport_selected_operation_area", true);
+    $operation_area_ids = get_post_meta($post_id, "mptbm_selected_operation_areas", true);
+    
     //Schedule array
     $schedule = [];
     //
-    if ($operation_area_id && $price_based !== "manual") {
-        mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $start_place_coordinates, $end_place_coordinates);
+    if ($operation_area_ids && $price_based !== "manual") {
+        // Handle multiple operation areas
+        if (is_array($operation_area_ids)) {
+            $is_in_any_area = false;
+            foreach ($operation_area_ids as $operation_area_id) {
+                $operation_area_type = get_post_meta($operation_area_id, "mptbm-operation-type", true);
+                if ($operation_area_type === "geo-fence-operation-area-type") {
+                    mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $start_place_coordinates, $end_place_coordinates);
+                    $is_in_any_area = true;
+                } else {
+                    $flat_operation_area_coordinates = get_post_meta($operation_area_id, "mptbm-coordinates-three", true);
+                    if (is_array($flat_operation_area_coordinates)) {
+                        $operation_area_coordinates = [];
+                        for ($i = 0; $i < count($flat_operation_area_coordinates); $i += 2) {
+                            $operation_area_coordinates[] = ["latitude" => $flat_operation_area_coordinates[$i], "longitude" => $flat_operation_area_coordinates[$i + 1]];
+                        }
+                        ?>
+                        <script>
+                            var operation_area_coordinates = <?php echo wp_json_encode($operation_area_coordinates); ?>;
+                            var post_id = <?php echo wp_json_encode($post_id); ?>;
+                            var start_place_coordinates = <?php echo wp_json_encode($start_place_coordinates); ?>;
+                            var end_place_coordinates = <?php echo wp_json_encode($end_place_coordinates); ?>;
+                            var startInArea = geolib.isPointInPolygon(start_place_coordinates, operation_area_coordinates);
+                            var endInArea = geolib.isPointInPolygon(end_place_coordinates, operation_area_coordinates);
+                            if (startInArea && endInArea) {
+                                var selectorClass = `.mptbm_booking_item_${post_id}`;
+                                jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
+                                document.cookie = selectorClass + '=' + selectorClass + ";path=/";
+                                <?php $is_in_any_area = true; ?>
+                            }
+                        </script>
+                        <?php
+                    }
+                }
+            }
+            if (!$is_in_any_area) {
+                ?>
+                <script>
+                    var post_id = <?php echo wp_json_encode($post_id); ?>;
+                    var selectorClass = `.mptbm_booking_item_${post_id}`;
+                    jQuery(selectorClass).addClass('mptbm_booking_item_hidden');
+                </script>
+                <?php
+            }
+        } else {
+            // Single operation area
+            mptbm_check_transport_area_geo_fence($post_id, $operation_area_ids, $start_place_coordinates, $end_place_coordinates);
+        }
     } else {
-        
-?>
-		<script>
-			var post_id = <?php echo wp_json_encode($post_id); ?>;
-			var selectorClass = `.mptbm_booking_item_${post_id}`;
-			jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
-			var vehicaleItemClass = `.mptbm_booking_item_${post_id}`;
-			
-			document.cookie = vehicaleItemClass +'='+  vehicaleItemClass+";path=/";
-		</script>
-<?php
+        ?>
+        <script>
+            var post_id = <?php echo wp_json_encode($post_id); ?>;
+            var selectorClass = `.mptbm_booking_item_${post_id}`;
+            jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');
+            var vehicaleItemClass = `.mptbm_booking_item_${post_id}`;
+            document.cookie = vehicaleItemClass +'='+  vehicaleItemClass+";path=/";
+        </script>
+        <?php
     }
     
     $available_all_time = get_post_meta($post_id, 'mptbm_available_for_all_time');
