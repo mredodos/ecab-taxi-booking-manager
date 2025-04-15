@@ -257,6 +257,17 @@ if (!class_exists('MPTBM_Settings_Global')) {
 						)
 					),
 					array(
+						'name' => 'show_number_of_passengers',
+						'label' => esc_html__('Show Number of Passengers', 'ecab-taxi-booking-manager'),
+						'desc' => esc_html__('If you want to show the Number of Passengers field, select Yes. Default is Yes', 'ecab-taxi-booking-manager'),
+						'type' => 'select',
+						'default' => 'yes',
+						'options' => array(
+							'yes' => esc_html__('Yes', 'ecab-taxi-booking-manager'),
+							'no' => esc_html__('No', 'ecab-taxi-booking-manager')
+						)
+					),
+					array(
 						'name' => 'no_transport_message',
 						'label' => esc_html__('No Transport Available Message', 'ecab-taxi-booking-manager'),
 						'desc' => esc_html__('Customize the message shown when no transport is available. You can use HTML tags for styling or select from predefined templates below.', 'ecab-taxi-booking-manager'),
