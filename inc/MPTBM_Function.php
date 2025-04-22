@@ -222,6 +222,21 @@ if (!class_exists('MPTBM_Function')) {
 		//*************Price*********************************//
 		public static function get_price($post_id, $distance = 1000, $duration = 3600, $start_place = '', $destination_place = '', $waiting_time = 0, $two_way = 1, $fixed_time = 0)
 		{
+			// Get price display type
+			$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+			
+			// If price display type is zero, return 0
+			if ($price_display_type === 'zero') {
+				return 0;
+			}
+			
+			// If price display type is custom message, store it in a transient and return 0
+			if ($price_display_type === 'custom_message') {
+				$custom_message = MP_Global_Function::get_post_info($post_id, 'mptbm_custom_price_message', '');
+				set_transient('mptbm_custom_price_message_' . $post_id, $custom_message, HOUR_IN_SECONDS);
+				return 0;
+			}
+
 			$price = 0.0;  // Initialize price as a float
 
 			// Check if the session is active

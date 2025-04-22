@@ -43,12 +43,26 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
         //$product_id = MP_Global_Function::get_post_info($post_id, 'link_wc_product');
         $thumbnail = MP_Global_Function::get_image_url($post_id);
         $price = MPTBM_Function::get_price($post_id, $distance, $duration, $start_place, $end_place, $waiting_time, $two_way, $fixed_time);
-        if(!$price || $price == 0){
+
+        // Get price display type and custom message
+        $price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+        $custom_message = get_transient('mptbm_custom_price_message_' . $post_id);
+
+        // Only skip display if price is 0 and we're not in zero or custom message mode
+        if (!$price && $price_display_type === 'normal') {
             return false;
         }
-        
-        $wc_price = MP_Global_Function::wc_price($post_id, $price);
-        $raw_price = MP_Global_Function::price_convert_raw($wc_price);
+
+        // Handle price display
+        if ($price_display_type === 'custom_message' && $custom_message) {
+            $price_display = '<div class="mptbm-custom-price-message" style=" font-size: 15px; ">' . wp_kses_post($custom_message) . '</div>';
+            $raw_price = 0; // Set raw price to 0 for custom message
+        } else {
+            $wc_price = MP_Global_Function::wc_price($post_id, $price);
+            $raw_price = MP_Global_Function::price_convert_raw($wc_price);
+            $price_display = $wc_price;
+        }
+
         $display_features = MP_Global_Function::get_post_info($post_id, 'display_mptbm_features', 'on');
         $all_features = MP_Global_Function::get_post_info($post_id, 'mptbm_features');
 ?>
@@ -83,7 +97,7 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                         <div></div>
                     <?php } ?>
                     <div class="_min_150_mL_xs">
-                        <h4 class="textCenter"> <?php echo wp_kses_post(wc_price($raw_price)); ?></h4>
+                        <h4 class="textCenter"> <?php echo wp_kses_post($price_display); ?></h4>
                         <button type="button" class="_mpBtn_xs_w_150 mptbm_transport_select" data-transport-name="<?php echo esc_attr(get_the_title($post_id)); ?>" data-transport-price="<?php echo esc_attr($raw_price); ?>" data-post-id="<?php echo esc_attr($post_id); ?>" data-open-text="<?php esc_attr_e('Select Car', 'ecab-taxi-booking-manager'); ?>" data-close-text="<?php esc_html_e('Selected', 'ecab-taxi-booking-manager'); ?>" data-open-icon="" data-close-icon="fas fa-check mR_xs">
                             <span class="" data-icon></span>
                             <span data-text><?php esc_html_e('Select Car', 'ecab-taxi-booking-manager'); ?></span>

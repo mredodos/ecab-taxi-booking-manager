@@ -35,6 +35,10 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			// Add filter to modify WooCommerce validation process
 			add_filter('woocommerce_checkout_posted_data', array($this, 'modify_checkout_posted_data'), 99);
 			add_filter('woocommerce_checkout_required_field_notice', array($this, 'modify_required_field_notice'), 99, 2);
+
+			// Add hooks for custom message display
+			add_action('woocommerce_thankyou', [$this, 'display_order_custom_message'], 10);
+			add_action('woocommerce_email_order_details', [$this, 'email_order_custom_message'], 10, 4);
 		}
 
 		public function custom_override_checkout_fields($fields) {
@@ -246,17 +250,25 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function before_calculate_totals($cart_object)
 		{
-
 			foreach ($cart_object->cart_contents as $value) {
 				$post_id = array_key_exists('mptbm_id', $value) ? $value['mptbm_id'] : 0;
 				if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
+					// Check if custom message is set
+					$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+					if ($price_display_type === 'custom_message') {
+						$custom_message = MP_Global_Function::get_post_info($post_id, 'mptbm_custom_price_message', '');
+						$value['mptbm_custom_price_message'] = $custom_message;
+						$value['data']->set_price(0);
+						$value['data']->set_regular_price(0);
+						$value['data']->set_sale_price(0);
+						continue;
+					}
+					
 					$total_price = $value['mptbm_tp'];
+					
 					if (isset($_SESSION['geo_fence_post_' . $post_id])) {
-						// Extract amount from session
 						$session_data = $_SESSION['geo_fence_post_' . $post_id];
-						// Check if session data contains the amount
 						if (isset($session_data[0])) {
-							// Add the amount to the price
 							$total_price += (float)$session_data[0];
 						}
 					}
@@ -1154,6 +1166,12 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function get_cart_total_price($post_id)
 		{
+			// Check if custom message is set
+			$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+			if ($price_display_type === 'custom_message') {
+				return 0;
+			}
+
 			$distance = isset($_COOKIE['mptbm_distance']) ? absint($_COOKIE['mptbm_distance']) : '';
 			$duration = isset($_COOKIE['mptbm_duration']) ? absint($_COOKIE['mptbm_duration']) : '';
 			$start_place = isset($_POST['mptbm_start_place']) ? sanitize_text_field($_POST['mptbm_start_place']) : '';
@@ -1235,6 +1253,49 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			}
 			echo ob_get_clean();
 			die();
+		}
+
+		// Add custom message to order item meta
+		public function add_order_item_meta($item_id, $values) {
+			if (isset($values['mptbm_custom_price_message'])) {
+				wc_add_order_item_meta($item_id, '_mptbm_custom_price_message', $values['mptbm_custom_price_message']);
+			}
+		}
+
+		// Display custom message on thank you page
+		public function display_order_custom_message($order_id) {
+			$order = wc_get_order($order_id);
+			if (!$order) return;
+
+			foreach ($order->get_items() as $item_id => $item) {
+				$custom_message = wc_get_order_item_meta($item_id, '_mptbm_custom_price_message', true);
+				if ($custom_message) {
+					echo '<div class="mptbm-custom-price-message">';
+					echo '<h4>' . esc_html__('Important Information', 'ecab-taxi-booking-manager') . '</h4>';
+					echo '<p>' . wp_kses_post($custom_message) . '</p>';
+					echo '</div>';
+				}
+			}
+		}
+
+		// Add custom message to order emails
+		public function email_order_custom_message($order, $sent_to_admin, $plain_text, $email) {
+			if (!$order) return;
+
+			foreach ($order->get_items() as $item_id => $item) {
+				$custom_message = wc_get_order_item_meta($item_id, '_mptbm_custom_price_message', true);
+				if ($custom_message) {
+					if ($plain_text) {
+						echo "\n\n" . esc_html__('Important Information', 'ecab-taxi-booking-manager') . "\n";
+						echo esc_html($custom_message) . "\n\n";
+					} else {
+						echo '<div class="mptbm-custom-price-message">';
+						echo '<h4>' . esc_html__('Important Information', 'ecab-taxi-booking-manager') . '</h4>';
+						echo '<p>' . wp_kses_post($custom_message) . '</p>';
+						echo '</div>';
+					}
+				}
+			}
 		}
 	}
 	new MPTBM_Woocommerce();
