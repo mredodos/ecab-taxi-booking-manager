@@ -307,211 +307,20 @@ if (!class_exists('MPTBM_Function')) {
 				$selected_start_time = get_transient('start_time_schedule_transient');
 				$datetime_discount_applied = false;
 				$day_discount_applied = false;
-				$conditional_rule_applied = false;
 				$original_price = $price;
-				$base_price = $price; // Store the original price before any discounts
 
-				// Format start time consistently
+				// Get toggle states for both discount types
+				$datetime_discount_enabled = get_post_meta($post_id, 'mptbm_datetime_discount_enabled', true);
+				$day_discount_enabled = get_post_meta($post_id, 'mptbm_day_discount_enabled', true);
+
 				if (strpos($selected_start_time, '.') !== false) {
 					$selected_start_time = sprintf('%02d:%02d', floor($selected_start_time), ($selected_start_time - floor($selected_start_time)) * 60);
 				} else {
 					$selected_start_time = sprintf('%02d:00', $selected_start_time);
 				}
 
-				// Get toggle states for all discount types
-				$datetime_discount_enabled = get_post_meta($post_id, 'mptbm_datetime_discount_enabled', true);
-				$day_discount_enabled = get_post_meta($post_id, 'mptbm_day_discount_enabled', true);
-				$conditional_rules = get_post_meta($post_id, 'mptbm_conditional_rules', true);
-
-				// Track total discount amount
-				$total_discount = 0;
-				$price_override = false;
-
-				// 1. Apply Conditional Rules First
-				if (!empty($conditional_rules) && is_array($conditional_rules)) {
-					foreach ($conditional_rules as $rule) {
-						$rule_matches = true;
-						
-						if (empty($rule['conditions']) || !is_array($rule['conditions'])) {
-							continue;
-						}
-
-						// Check each condition in the rule
-						foreach ($rule['conditions'] as $condition) {
-							$condition_type = isset($condition['type']) ? $condition['type'] : '';
-							$operator = isset($condition['operator']) ? $condition['operator'] : 'is';
-							$matches = false;
-
-							switch ($condition_type) {
-								case 'simple_date':
-									$condition_date = isset($condition['date']) ? date('Y-m-d', strtotime($condition['date'])) : '';
-									$matches = ($selected_start_date === $condition_date);
-									break;
-
-								case 'date_range':
-									$start = isset($condition['start']) ? date('Y-m-d', strtotime($condition['start'])) : '';
-									$end = isset($condition['end']) ? date('Y-m-d', strtotime($condition['end'])) : '';
-									$matches = (strtotime($selected_start_date) >= strtotime($start) && 
-											  strtotime($selected_start_date) <= strtotime($end));
-									break;
-
-								case 'weekday':
-									$day = isset($condition['value']) ? strtolower($condition['value']) : '';
-									$current_day = strtolower(date('l', strtotime($selected_start_date)));
-									$matches = ($current_day === $day);
-									break;
-
-								case 'time_of_day':
-									$time_ranges = [
-										'early_morning' => ['04:00', '07:00'],
-										'morning_rush' => ['07:00', '10:00'],
-										'midday' => ['10:00', '16:00'],
-										'evening_rush' => ['16:00', '19:00'],
-										'night' => ['19:00', '04:00']
-									];
-									
-									$selected_time = isset($condition['value']) ? $condition['value'] : '';
-									if (isset($time_ranges[$selected_time])) {
-										$range = $time_ranges[$selected_time];
-										if ($selected_time === 'night') {
-											$matches = (strtotime($selected_start_time) >= strtotime($range[0]) || 
-													  strtotime($selected_start_time) <= strtotime($range[1]));
-										} else {
-											$matches = (strtotime($selected_start_time) >= strtotime($range[0]) && 
-													  strtotime($selected_start_time) <= strtotime($range[1]));
-										}
-									}
-									break;
-
-								case 'holiday':
-									$holiday_dates = [
-										'new_year' => '01-01',
-										'christmas' => '12-25',
-										'thanksgiving' => date('m-d', strtotime('fourth thursday of november ' . date('Y'))),
-										'independence_day' => '07-04',
-										'labor_day' => date('m-d', strtotime('first monday of september ' . date('Y'))),
-										'memorial_day' => date('m-d', strtotime('last monday of may ' . date('Y')))
-									];
-									
-									$holiday = isset($condition['value']) ? $condition['value'] : '';
-									if ($holiday === 'custom') {
-										$custom_date = isset($condition['custom_date']) ? date('m-d', strtotime($condition['custom_date'])) : '';
-										$matches = (date('m-d', strtotime($selected_start_date)) === $custom_date);
-									} else if (isset($holiday_dates[$holiday])) {
-										$matches = (date('m-d', strtotime($selected_start_date)) === $holiday_dates[$holiday]);
-									}
-									break;
-
-								case 'special_event':
-									$event_name = isset($condition['name']) ? sanitize_text_field($condition['name']) : '';
-									$event_date = isset($condition['date']) ? date('Y-m-d', strtotime($condition['date'])) : '';
-									$event_location = isset($condition['location']) ? sanitize_text_field($condition['location']) : '';
-									
-									// Check if date matches
-									$date_matches = ($selected_start_date === $event_date);
-									
-									// Get booking location
-									$booking_location = apply_filters('mptbm_get_booking_location', '', $post_id);
-									$location_matches = empty($event_location) || stripos($booking_location, $event_location) !== false;
-									
-									$matches = $date_matches && $location_matches;
-									break;
-
-								case 'location':
-									$location_type = isset($condition['type']) ? $condition['type'] : '';
-									$custom_location = isset($condition['custom']) ? sanitize_text_field($condition['custom']) : '';
-									
-									// Get route type
-									$route_type = apply_filters('mptbm_get_route_type', '', $post_id);
-									
-									if ($location_type === 'custom') {
-										$booking_location = apply_filters('mptbm_get_booking_location', '', $post_id);
-										$matches = stripos($booking_location, $custom_location) !== false;
-									} else {
-										$matches = ($route_type === $location_type);
-									}
-									break;
-
-								case 'weather':
-									// Get weather data for the location
-									$booking_location = apply_filters('mptbm_get_booking_location', '', $post_id);
-									$weather_data = apply_filters('mptbm_get_weather_data', [], $booking_location, $selected_start_date);
-									
-									$weather_condition = isset($condition['value']) ? $condition['value'] : '';
-									$matches = ($weather_data['condition'] === $weather_condition);
-									break;
-
-								case 'booking_count':
-									$count_operator = isset($condition['operator']) ? $condition['operator'] : '';
-									$count_value = isset($condition['count']) ? intval($condition['count']) : 0;
-									
-									// Get current booking count
-									$current_bookings = apply_filters('mptbm_get_date_booking_count', 0, $post_id, $selected_start_date);
-									
-									switch ($count_operator) {
-										case 'less_than':
-											$matches = ($current_bookings < $count_value);
-											break;
-										case 'more_than':
-											$matches = ($current_bookings > $count_value);
-											break;
-										case 'equal':
-											$matches = ($current_bookings === $count_value);
-											break;
-									}
-									break;
-							}
-
-							// Apply operator
-							if ($operator === 'is_not') {
-								$matches = !$matches;
-							}
-
-							// If any condition fails, the rule doesn't match
-							if (!$matches) {
-								$rule_matches = false;
-								break;
-							}
-						}
-
-						// If all conditions match, apply the rule's action
-						if ($rule_matches) {
-							$action = isset($rule['action']) ? $rule['action'] : [];
-							$action_type = isset($action['type']) ? $action['type'] : '';
-							$action_value = isset($action['value']) ? floatval($action['value']) : 0;
-							$action_unit = isset($action['unit']) ? $action['unit'] : 'fixed';
-
-							switch ($action_type) {
-								case 'adjust_price':
-									if ($action_unit === 'percentage') {
-										$adjustment = ($action_value / 100) * $base_price;
-									} else {
-										$adjustment = $action_value;
-									}
-									$total_discount += $adjustment;
-									$conditional_rule_applied = true;
-									break;
-
-								case 'override_price':
-									if ($action_unit === 'percentage') {
-										$price = ($action_value / 100) * $base_price;
-									} else {
-										$price = $action_value;
-									}
-									$price_override = true;
-									return $price; // Return immediately for price override
-
-								case 'disable_discount':
-									return $base_price; // Return original price, skip all discounts
-							}
-
-							break; // Stop after first matching rule
-						}
-					}
-				}
-
-				// 2. Apply Date and Time Wise Discount if enabled and no price override
-				if (!$price_override && $datetime_discount_enabled === 'on') {
+				// Apply Date and Time Wise Discount if enabled
+				if ($datetime_discount_enabled === 'on') {
 					$discounts = MP_Global_Function::get_post_info($post_id, 'mptbm_discounts', []);
 					if (!empty($discounts)) {
 						foreach ($discounts as $discount) {
@@ -519,13 +328,11 @@ if (!class_exists('MPTBM_Function')) {
 							$end_date = isset($discount['end_date']) ? date('Y-m-d', strtotime($discount['end_date'])) : '';
 							$time_slots = isset($discount['time_slots']) ? $discount['time_slots'] : [];
 
-							if (strtotime($selected_start_date) >= strtotime($start_date) && 
-								strtotime($selected_start_date) <= strtotime($end_date)) {
+							if (strtotime($selected_start_date) >= strtotime($start_date) && strtotime($selected_start_date) <= strtotime($end_date)) {
 								foreach ($time_slots as $slot) {
 									$start_time = isset($slot['start_time']) ? sanitize_text_field($slot['start_time']) : '';
 									$end_time = isset($slot['end_time']) ? sanitize_text_field($slot['end_time']) : '';
 
-									// Format times consistently
 									if (strpos($start_time, '.') !== false) {
 										$start_time = sprintf('%02d:%02d', floor($start_time), ($start_time - floor($start_time)) * 60);
 									}
@@ -533,28 +340,34 @@ if (!class_exists('MPTBM_Function')) {
 										$end_time = sprintf('%02d:%02d', floor($end_time), ($end_time - floor($end_time)) * 60);
 									}
 
-									$time_matches = false;
 									if (strtotime($start_time) > strtotime($end_time)) {
-										// Handles overnight time ranges
-										$time_matches = (strtotime($selected_start_time) >= strtotime($start_time) || 
-													  strtotime($selected_start_time) <= strtotime($end_time));
-									} else {
-										// Normal time range
-										$time_matches = (strtotime($selected_start_time) >= strtotime($start_time) && 
-													  strtotime($selected_start_time) <= strtotime($end_time));
-									}
+										if (strtotime($selected_start_time) >= strtotime($start_time) || strtotime($selected_start_time) <= strtotime($end_time)) {
+											$percentage = floatval(rtrim($slot['percentage'], '%'));
+											$type = isset($slot['type']) ? $slot['type'] : 'increase';
 
-									if ($time_matches) {
-										$percentage = floatval(rtrim($slot['percentage'], '%'));
-										$type = isset($slot['type']) ? $slot['type'] : 'increase';
-										$discount_amount = ($percentage / 100) * $base_price;
+											$discount_amount = ($percentage / 100) * $original_price;
 
-										if ($type === 'decrease') {
-											$total_discount -= $discount_amount;
-										} else {
-											$total_discount += $discount_amount;
+											if ($type === 'decrease') {
+												$price -= abs($discount_amount);
+											} else {
+												$price += $discount_amount;
+											}
+											$datetime_discount_applied = true;
 										}
-										$datetime_discount_applied = true;
+									} else {
+										if (strtotime($selected_start_time) >= strtotime($start_time) && strtotime($selected_start_time) <= strtotime($end_time)) {
+											$percentage = floatval(rtrim($slot['percentage'], '%'));
+											$type = isset($slot['type']) ? $slot['type'] : 'increase';
+
+											$discount_amount = ($percentage / 100) * $original_price;
+
+											if ($type === 'decrease') {
+												$price -= abs($discount_amount);
+											} else {
+												$price += $discount_amount;
+											}
+											$datetime_discount_applied = true;
+										}
 									}
 								}
 							}
@@ -562,36 +375,31 @@ if (!class_exists('MPTBM_Function')) {
 					}
 				}
 
-				// 3. Apply Day-based discount if enabled and no price override
-				if (!$price_override && $day_discount_enabled === 'on' && !empty($selected_start_date)) {
+				// Apply Day-based discount if enabled
+				if ($day_discount_enabled === 'on' && !empty($selected_start_date)) {
 					$day_of_week = strtolower(date('l', strtotime($selected_start_date)));
-					$day_discounts = get_post_meta($post_id, 'mptbm_day_discounts', true);
 					
-					if (is_array($day_discounts) && isset($day_discounts[$day_of_week]) && 
-						$day_discounts[$day_of_week]['status'] === 'active') {
+					// Get day-based discounts
+					$day_discounts = get_post_meta($post_id, 'mptbm_day_discounts', true);
+					if (is_array($day_discounts) && isset($day_discounts[$day_of_week]) && $day_discounts[$day_of_week]['status'] === 'active') {
 						$day_data = $day_discounts[$day_of_week];
 						$amount = floatval($day_data['amount']);
 						
 						if ($amount > 0) {
 							if ($day_data['amount_type'] === 'percentage') {
-								$discount_amount = ($amount / 100) * $base_price;
+								$discount_amount = ($amount / 100) * $original_price;
 							} else {
 								$discount_amount = $amount;
 							}
 
 							if ($day_data['type'] === 'decrease') {
-								$total_discount -= $discount_amount;
+								$price -= $discount_amount;
 							} else {
-								$total_discount += $discount_amount;
+								$price += $discount_amount;
 							}
 							$day_discount_applied = true;
 						}
 					}
-				}
-
-				// Apply total discount if any discounts were applied and no price override
-				if (!$price_override && ($conditional_rule_applied || $datetime_discount_applied || $day_discount_applied)) {
-					$price = $base_price + $total_discount;
 				}
 			}
 
