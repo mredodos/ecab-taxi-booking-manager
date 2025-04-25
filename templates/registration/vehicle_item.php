@@ -84,6 +84,30 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                     <?php } ?>
                     <div class="_min_150_mL_xs">
                         <h4 class="textCenter"> <?php echo wp_kses_post(wc_price($raw_price)); ?></h4>
+                        <?php if (class_exists('MPTBM_Plugin_Pro')) { 
+                            $quantity = MP_Global_Function::get_post_info($post_id, 'mptbm_quantity');
+                            if ($quantity && $quantity > 1) { ?>
+                                <div style="margin-bottom: 2px;" class="textCenter _mT_xs mptbm_quantity_selector mptbm_booking_item_hidden <?php echo 'mptbm_quantity_selector_' . $post_id; ?> ">
+                                    <div class="mp_quantity_selector">
+                                        <button type="button" class="mp_quantity_minus" data-post-id="<?php echo esc_attr($post_id); ?>">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" 
+                                               class="mp_quantity_input" 
+                                               name="vehicle_quantity[<?php echo esc_attr($post_id); ?>]" 
+                                               value="1" 
+                                               min="1" 
+                                               max="<?php echo esc_attr($quantity); ?>" 
+                                               data-post-id="<?php echo esc_attr($post_id); ?>"
+                                               readonly />
+                                        <button type="button" class="mp_quantity_plus" data-post-id="<?php echo esc_attr($post_id); ?>">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            <?php }
+                        } ?>
                         <button type="button" class="_mpBtn_xs_w_150 mptbm_transport_select" data-transport-name="<?php echo esc_attr(get_the_title($post_id)); ?>" data-transport-price="<?php echo esc_attr($raw_price); ?>" data-post-id="<?php echo esc_attr($post_id); ?>" data-open-text="<?php esc_attr_e('Select Car', 'ecab-taxi-booking-manager'); ?>" data-close-text="<?php esc_html_e('Selected', 'ecab-taxi-booking-manager'); ?>" data-open-icon="" data-close-icon="fas fa-check mR_xs">
                             <span class="" data-icon></span>
                             <span data-text><?php esc_html_e('Select Car', 'ecab-taxi-booking-manager'); ?></span>

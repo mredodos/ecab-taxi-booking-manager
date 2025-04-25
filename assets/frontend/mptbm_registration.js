@@ -165,6 +165,7 @@ function mptbm_map_area_init() {
         let two_way = parent.find('[name="mptbm_taxi_return"]').val();
         let waiting_time = parent.find('[name="mptbm_waiting_time"]').val();
         let fixed_time = parent.find('[name="mptbm_fixed_hours"]').val();
+        
         let mptbm_enable_view_search_result_page = parent
             .find('[name="mptbm_enable_view_search_result_page"]')
             .val();
@@ -604,6 +605,7 @@ function mptbm_content_refresh(parent) {
 }
 //=======================//
 function mptbm_price_calculation(parent) {
+    
     let target_summary = parent.find(".mptbm_transport_summary");
     let total = 0;
     let post_id = parseInt(parent.find('[name="mptbm_post_id"]').val());
@@ -629,12 +631,62 @@ function mptbm_price_calculation(parent) {
         .html(mp_price_format(total));
 }
 (function ($) {
+    
+    $(document).on('click', '.mp_quantity_minus, .mp_quantity_plus', function () {
+        var postId = $(this).data('post-id');
+        var $input = $(`.mp_quantity_input[data-post-id="${postId}"]`);
+        var currentVal = parseInt($input.val());
+        var maxVal = parseInt($input.attr('max'));
+        var minVal = parseInt($input.attr('min'));
+    
+        if ($(this).hasClass('mp_quantity_minus')) {
+            if (currentVal > minVal) {
+                $input.val(currentVal - 1);
+            }
+        } else {
+            if (currentVal < maxVal) {
+                $input.val(currentVal + 1);
+            }
+        }
+    
+        var updatedVal = parseInt($input.val());
+        var $parent = $(this).closest('.mptbm_booking_item');
+        var $searchArea = $parent.closest('.mptbm_transport_search_area');
+        var transportPrice = parseFloat($(`.mptbm_transport_select[data-post-id="${postId}"]`).attr('data-transport-price'));
+        var $summary = $searchArea.find('.mptbm_transport_summary');
+    
+        $summary.find('.mptbm_product_price').html(
+            'x' + updatedVal + ' <span style="color:#000;">|&nbsp;&nbsp;</span>' + mp_price_format(transportPrice * updatedVal)
+        );
+    
+        // 🧠 Update the data-price dynamically if needed
+        $searchArea.find('[name="mptbm_post_id"]').attr('data-price', transportPrice * updatedVal);
+    
+        // ✅ Now update the total
+        mptbm_price_calculation($searchArea);
+    });
     $(document).on('click', '.mptbm_transport_search_area .mptbm_transport_select', function () {
         let $this = $(this);
+        let postId = $this.data('post-id');
         let parent = $this.closest('.mptbm_transport_search_area');
+    
+        // Keeping all original variables
         let target_summary = parent.find('.mptbm_transport_summary');
         let target_extra_service = parent.find('.mptbm_extra_service');
         let target_extra_service_summary = parent.find('.mptbm_extra_service_summary');
+        let all_quantity_selectors = parent.find('.mptbm_quantity_selector');
+        let target_quantity_selector = parent.find('.mptbm_quantity_selector_' + postId);
+    
+        // Toggle logic for quantity selector
+        if (target_quantity_selector.length && target_quantity_selector.hasClass('mptbm_booking_item_hidden')) {
+            // Hide all first, then show selected one
+            all_quantity_selectors.addClass('mptbm_booking_item_hidden');
+            target_quantity_selector.removeClass('mptbm_booking_item_hidden');
+        } else {
+            // If already visible or doesn't exist, hide all
+            all_quantity_selectors.addClass('mptbm_booking_item_hidden');
+        }
+
         target_summary.slideDown(400);
         target_extra_service.slideDown(400).html('');
         target_extra_service_summary.slideDown(400).html('');
@@ -652,7 +704,11 @@ function mptbm_price_calculation(parent) {
                 let transport_price = parseFloat($this.attr('data-transport-price'));
                 let post_id = $this.attr('data-post-id');
                 target_summary.find('.mptbm_product_name').html(transport_name);
-                target_summary.find('.mptbm_product_price').html(mp_price_format(transport_price));
+                let quantityInput = parent.find(`.mp_quantity_input[data-post-id="${post_id}"]`);
+                let quantityVal = quantityInput.length ? parseInt(quantityInput.val()) || 1 : 1;
+                target_summary.find('.mptbm_product_price').html(
+                    'x' + quantityVal + ' <span style="color:#000;">|&nbsp;&nbsp;</span> ' + mp_price_format(transport_price * quantityVal)
+                );
                 $this.addClass('active_select');
                 mp_all_content_change($this);
                 parent.find('[name="mptbm_post_id"]').val(post_id).attr('data-price', transport_price).promise().done(function () {
@@ -805,6 +861,8 @@ function mptbm_price_calculation(parent) {
         let post_id = parent.find('[name="mptbm_post_id"]').val();
         let date = parent.find('[name="mptbm_date"]').val();
         let link_id = $(this).attr('data-wc_link_id');
+        let quantity = parseInt(parent.find(`.mp_quantity_input[data-post-id="${post_id}"]`).val()) || 1;
+       
         if (start_place !== '' && end_place !== '' && link_id && post_id) {
             let extra_service_name = {};
             let extra_service_qty = {};
@@ -825,6 +883,7 @@ function mptbm_price_calculation(parent) {
                 data: {
                     action: "mptbm_add_to_cart",
                     //"product_id": post_id,
+                    transport_quantity: quantity,
                     link_id: link_id,
                     mptbm_start_place: start_place,
                     mptbm_end_place: end_place,
@@ -946,5 +1005,5 @@ function mptbm_price_calculation(parent) {
 }(jQuery));
 function gm_authFailure() {
     var warning = jQuery('.mptbm-map-warning').html();
-    jQuery('#mptbm_map_area').html('<div class="mptbm-map-warning"><h6>'+warning+'</h6></div>');
+    jQuery('#mptbm_map_area').html('<div class="mptbm-map-warning"><h6>' + warning + '</h6></div>');
 }

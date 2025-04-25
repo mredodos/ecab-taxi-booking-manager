@@ -21,6 +21,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			add_action('woocommerce_before_calculate_totals', array($this, 'before_calculate_totals'), 90);
 			add_filter('woocommerce_cart_item_thumbnail', array($this, 'cart_item_thumbnail'), 90, 3);
 			add_filter('woocommerce_get_item_data', array($this, 'get_item_data'), 90, 2);
+			// Replace displayed quantity on order/thank-you using transport quantity meta
+			add_filter('woocommerce_order_item_quantity_html', array($this, 'filter_order_item_quantity'), 10, 2);
 			//************//
 			add_action('woocommerce_after_checkout_validation', array($this, 'after_checkout_validation'));
 			add_action('woocommerce_checkout_create_order_line_item', array($this, 'checkout_create_order_line_item'), 90, 4);
@@ -202,6 +204,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		}
 		public function add_cart_item_data($cart_item_data, $product_id)
 		{
+			$quantity = isset($_POST['transport_quantity']) ? sanitize_text_field($_POST['transport_quantity']) : 1;
+			$cart_item_data['mptbm_transport_quantity'] = $quantity;
 			$linked_id = MP_Global_Function::get_post_info($product_id, 'link_mptbm_id', $product_id);
 			$post_id = is_string(get_post_status($linked_id)) ? $linked_id : $product_id;
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
@@ -212,10 +216,20 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$waiting_time = isset($_POST['mptbm_waiting_time']) ? sanitize_text_field($_POST['mptbm_waiting_time']) : 0;
 				$return = isset($_POST['mptbm_taxi_return']) ? sanitize_text_field($_POST['mptbm_taxi_return']) : 1;
 				$fixed_hour = isset($_POST['mptbm_fixed_hours']) ? sanitize_text_field($_POST['mptbm_fixed_hours']) : 0;
-				$total_price = $this->get_cart_total_price($post_id);
+				// Calculate single-unit transport price
 				$price = MPTBM_Function::get_price($post_id, $distance, $duration, $start_place, $end_place, $waiting_time, $return, $fixed_hour);
 				$wc_price = MP_Global_Function::wc_price($post_id, $price);
 				$raw_price = MP_Global_Function::price_convert_raw($wc_price);
+				// Multiply transport unit price by quantity
+				$transport_total_price = $raw_price * $quantity;
+				// Calculate extra service total (single add-on, not per transport unit)
+				$extra_services = self::cart_extra_service_info($post_id);
+				$extra_total_price = 0;
+				foreach ($extra_services as $svc) {
+					$extra_total_price += ($svc['service_price'] * $svc['service_quantity']);
+				}
+				// Final total: transport plus extra services
+				$total_price = $transport_total_price + $extra_total_price;
 				$cart_item_data['mptbm_date'] = isset($_POST['mptbm_date']) ? sanitize_text_field($_POST['mptbm_date']) : '';
 				$cart_item_data['mptbm_taxi_return'] = $return;
 				$cart_item_data['mptbm_waiting_time'] = $waiting_time;
@@ -263,7 +277,6 @@ if (!class_exists('MPTBM_Woocommerce')) {
 					$value['data']->set_price($total_price);
 					$value['data']->set_regular_price($total_price);
 					$value['data']->set_sale_price($total_price);
-					$value['data']->set_sold_individually('yes');
 					$value['data']->get_price();
 				}
 			}
@@ -600,25 +613,26 @@ if (!class_exists('MPTBM_Woocommerce')) {
 
 			$post_id = array_key_exists('mptbm_id', $values) ? $values['mptbm_id'] : 0;
 			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
-				$date = $values['mptbm_date'] ?? '';
-				$start_location = $values['mptbm_start_place'] ?? '';
-				$end_location = $values['mptbm_end_place'] ?? '';
-				$distance = $values['mptbm_distance'] ?? '';
-				$distance_text = $values['mptbm_distance_text'] ?? '';
-				$duration = $values['mptbm_duration'] ?? '';
-				$duration_text = $values['mptbm_duration_text'] ?? '';
-				$base_price = $values['mptbm_base_price'] ?? '';
+				$date = isset($values['mptbm_date']) ? $values['mptbm_date'] : '';
+				$start_location = isset($values['mptbm_start_place']) ? $values['mptbm_start_place'] : '';
+				$end_location = isset($values['mptbm_end_place']) ? $values['mptbm_end_place'] : '';
+				$distance = isset($values['mptbm_distance']) ? $values['mptbm_distance'] : '';
+				$distance_text = isset($values['mptbm_distance_text']) ? $values['mptbm_distance_text'] : '';
+				$duration = isset($values['mptbm_duration']) ? $values['mptbm_duration'] : '';
+				$duration_text = isset($values['mptbm_duration_text']) ? $values['mptbm_duration_text'] : '';
+				$base_price = isset($values['mptbm_base_price']) ? $values['mptbm_base_price'] : '';
 				$return = $values['mptbm_taxi_return'] ?? '';
 				$waiting_time = $values['mptbm_waiting_time'] ?? '';
 				$fixed_time = $values['mptbm_fixed_hours'] ?? 0;
 				$extra_service = $values['mptbm_extra_service_info'] ?? [];
-				$price = $values['mptbm_tp'] ?? '';
-
+				$price = isset($values['mptbm_tp']) ? $values['mptbm_tp'] : '';
+				$transport_quantity = isset($values['mptbm_transport_quantity']) ? $values['mptbm_transport_quantity'] : 1;
+				$item->set_quantity( $transport_quantity );
 				$item->add_meta_data(esc_html__('Pickup Location ', 'ecab-taxi-booking-manager'), $start_location);
 				$item->add_meta_data(esc_html__('Drop-Off Location ', 'ecab-taxi-booking-manager'), $end_location);
 				$price_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
 				if ($price_type !== 'manual') {
-					$item->add_meta_data(esc_html__('Approximate Distance ', 'ecab-taxi-booking-manager'), $distance_text);
+					$item->add_meta_data(esc_html__('Approximate Distancee ', 'ecab-taxi-booking-manager'), $distance_text);
 					$item->add_meta_data(esc_html__('Approximate Time ', 'ecab-taxi-booking-manager'), $duration_text);
 				}
 
@@ -630,7 +644,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				}
 				$item->add_meta_data(esc_html__('Date ', 'ecab-taxi-booking-manager'), esc_html(MP_Global_Function::date_format($date)));
 				$item->add_meta_data(esc_html__('Time ', 'ecab-taxi-booking-manager'), esc_html(MP_Global_Function::date_format($date, 'time')));
-				
+				$item->add_meta_data(esc_html__('Transport Quantity ', 'ecab-taxi-booking-manager'), $transport_quantity);
 				// Add passenger count to order meta only if the setting is enabled
 				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'yes');
 				if ($show_passengers === 'yes') {
@@ -679,6 +693,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						$item->add_meta_data('_mptbm_return_date', $return_date);
 						$item->add_meta_data('_mptbm_return_time', $return_time);
 					}
+					$item->add_meta_data(esc_html__('Transport Quantity', 'ecab-taxi-booking-manager'), $transport_quantity);
 				}
 				$item->add_meta_data(esc_html__('Price ', 'ecab-taxi-booking-manager'), wp_kses_post(wc_price($base_price)));
 				if (sizeof($extra_service) > 0) {
@@ -759,6 +774,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$item->add_meta_data('_mptbm_base_price', $base_price);
 				$item->add_meta_data('_mptbm_tp', $price);
 				$item->add_meta_data('_mptbm_service_info', $extra_service);
+				$item->add_meta_data('_mptbm_transport_quantity', $transport_quantity);
 
 				do_action('mptbm_checkout_create_order_line_item', $item, $values);
 			}
@@ -806,8 +822,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				}
 				$order_status = $order->get_status();
 				$order_meta = get_post_meta($order_id);
-				$payment_method = $order_meta['_payment_method_title'][0] ?? '';
-				$user_id = $order_meta['_customer_user'][0] ?? '';
+				$payment_method = isset($order_meta['_payment_method_title'][0]) ? $order_meta['_payment_method_title'][0] : '';
+				$user_id = isset($order_meta['_customer_user'][0]) ? $order_meta['_customer_user'][0] : '';
 
 				if ($order_status != 'failed') {
 					foreach ($order->get_items() as $item_id => $item) {
@@ -841,7 +857,9 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							$service_info = $service ? MP_Global_Function::data_sanitize($service) : [];
 							$price = MP_Global_Function::get_order_item_meta($item_id, '_mptbm_tp');
 							$price = $price ? MP_Global_Function::data_sanitize($price) : [];
-
+							$transport_quantity = MP_Global_Function::get_order_item_meta($item_id, '_mptbm_transport_quantity');
+							$quantity = $transport_quantity ? MP_Global_Function::data_sanitize($transport_quantity) : 1;
+							
 							// Add meta array data to the $data array
 							$data = array_merge($meta_array, [
 								'mptbm_id' => $post_id,
@@ -863,7 +881,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 								'mptbm_billing_name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
 								'mptbm_billing_email' => $order->get_billing_email(),
 								'mptbm_billing_phone' => $order->get_billing_phone(),
-								'mptbm_target_pickup_interval_time' => MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30')
+								'mptbm_target_pickup_interval_time' => MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30'),
+								'mptbm_transport_quantity' => $quantity
 							]);
 
 							// Only add passenger count if the setting is enabled
@@ -1051,6 +1070,15 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							<h6 class="_mR_xs"><?php esc_html_e('Base Price : ', 'ecab-taxi-booking-manager'); ?></h6>
 							<span><?php echo wp_kses_post(wc_price($base_price)); ?></span>
 						</li>
+						<?php
+						// Display transport quantity
+						$transport_quantity = isset($cart_item['mptbm_transport_quantity']) ? absint($cart_item['mptbm_transport_quantity']) : 1;
+						?>
+						<li>
+							<span class="fas fa-car"></span>
+							<h6 class="_mR_xs"><?php esc_html_e('Transport Quantity', 'ecab-taxi-booking-manager'); ?> :</h6>
+							<span><?php echo esc_html($transport_quantity); ?></span>
+						</li>
 						<?php do_action('mptbm_cart_item_display', $cart_item, $post_id); ?>
 					</ul>
 				</div>
@@ -1205,9 +1233,10 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		/****************************/
 		public function mptbm_add_to_cart()
 		{
+			$quantity = isset($_POST['transport_quantity']) ? sanitize_text_field($_POST['transport_quantity']) : 1;
+			
 			$link_id = absint($_POST['link_id']);
 			$product_id = apply_filters('woocommerce_add_to_cart_product_id', $link_id);
-			$quantity = 1;
 			$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity);
 			$product_status = get_post_status($product_id);
 			WC()->cart->empty_cart();
@@ -1235,6 +1264,20 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			}
 			echo ob_get_clean();
 			die();
+		}
+		/**
+		 * Override order-item quantity HTML with transport quantity meta.
+		 *
+		 * @param string       $quantity_html Original quantity HTML.
+		 * @param WC_Order_Item $item Order item instance.
+		 * @return string Modified quantity HTML.
+		 */
+		public function filter_order_item_quantity($quantity_html, $item) {
+			$transport_quantity = $item->get_meta('mptbm_transport_quantity', true);
+			if ($transport_quantity && absint($transport_quantity) > 0) {
+				return ' <strong class="product-quantity">&times;&nbsp;' . absint($transport_quantity) . '</strong>';
+			}
+			return $quantity_html;
 		}
 	}
 	new MPTBM_Woocommerce();
