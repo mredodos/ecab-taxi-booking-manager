@@ -188,6 +188,15 @@ function mptbm_map_area_init() {
             return_time = 'Not applicable';
         }
         let start_time = target_time.val();
+        // Get the actual time from the data-time attribute
+        let selectedTimeElement = parent.find("#mptbm_map_start_time").closest(".mp_input_select").find("li[data-value='" + start_time + "']");
+        if (selectedTimeElement.length) {
+            start_time = selectedTimeElement.attr('data-time');
+            // Convert the time to a proper format
+            let [hours, minutes] = start_time.split('.');
+            start_time = parseFloat(hours) + (parseFloat(minutes) / 100);
+        }
+        
         if (!start_date) {
             target_date.trigger("click");
         } else if (!start_time) {

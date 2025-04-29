@@ -358,6 +358,7 @@ if ($start_time !== "") {
 // Format hours and minutes
 $start_time_formatted = sprintf('%02d:%02d', $hours, $minutes);
 
+
 // Combine date and time if both are available
 $date = $start_date ? gmdate("Y-m-d", strtotime($start_date)) : "";
 if ($date && $start_time !== "") {
