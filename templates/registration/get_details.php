@@ -336,7 +336,7 @@ if (sizeof($all_dates) > 0) {
 					</div>
 				<?php } ?>
 				<?php 
-				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'yes');
+				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
 				if ($show_passengers === 'yes') { 
 				?>
 				<div class="inputList">

@@ -19,6 +19,8 @@ if (!class_exists('MPTBM_Woocommerce')) {
 			add_action('woocommerce_checkout_update_order_meta', array($this, 'product_custom_field_to_custom_order_notes'), 100, 2);
 			add_filter('woocommerce_add_cart_item_data', array($this, 'add_cart_item_data'), 90, 3);
 			add_action('woocommerce_before_calculate_totals', array($this, 'before_calculate_totals'), 90);
+			add_filter('woocommerce_cart_item_price', array($this, 'adjust_cart_item_price'), 10, 3);
+			add_filter('woocommerce_cart_item_subtotal', array($this, 'adjust_cart_item_subtotal'), 10, 3);
 			add_filter('woocommerce_cart_item_thumbnail', array($this, 'cart_item_thumbnail'), 90, 3);
 			add_filter('woocommerce_get_item_data', array($this, 'get_item_data'), 90, 2);
 			//************//
@@ -216,10 +218,22 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$waiting_time = isset($_POST['mptbm_waiting_time']) ? sanitize_text_field($_POST['mptbm_waiting_time']) : 0;
 				$return = isset($_POST['mptbm_taxi_return']) ? sanitize_text_field($_POST['mptbm_taxi_return']) : 1;
 				$fixed_hour = isset($_POST['mptbm_fixed_hours']) ? sanitize_text_field($_POST['mptbm_fixed_hours']) : 0;
-				$total_price = $this->get_cart_total_price($post_id);
-				$price = MPTBM_Function::get_price($post_id, $distance, $duration, $start_place, $end_place, $waiting_time, $return, $fixed_hour);
-				$wc_price = MP_Global_Function::wc_price($post_id, $price);
-				$raw_price = MP_Global_Function::price_convert_raw($wc_price);
+				
+				// Check price display type
+				$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+				
+				if ($price_display_type === 'custom_message') {
+					$price = 0;
+					$wc_price = MP_Global_Function::wc_price($post_id, $price);
+					$raw_price = MP_Global_Function::price_convert_raw($wc_price);
+					$total_price = $this->get_cart_total_price($post_id);
+				} else {
+					$price = MPTBM_Function::get_price($post_id, $distance, $duration, $start_place, $end_place, $waiting_time, $return, $fixed_hour);
+					$wc_price = MP_Global_Function::wc_price($post_id, $price);
+					$raw_price = MP_Global_Function::price_convert_raw($wc_price);
+					$total_price = $this->get_cart_total_price($post_id);
+				}
+
 				$cart_item_data['mptbm_date'] = isset($_POST['mptbm_date']) ? sanitize_text_field($_POST['mptbm_date']) : '';
 				$cart_item_data['mptbm_taxi_return'] = $return;
 				$cart_item_data['mptbm_waiting_time'] = $waiting_time;
@@ -258,23 +272,37 @@ if (!class_exists('MPTBM_Woocommerce')) {
 					if ($price_display_type === 'custom_message') {
 						$custom_message = MP_Global_Function::get_post_info($post_id, 'mptbm_custom_price_message', '');
 						$value['mptbm_custom_price_message'] = $custom_message;
-						$value['data']->set_price(0);
-						$value['data']->set_regular_price(0);
-						$value['data']->set_sale_price(0);
-						continue;
-					}
-					
-					$total_price = $value['mptbm_tp'];
-					
-					if (isset($_SESSION['geo_fence_post_' . $post_id])) {
-						$session_data = $_SESSION['geo_fence_post_' . $post_id];
-						if (isset($session_data[0])) {
-							$total_price += (float)$session_data[0];
+						
+						// Calculate extra service prices
+						$extra_service_total = 0;
+						if (isset($value['mptbm_extra_service_info']) && is_array($value['mptbm_extra_service_info'])) {
+							foreach ($value['mptbm_extra_service_info'] as $service) {
+								if (isset($service['service_price']) && isset($service['service_quantity'])) {
+									$extra_service_total += floatval($service['service_price']) * intval($service['service_quantity']);
+								}
+							}
 						}
+						
+						// Set the cart item price to only include extra services
+						$value['data']->set_price($extra_service_total);
+						$value['data']->set_regular_price($extra_service_total);
+						$value['data']->set_sale_price($extra_service_total);
+						$value['mptbm_tp'] = $extra_service_total;
+						$value['line_total'] = $extra_service_total;
+						$value['line_subtotal'] = $extra_service_total;
+					} else {
+						$total_price = $value['mptbm_tp'];
+						
+						if (isset($_SESSION['geo_fence_post_' . $post_id])) {
+							$session_data = $_SESSION['geo_fence_post_' . $post_id];
+							if (isset($session_data[0])) {
+								$total_price += (float)$session_data[0];
+							}
+						}
+						$value['data']->set_price($total_price);
+						$value['data']->set_regular_price($total_price);
+						$value['data']->set_sale_price($total_price);
 					}
-					$value['data']->set_price($total_price);
-					$value['data']->set_regular_price($total_price);
-					$value['data']->set_sale_price($total_price);
 					$value['data']->set_sold_individually('yes');
 					$value['data']->get_price();
 				}
@@ -692,70 +720,33 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						$item->add_meta_data('_mptbm_return_time', $return_time);
 					}
 				}
-				$item->add_meta_data(esc_html__('Price ', 'ecab-taxi-booking-manager'), wp_kses_post(wc_price($base_price)));
-				if (sizeof($extra_service) > 0) {
-					$item->add_meta_data(esc_html__('Optional Service ', 'ecab-taxi-booking-manager'), '');
-					foreach ($extra_service as $service) {
-						$item->add_meta_data(esc_html__('Services Name ', 'ecab-taxi-booking-manager'), $service['service_name']);
-						$item->add_meta_data(esc_html__('Services Quantity ', 'ecab-taxi-booking-manager'), $service['service_quantity']);
-						$item->add_meta_data(esc_html__('Price ', 'ecab-taxi-booking-manager'), esc_html(' ( ') . wp_kses_post(wc_price($service['service_price'])) . esc_html(' X ') . esc_html($service['service_quantity']) . esc_html(') = ') . wp_kses_post(wc_price($service['service_price'] * $service['service_quantity'])));
+
+				// Check if custom message is set
+				$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+				if ($price_display_type === 'custom_message') {
+					$custom_message = MP_Global_Function::get_post_info($post_id, 'mptbm_custom_price_message', '');
+					$item->add_meta_data(esc_html__('Important Information', 'ecab-taxi-booking-manager'), $custom_message);
+					
+					// Calculate and show only extra service prices
+					if (sizeof($extra_service) > 0) {
+						$item->add_meta_data(esc_html__('Optional Service ', 'ecab-taxi-booking-manager'), '');
+						foreach ($extra_service as $service) {
+							$item->add_meta_data(esc_html__('Services Name ', 'ecab-taxi-booking-manager'), $service['service_name']);
+							$item->add_meta_data(esc_html__('Services Quantity ', 'ecab-taxi-booking-manager'), $service['service_quantity']);
+							$item->add_meta_data(esc_html__('Price ', 'ecab-taxi-booking-manager'), esc_html(' ( ') . wp_kses_post(wc_price($service['service_price'])) . esc_html(' X ') . esc_html($service['service_quantity']) . esc_html(') = ') . wp_kses_post(wc_price($service['service_price'] * $service['service_quantity'])));
+						}
 					}
-				}
-				if (class_exists('MPTBM_Plugin_Ecab_Calendar_Addon')) {
-					// Prepare date and time for Google Calendar format
-					$formatted_date = MP_Global_Function::date_format($date);
-					$formatted_time = MP_Global_Function::date_format($date, 'time');
-					// Combine the provided formatted date and time
-					$date_time_string = $formatted_date . ' ' . $formatted_time; // Combine date and time as a single string
-
-					// Get the WordPress time zone
-					$timezone = new DateTimeZone(wp_timezone_string());
-
-					// Create DateTime object with the combined date and time, and apply WordPress time zone
-					$start_date_time = new DateTime($date_time_string, $timezone);
-
-					// Convert to UTC (Google Calendar requires UTC time format)
-					$start_date_time->setTimezone(new DateTimeZone('UTC'));
-
-					// Format date and time for Google Calendar
-					$formatted_date_time = $start_date_time->format('Ymd\THis\Z'); // Start time in Google Calendar format
-
-					// For the event end time (assuming 1 hour duration)
-					$end_date_time = clone $start_date_time;
-					$end_date_time->modify('+2  hour'); // Set the end time to 1 hour later
-					$formatted_end_time = $end_date_time->format('Ymd\THis\Z'); // End time in Google Calendar format
-					$driver_id = get_post_meta($post_id, 'mptbm_selected_driver', true);
-					if ($driver_id) {
-						$driver_info = get_userdata($driver_id);
-						$driver_name = $driver_info->display_name;
-						$driver_email = $driver_info->user_email;
-					} else {
-						$driver_name = '';
-						$driver_email = '';
+				} else {
+					// Show base price and extra services for normal pricing
+					$item->add_meta_data(esc_html__('Price ', 'ecab-taxi-booking-manager'), wp_kses_post(wc_price($base_price)));
+					if (sizeof($extra_service) > 0) {
+						$item->add_meta_data(esc_html__('Optional Service ', 'ecab-taxi-booking-manager'), '');
+						foreach ($extra_service as $service) {
+							$item->add_meta_data(esc_html__('Services Name ', 'ecab-taxi-booking-manager'), $service['service_name']);
+							$item->add_meta_data(esc_html__('Services Quantity ', 'ecab-taxi-booking-manager'), $service['service_quantity']);
+							$item->add_meta_data(esc_html__('Price ', 'ecab-taxi-booking-manager'), esc_html(' ( ') . wp_kses_post(wc_price($service['service_price'])) . esc_html(' X ') . esc_html($service['service_quantity']) . esc_html(') = ') . wp_kses_post(wc_price($service['service_price'] * $service['service_quantity'])));
+						}
 					}
-
-					// Build the details string conditionally
-					$details = "Transport service from " . $start_location . " to " . $end_location;
-					if ($driver_email) {
-						$details .= ". Driver email: " . $driver_email;
-					}
-					if ($driver_name) {
-						$driver_name = $driver_name;
-					}
-
-					// Create Google Calendar link
-					$google_calendar_link = "https://www.google.com/calendar/render?action=TEMPLATE&text="
-						. urlencode($this->ordered_item_name) // Event title
-						. "&dates=" . $formatted_date_time . "/" . $formatted_end_time // Start and end times
-						. "&details=" . urlencode($details)
-						. "&location=" . urlencode($start_location)
-						. "&sf=true&output=xml";
-
-					// Add Google Calendar link as meta data
-					$item->add_meta_data(
-						esc_html__('Add this event to your Google Calendar', 'ecab-taxi-booking-manager'),
-						'<a href="' . esc_url($google_calendar_link) . '" target="_blank">' . esc_html__('Add this event to your Google Calendar', 'ecab-taxi-booking-manager') . '</a>'
-					);
 				}
 				$item->add_meta_data('_mptbm_id', $post_id);
 				$item->add_meta_data('_mptbm_date', $date);
@@ -1168,20 +1159,23 @@ if (!class_exists('MPTBM_Woocommerce')) {
 		{
 			// Check if custom message is set
 			$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
-			if ($price_display_type === 'custom_message') {
-				return 0;
+			$raw_price = 0;
+			
+			// Only calculate base price if not custom_message
+			if ($price_display_type !== 'custom_message') {
+				$distance = isset($_COOKIE['mptbm_distance']) ? absint($_COOKIE['mptbm_distance']) : '';
+				$duration = isset($_COOKIE['mptbm_duration']) ? absint($_COOKIE['mptbm_duration']) : '';
+				$start_place = isset($_POST['mptbm_start_place']) ? sanitize_text_field($_POST['mptbm_start_place']) : '';
+				$end_place = isset($_POST['mptbm_end_place']) ? sanitize_text_field($_POST['mptbm_end_place']) : '';
+				$waiting_time = isset($_POST['mptbm_waiting_time']) ? sanitize_text_field($_POST['mptbm_waiting_time']) : 0;
+				$return = isset($_POST['mptbm_taxi_return']) ? sanitize_text_field($_POST['mptbm_taxi_return']) : 1;
+				$fixed_hour = isset($_POST['mptbm_fixed_hours']) ? sanitize_text_field($_POST['mptbm_fixed_hours']) : 0;
+				$price = MPTBM_Function::get_price($post_id, $distance, $duration, $start_place, $end_place, $waiting_time, $return, $fixed_hour);
+				$wc_price = MP_Global_Function::wc_price($post_id, $price);
+				$raw_price = MP_Global_Function::price_convert_raw($wc_price);
 			}
 
-			$distance = isset($_COOKIE['mptbm_distance']) ? absint($_COOKIE['mptbm_distance']) : '';
-			$duration = isset($_COOKIE['mptbm_duration']) ? absint($_COOKIE['mptbm_duration']) : '';
-			$start_place = isset($_POST['mptbm_start_place']) ? sanitize_text_field($_POST['mptbm_start_place']) : '';
-			$end_place = isset($_POST['mptbm_end_place']) ? sanitize_text_field($_POST['mptbm_end_place']) : '';
-			$waiting_time = isset($_POST['mptbm_waiting_time']) ? sanitize_text_field($_POST['mptbm_waiting_time']) : 0;
-			$return = isset($_POST['mptbm_taxi_return']) ? sanitize_text_field($_POST['mptbm_taxi_return']) : 1;
-			$fixed_hour = isset($_POST['mptbm_fixed_hours']) ? sanitize_text_field($_POST['mptbm_fixed_hours']) : 0;
-			$price = MPTBM_Function::get_price($post_id, $distance, $duration, $start_place, $end_place, $waiting_time, $return, $fixed_hour);
-			$wc_price = MP_Global_Function::wc_price($post_id, $price);
-			$raw_price = MP_Global_Function::price_convert_raw($wc_price);
+			// Calculate extra service prices
 			$service_name = isset($_POST['mptbm_extra_service']) ? array_map('sanitize_text_field', $_POST['mptbm_extra_service']) : [];
 			$service_quantity = isset($_POST['mptbm_extra_service_qty']) ? array_map('absint', $_POST['mptbm_extra_service_qty']) : [];
 			if (sizeof($service_name) > 0) {
@@ -1296,6 +1290,38 @@ if (!class_exists('MPTBM_Woocommerce')) {
 					}
 				}
 			}
+		}
+
+		// Add these new functions
+		public function adjust_cart_item_price($price, $cart_item, $cart_item_key) {
+			$post_id = array_key_exists('mptbm_id', $cart_item) ? $cart_item['mptbm_id'] : 0;
+			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
+				$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+				if ($price_display_type === 'custom_message') {
+					return wc_price(0);
+				}
+			}
+			return $price;
+		}
+
+		public function adjust_cart_item_subtotal($subtotal, $cart_item, $cart_item_key) {
+			$post_id = array_key_exists('mptbm_id', $cart_item) ? $cart_item['mptbm_id'] : 0;
+			if (get_post_type($post_id) == MPTBM_Function::get_cpt()) {
+				$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+				if ($price_display_type === 'custom_message') {
+					// Calculate only extra service total
+					$extra_service_total = 0;
+					if (isset($cart_item['mptbm_extra_service_info']) && is_array($cart_item['mptbm_extra_service_info'])) {
+						foreach ($cart_item['mptbm_extra_service_info'] as $service) {
+							if (isset($service['service_price']) && isset($service['service_quantity'])) {
+								$extra_service_total += floatval($service['service_price']) * intval($service['service_quantity']);
+							}
+						}
+					}
+					return wc_price($extra_service_total);
+				}
+			}
+			return $subtotal;
 		}
 	}
 	new MPTBM_Woocommerce();
