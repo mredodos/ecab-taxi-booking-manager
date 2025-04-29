@@ -22,6 +22,8 @@ if (!class_exists('MPTBM_Price_Settings')) {
 			$return_discount = MP_Global_Function::get_post_info($post_id, 'mptbm_return_discount');
 			$display_map = MP_Global_Function::get_settings('mptbm_map_api_settings', 'display_map', 'enable');
 			$price_based = MP_Global_Function::get_post_info($post_id, 'mptbm_price_based');
+			$price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+			$custom_price_message = MP_Global_Function::get_post_info($post_id, 'mptbm_custom_price_message', '');
 			$price_based = $display_map == 'disable' ? 'manual' : $price_based;
 			$distance_price = MP_Global_Function::get_post_info($post_id, 'mptbm_km_price');
 			$time_price = MP_Global_Function::get_post_info($post_id, 'mptbm_hour_price');
@@ -187,6 +189,29 @@ if (!class_exists('MPTBM_Price_Settings')) {
 						<?php MP_Custom_Layout::add_new_button(esc_html__('Add New Price', 'ecab-taxi-booking-manager')); ?>
 						<?php $this->hidden_manual_price_item($location_terms); ?>
 					</div>
+				</section>
+
+				<section>
+					<label class="label">
+						<div>
+							<h6><?php esc_html_e('Price Display Type', 'ecab-taxi-booking-manager'); ?></h6>
+							<span class="desc"><?php esc_html_e('Choose how the price should be displayed', 'ecab-taxi-booking-manager'); ?></span>
+						</div>
+						<select class="formControl" name="mptbm_price_display_type" data-collapse-target>
+							<option value="normal" <?php selected($price_display_type, 'normal'); ?>><?php esc_html_e('Normal Price', 'ecab-taxi-booking-manager'); ?></option>
+							<option value="zero" <?php selected($price_display_type, 'zero'); ?>><?php esc_html_e('Show as Zero (0.00)', 'ecab-taxi-booking-manager'); ?></option>
+							<option value="custom_message" <?php selected($price_display_type, 'custom_message'); ?>><?php esc_html_e('Show Custom Message', 'ecab-taxi-booking-manager'); ?></option>
+						</select>
+					</label>
+				</section>
+				<section data-collapse="#custom_message_section" class="<?php echo esc_attr($price_display_type == 'custom_message' ? 'mActive' : ''); ?>">
+					<label class="label">
+						<div>
+							<h6><?php esc_html_e('Custom Price Message', 'ecab-taxi-booking-manager'); ?></h6>
+							<span class="desc"><?php esc_html_e('Message to display instead of price (e.g. "Price pending confirmation")', 'ecab-taxi-booking-manager'); ?></span>
+						</div>
+						<textarea class="formControl" name="mptbm_custom_price_message" rows="3"><?php echo esc_textarea($custom_price_message); ?></textarea>
+					</label>
 				</section>
 
 			</div>
@@ -398,6 +423,10 @@ if (!class_exists('MPTBM_Price_Settings')) {
 				update_post_meta($post_id, 'mptbm_terms_price_info', $terms_price_infos);
 				$waiting_price = isset($_POST['mptbm_waiting_price']) ? sanitize_text_field($_POST['mptbm_waiting_price']) : '';
 				update_post_meta($post_id, 'mptbm_waiting_price', $waiting_price);
+				$price_display_type = isset($_POST['mptbm_price_display_type']) ? sanitize_text_field($_POST['mptbm_price_display_type']) : 'normal';
+				update_post_meta($post_id, 'mptbm_price_display_type', $price_display_type);
+				$custom_price_message = isset($_POST['mptbm_custom_price_message']) ? sanitize_textarea_field($_POST['mptbm_custom_price_message']) : '';
+				update_post_meta($post_id, 'mptbm_custom_price_message', $custom_price_message);
 			}
 		}
 	}
