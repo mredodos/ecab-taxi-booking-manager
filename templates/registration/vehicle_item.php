@@ -23,7 +23,77 @@ if (MP_Global_Function::get_settings('mptbm_general_settings', 'enable_filter_vi
 $fixed_time = $fixed_time ?? 0;
 $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : '';
 $start_date = $start_date ? date('Y-m-d', strtotime($start_date)) : '';
+$start_time = isset($_POST['start_time']) ? sanitize_text_field($_POST['start_time']) : '';
 $all_dates = MPTBM_Function::get_date($post_id);
+
+// Get booking interval time from transport settings
+$booking_interval_time = MP_Global_Function::get_post_info($post_id, 'mptbm_booking_interval_time', 0);
+
+// Calculate available quantity based on overlapping bookings
+$total_quantity = MP_Global_Function::get_post_info($post_id, 'mptbm_quantity', 1);
+$available_quantity = $total_quantity;
+if ($start_date && $start_time) {
+    // Get all bookings for the same date
+    $query = new WP_Query([
+        'post_type' => 'mptbm_booking',
+        'posts_per_page' => -1,
+        'meta_query' => [
+            'relation' => 'AND',
+            [
+                'key' => 'mptbm_date',
+                'value' => $start_date,
+                'compare' => 'LIKE'
+            ],
+            [
+                'key' => 'mptbm_id',
+                'value' => $post_id,
+                'compare' => '='
+            ]
+        ]
+    ]);
+
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $booking_datetime = get_post_meta(get_the_ID(), 'mptbm_date', true);
+            
+            // Extract time from datetime string (format: YYYY-MM-DD HH:MM)
+            $booking_time = '';
+            if (preg_match('/(\d{2}:\d{2})$/', $booking_datetime, $matches)) {
+                $booking_time = $matches[1];
+                // Convert HH:MM to minutes since midnight
+                list($hours, $minutes) = explode(':', $booking_time);
+                $booking_time_minutes = ((int)$hours * 60) + (int)$minutes;
+            } else {
+                $booking_time_minutes = 0;
+            }
+            
+            // Convert decimal hours to minutes since midnight
+            $desired_time_minutes = 0;
+            if (is_numeric($start_time)) {
+                $hours = floor($start_time);
+                $decimal_part = $start_time - $hours;
+                $minutes = (int)($decimal_part * 100); // Get the decimal part as minutes (e.g., 0.4 becomes 40)
+                $desired_time_minutes = ($hours * 60) + $minutes;
+            }
+            
+            // Debug output
+            echo 'Desired time (HH:MM): ' . sprintf('%02d:%02d', floor($desired_time_minutes / 60), $desired_time_minutes % 60) . '<br>';
+            echo 'Booking time (HH:MM): ' . $booking_time . '<br>';
+            echo 'Desired minutes: ' . $desired_time_minutes . '<br>';
+            echo 'Booking minutes: ' . $booking_time_minutes . '<br>';
+            echo 'Time difference: ' . abs($desired_time_minutes - $booking_time_minutes) . '<br>';
+            echo 'Interval time: ' . $booking_interval_time . '<br><br>';
+            
+            // Check if booking times overlap considering interval time
+            if (abs($desired_time_minutes - $booking_time_minutes) <= $booking_interval_time) {
+                $available_quantity--;
+            }
+        }
+    }
+    wp_reset_postdata();
+}
+
 $mptbm_enable_view_search_result_page  = MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_search_result_page');
 if ($mptbm_enable_view_search_result_page == '') {
     $hidden_class = 'mptbm_booking_item_hidden';
@@ -85,8 +155,8 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                     <div class="_min_150_mL_xs">
                         <h4 class="textCenter"> <?php echo wp_kses_post(wc_price($raw_price)); ?></h4>
                         <?php if (class_exists('MPTBM_Plugin_Pro')) { 
-                            $quantity = MP_Global_Function::get_post_info($post_id, 'mptbm_quantity');
-                            if ($quantity && $quantity > 1) { ?>
+                            $quantity = $available_quantity;
+                            if ($quantity && $quantity > 0) { ?>
                                 <div style="margin-bottom: 2px;" class="textCenter _mT_xs mptbm_quantity_selector mptbm_booking_item_hidden <?php echo 'mptbm_quantity_selector_' . $post_id; ?> ">
                                     <div class="mp_quantity_selector">
                                         <button type="button" class="mp_quantity_minus" data-post-id="<?php echo esc_attr($post_id); ?>">

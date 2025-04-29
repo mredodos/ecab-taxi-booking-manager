@@ -84,6 +84,15 @@
 								<input class="formControl mp_price_validation" name="mptbm_quantity" value="<?php echo esc_attr(MP_Global_Function::get_post_info($post_id, 'mptbm_quantity', 1)); ?>" type="number" min="1" placeholder="<?php esc_html_e('EX:5', 'ecab-taxi-booking-manager'); ?>" />
 							</label>
 						</section>
+						<section>
+							<label class="label">
+								<div>
+									<h6><?php esc_html_e('Transport Booking Interval Time (minutes)', 'ecab-taxi-booking-manager'); ?></h6>
+									<span class="desc"><?php esc_html_e('Set the interval time between bookings in minutes', 'ecab-taxi-booking-manager'); ?></span>
+								</div>
+								<input class="formControl mp_price_validation" name="mptbm_booking_interval_time" value="<?php echo esc_attr(MP_Global_Function::get_post_info($post_id, 'mptbm_booking_interval_time', 0)); ?>" type="number" min="0" placeholder="<?php esc_html_e('EX:30', 'ecab-taxi-booking-manager'); ?>" />
+							</label>
+						</section>
 						<section >
 							<label class="label">
 								<div>
@@ -154,9 +163,11 @@
 					$max_passenger = isset($_POST['mptbm_maximum_passenger']) ? sanitize_text_field($_POST['mptbm_maximum_passenger']) : '';
 					$max_bag = isset($_POST['mptbm_maximum_bag']) ? sanitize_text_field($_POST['mptbm_maximum_bag']) : '';
 					$quantity = isset($_POST['mptbm_quantity']) ? absint($_POST['mptbm_quantity']) : 1;
+					$booking_interval_time = isset($_POST['mptbm_booking_interval_time']) ? absint($_POST['mptbm_booking_interval_time']) : 0;
 					update_post_meta($post_id, 'mptbm_maximum_passenger', $max_passenger);
 					update_post_meta($post_id, 'mptbm_maximum_bag', $max_bag);
 					update_post_meta($post_id, 'mptbm_quantity', $quantity);
+					update_post_meta($post_id, 'mptbm_booking_interval_time', $booking_interval_time);
 					$display_features = isset($_POST['display_mptbm_features']) && sanitize_text_field($_POST['display_mptbm_features'])? 'on' : 'off';
 					update_post_meta($post_id, 'display_mptbm_features', $display_features);
 					$features_label = isset($_POST['mptbm_features_label']) ? array_map('sanitize_text_field',$_POST['mptbm_features_label']) : [];
