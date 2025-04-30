@@ -56,6 +56,8 @@ if ($start_date && $start_time) {
         while ($query->have_posts()) {
             $query->the_post();
             $booking_datetime = get_post_meta(get_the_ID(), 'mptbm_date', true);
+            $booking_transport_quantity = get_post_meta(get_the_ID(), 'mptbm_transport_quantity', true);
+            $booking_transport_quantity = $booking_transport_quantity ? absint($booking_transport_quantity) : 1;
             
             // Extract time from datetime string (format: YYYY-MM-DD HH:MM)
             $booking_time = '';
@@ -77,17 +79,9 @@ if ($start_date && $start_time) {
                 $desired_time_minutes = ($hours * 60) + $minutes;
             }
             
-            // Debug output
-            echo 'Desired time (HH:MM): ' . sprintf('%02d:%02d', floor($desired_time_minutes / 60), $desired_time_minutes % 60) . '<br>';
-            echo 'Booking time (HH:MM): ' . $booking_time . '<br>';
-            echo 'Desired minutes: ' . $desired_time_minutes . '<br>';
-            echo 'Booking minutes: ' . $booking_time_minutes . '<br>';
-            echo 'Time difference: ' . abs($desired_time_minutes - $booking_time_minutes) . '<br>';
-            echo 'Interval time: ' . $booking_interval_time . '<br><br>';
-            
             // Check if booking times overlap considering interval time
             if (abs($desired_time_minutes - $booking_time_minutes) <= $booking_interval_time) {
-                $available_quantity--;
+                $available_quantity -= $booking_transport_quantity;
             }
         }
     }
@@ -110,7 +104,6 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
     $waiting_time = $waiting_time ?? 0;
     $location_exit = MPTBM_Function::location_exit($post_id, $start_place, $end_place);
     if ($location_exit && $post_id) {
-        //$product_id = MP_Global_Function::get_post_info($post_id, 'link_wc_product');
         $thumbnail = MP_Global_Function::get_image_url($post_id);
         $price = MPTBM_Function::get_price($post_id, $distance, $duration, $start_place, $end_place, $waiting_time, $two_way, $fixed_time);
         if(!$price || $price == 0){
@@ -156,7 +149,7 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                         <h4 class="textCenter"> <?php echo wp_kses_post(wc_price($raw_price)); ?></h4>
                         <?php if (class_exists('MPTBM_Plugin_Pro')) { 
                             $quantity = $available_quantity;
-                            if ($quantity && $quantity > 0) { ?>
+                            if ($quantity && $quantity > 1) { ?>
                                 <div style="margin-bottom: 2px;" class="textCenter _mT_xs mptbm_quantity_selector mptbm_booking_item_hidden <?php echo 'mptbm_quantity_selector_' . $post_id; ?> ">
                                     <div class="mp_quantity_selector">
                                         <button type="button" class="mp_quantity_minus" data-post-id="<?php echo esc_attr($post_id); ?>">
@@ -175,13 +168,18 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                                         </button>
                                     </div>
                                 </div>
-
-                            <?php }
-                        } ?>
-                        <button type="button" class="_mpBtn_xs_w_150 mptbm_transport_select" data-transport-name="<?php echo esc_attr(get_the_title($post_id)); ?>" data-transport-price="<?php echo esc_attr($raw_price); ?>" data-post-id="<?php echo esc_attr($post_id); ?>" data-open-text="<?php esc_attr_e('Select Car', 'ecab-taxi-booking-manager'); ?>" data-close-text="<?php esc_html_e('Selected', 'ecab-taxi-booking-manager'); ?>" data-open-icon="" data-close-icon="fas fa-check mR_xs">
-                            <span class="" data-icon></span>
-                            <span data-text><?php esc_html_e('Select Car', 'ecab-taxi-booking-manager'); ?></span>
-                        </button>
+                            <?php } ?>
+                        <?php } ?>
+                        <?php if ($available_quantity > 0) { ?>
+                            <button type="button" class="_mpBtn_xs_w_150 mptbm_transport_select" data-transport-name="<?php echo esc_attr(get_the_title($post_id)); ?>" data-transport-price="<?php echo esc_attr($raw_price); ?>" data-post-id="<?php echo esc_attr($post_id); ?>" data-open-text="<?php esc_attr_e('Select Car', 'ecab-taxi-booking-manager'); ?>" data-close-text="<?php esc_html_e('Selected', 'ecab-taxi-booking-manager'); ?>" data-open-icon="" data-close-icon="fas fa-check mR_xs">
+                                <span class="" data-icon></span>
+                                <span data-text><?php esc_html_e('Select Car', 'ecab-taxi-booking-manager'); ?></span>
+                            </button>
+                        <?php } else { ?>
+                            <button type="button" class="_mpBtn_xs_w_150 mptbm_out_of_stock" disabled style="background-color: #ccc; cursor: not-allowed;">
+                                <span><?php esc_html_e('Out of Stock', 'ecab-taxi-booking-manager'); ?></span>
+                            </button>
+                        <?php } ?>
                     </div>
                 </div>
                 <!-- poro feature used this hook for showing driver's data -->

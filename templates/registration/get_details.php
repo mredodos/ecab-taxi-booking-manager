@@ -98,32 +98,7 @@ if (sizeof($all_dates) > 0) {
 	$interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30');
 	$interval_hours = $interval_time / 60;
 	$waiting_time_check = MPTBM_Function::get_general_settings('taxi_waiting_time', 'enable');
-?>
-	<?php 
-		$query = new WP_Query([
-			'post_type' => 'mptbm_booking',
-			'posts_per_page' => -1,
-		]);
-		
-		if ($query->have_posts()) {
-			echo '<ul>';
-			while ($query->have_posts()) {
-				$query->the_post();
-		
-				$mptbm_id   = get_post_meta(get_the_ID(), 'mptbm_id', true);
-				$mptbm_date = get_post_meta(get_the_ID(), 'mptbm_date', true);
-		
-				echo '<li>';
-				echo 'ID: <strong>' . esc_html($mptbm_id) . '</strong><br>';
-				echo 'Date and Time: ' . esc_html($mptbm_date);
-				echo '</li><hr>';
-			}
-			echo '</ul>';
-		} else {
-			echo 'No bookings found.';
-		}
-		wp_reset_postdata();
-	?>
+?>	
 	<div class="<?php echo esc_attr($area_class); ?> ">
 
 		<div class="_dLayout mptbm_search_area <?php echo esc_attr($form_style_class); ?> <?php echo esc_attr($price_based == 'manual' ? 'mAuto' : ''); ?>">
