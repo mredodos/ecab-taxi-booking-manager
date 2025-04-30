@@ -20,72 +20,84 @@ if (MP_Global_Function::get_settings('mptbm_general_settings', 'enable_filter_vi
     }
 }
 
+// Get display features setting
+$display_features = MP_Global_Function::get_post_info($post_id, 'display_mptbm_features', 'on');
+
+$all_features = MP_Global_Function::get_post_info($post_id, 'mptbm_features');
+
 $fixed_time = $fixed_time ?? 0;
 $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : '';
 $start_date = $start_date ? date('Y-m-d', strtotime($start_date)) : '';
 $start_time = isset($_POST['start_time']) ? sanitize_text_field($_POST['start_time']) : '';
 $all_dates = MPTBM_Function::get_date($post_id);
 
-// Get booking interval time from transport settings
-$booking_interval_time = MP_Global_Function::get_post_info($post_id, 'mptbm_booking_interval_time', 0);
+// Check if inventory is enabled
+$enable_inventory = MP_Global_Function::get_post_info($post_id, 'mptbm_enable_inventory', 'no');
+$total_quantity = 1;
+$available_quantity = 1;
 
-// Calculate available quantity based on overlapping bookings
-$total_quantity = MP_Global_Function::get_post_info($post_id, 'mptbm_quantity', 1);
-$available_quantity = $total_quantity;
-if ($start_date && $start_time) {
-    // Get all bookings for the same date
-    $query = new WP_Query([
-        'post_type' => 'mptbm_booking',
-        'posts_per_page' => -1,
-        'meta_query' => [
-            'relation' => 'AND',
-            [
-                'key' => 'mptbm_date',
-                'value' => $start_date,
-                'compare' => 'LIKE'
-            ],
-            [
-                'key' => 'mptbm_id',
-                'value' => $post_id,
-                'compare' => '='
+if ($enable_inventory == 'yes') {
+    // Get booking interval time from transport settings
+    $booking_interval_time = MP_Global_Function::get_post_info($post_id, 'mptbm_booking_interval_time', 0);
+
+    // Calculate available quantity based on overlapping bookings
+    $total_quantity = MP_Global_Function::get_post_info($post_id, 'mptbm_quantity', 1);
+    $available_quantity = $total_quantity;
+    if ($start_date && $start_time) {
+        // Get all bookings for the same date
+        $query = new WP_Query([
+            'post_type' => 'mptbm_booking',
+            'posts_per_page' => -1,
+            'meta_query' => [
+                'relation' => 'AND',
+                [
+                    'key' => 'mptbm_date',
+                    'value' => $start_date,
+                    'compare' => 'LIKE'
+                ],
+                [
+                    'key' => 'mptbm_id',
+                    'value' => $post_id,
+                    'compare' => '='
+                ]
             ]
-        ]
-    ]);
+        ]);
 
-    if ($query->have_posts()) {
-        while ($query->have_posts()) {
-            $query->the_post();
-            $booking_datetime = get_post_meta(get_the_ID(), 'mptbm_date', true);
-            $booking_transport_quantity = get_post_meta(get_the_ID(), 'mptbm_transport_quantity', true);
-            $booking_transport_quantity = $booking_transport_quantity ? absint($booking_transport_quantity) : 1;
-            
-            // Extract time from datetime string (format: YYYY-MM-DD HH:MM)
-            $booking_time = '';
-            if (preg_match('/(\d{2}:\d{2})$/', $booking_datetime, $matches)) {
-                $booking_time = $matches[1];
-                // Convert HH:MM to minutes since midnight
-                list($hours, $minutes) = explode(':', $booking_time);
-                $booking_time_minutes = ((int)$hours * 60) + (int)$minutes;
-            } else {
-                $booking_time_minutes = 0;
-            }
-            
-            // Convert decimal hours to minutes since midnight
-            $desired_time_minutes = 0;
-            if (is_numeric($start_time)) {
-                $hours = floor($start_time);
-                $decimal_part = $start_time - $hours;
-                $minutes = (int)($decimal_part * 100); // Get the decimal part as minutes (e.g., 0.4 becomes 40)
-                $desired_time_minutes = ($hours * 60) + $minutes;
-            }
-            
-            // Check if booking times overlap considering interval time
-            if (abs($desired_time_minutes - $booking_time_minutes) <= $booking_interval_time) {
-                $available_quantity -= $booking_transport_quantity;
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+                $booking_datetime = get_post_meta(get_the_ID(), 'mptbm_date', true);
+                $booking_transport_quantity = get_post_meta(get_the_ID(), 'mptbm_transport_quantity', true);
+                $booking_transport_quantity = $booking_transport_quantity ? absint($booking_transport_quantity) : 1;
+                
+                // Extract time from datetime string (format: YYYY-MM-DD HH:MM)
+                $booking_time = '';
+                if (preg_match('/(\d{2}:\d{2})$/', $booking_datetime, $matches)) {
+                    $booking_time = $matches[1];
+                    // Convert HH:MM to minutes since midnight
+                    list($hours, $minutes) = explode(':', $booking_time);
+                    $booking_time_minutes = ((int)$hours * 60) + (int)$minutes;
+                } else {
+                    $booking_time_minutes = 0;
+                }
+                
+                // Convert decimal hours to minutes since midnight
+                $desired_time_minutes = 0;
+                if (is_numeric($start_time)) {
+                    $hours = floor($start_time);
+                    $decimal_part = $start_time - $hours;
+                    $minutes = (int)($decimal_part * 100); // Get the decimal part as minutes (e.g., 0.4 becomes 40)
+                    $desired_time_minutes = ($hours * 60) + $minutes;
+                }
+                
+                // Check if booking times overlap considering interval time
+                if (abs($desired_time_minutes - $booking_time_minutes) <= $booking_interval_time) {
+                    $available_quantity -= $booking_transport_quantity;
+                }
             }
         }
+        wp_reset_postdata();
     }
-    wp_reset_postdata();
 }
 
 $mptbm_enable_view_search_result_page  = MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_search_result_page');
@@ -112,8 +124,6 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
         
         $wc_price = MP_Global_Function::wc_price($post_id, $price);
         $raw_price = MP_Global_Function::price_convert_raw($wc_price);
-        $display_features = MP_Global_Function::get_post_info($post_id, 'display_mptbm_features', 'on');
-        $all_features = MP_Global_Function::get_post_info($post_id, 'mptbm_features');
 ?>
 
         <div class="_dLayout_dFlex mptbm_booking_item  <?php echo 'mptbm_booking_item_' . $post_id; ?> <?php echo $hidden_class; ?> <?php echo $feature_class; ?>" data-placeholder>
@@ -148,8 +158,7 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                     <div class="_min_150_mL_xs">
                         <h4 class="textCenter"> <?php echo wp_kses_post(wc_price($raw_price)); ?></h4>
                         <?php if (class_exists('MPTBM_Plugin_Pro')) { 
-                            $quantity = $available_quantity;
-                            if ($quantity && $quantity > 1) { ?>
+                            if ($enable_inventory == 'yes' && $available_quantity > 1) { ?>
                                 <div style="margin-bottom: 2px;" class="textCenter _mT_xs mptbm_quantity_selector mptbm_booking_item_hidden <?php echo 'mptbm_quantity_selector_' . $post_id; ?> ">
                                     <div class="mp_quantity_selector">
                                         <button type="button" class="mp_quantity_minus" data-post-id="<?php echo esc_attr($post_id); ?>">
@@ -160,7 +169,7 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                                                name="vehicle_quantity[<?php echo esc_attr($post_id); ?>]" 
                                                value="1" 
                                                min="1" 
-                                               max="<?php echo esc_attr($quantity); ?>" 
+                                               max="<?php echo esc_attr($available_quantity); ?>" 
                                                data-post-id="<?php echo esc_attr($post_id); ?>"
                                                readonly />
                                         <button type="button" class="mp_quantity_plus" data-post-id="<?php echo esc_attr($post_id); ?>">
@@ -170,14 +179,19 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
                                 </div>
                             <?php } ?>
                         <?php } ?>
-                        <?php if ($available_quantity > 0) { ?>
+                        <?php if ($enable_inventory == 'yes' && $available_quantity > 0) { ?>
                             <button type="button" class="_mpBtn_xs_w_150 mptbm_transport_select" data-transport-name="<?php echo esc_attr(get_the_title($post_id)); ?>" data-transport-price="<?php echo esc_attr($raw_price); ?>" data-post-id="<?php echo esc_attr($post_id); ?>" data-open-text="<?php esc_attr_e('Select Car', 'ecab-taxi-booking-manager'); ?>" data-close-text="<?php esc_html_e('Selected', 'ecab-taxi-booking-manager'); ?>" data-open-icon="" data-close-icon="fas fa-check mR_xs">
                                 <span class="" data-icon></span>
                                 <span data-text><?php esc_html_e('Select Car', 'ecab-taxi-booking-manager'); ?></span>
                             </button>
-                        <?php } else { ?>
+                        <?php } else if ($enable_inventory == 'yes' && $available_quantity <= 0) { ?>
                             <button type="button" class="_mpBtn_xs_w_150 mptbm_out_of_stock" disabled style="background-color: #ccc; cursor: not-allowed;">
                                 <span><?php esc_html_e('Out of Stock', 'ecab-taxi-booking-manager'); ?></span>
+                            </button>
+                        <?php } else { ?>
+                            <button type="button" class="_mpBtn_xs_w_150 mptbm_transport_select" data-transport-name="<?php echo esc_attr(get_the_title($post_id)); ?>" data-transport-price="<?php echo esc_attr($raw_price); ?>" data-post-id="<?php echo esc_attr($post_id); ?>" data-open-text="<?php esc_attr_e('Select Car', 'ecab-taxi-booking-manager'); ?>" data-close-text="<?php esc_html_e('Selected', 'ecab-taxi-booking-manager'); ?>" data-open-icon="" data-close-icon="fas fa-check mR_xs">
+                                <span class="" data-icon></span>
+                                <span data-text><?php esc_html_e('Select Car', 'ecab-taxi-booking-manager'); ?></span>
                             </button>
                         <?php } ?>
                     </div>
