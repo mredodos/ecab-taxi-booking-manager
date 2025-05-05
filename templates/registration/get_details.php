@@ -99,8 +99,42 @@ if (sizeof($all_dates) > 0) {
 	$interval_hours = $interval_time / 60;
 	$waiting_time_check = MPTBM_Function::get_general_settings('taxi_waiting_time', 'enable');
 ?>	
-	<div class="<?php echo esc_attr($area_class); ?> ">
+<?php 
+$query = new WP_Query([
+    'post_type' => 'mptbm_booking',
+    'posts_per_page' => -1,
+]);
 
+if ($query->have_posts()) {
+    echo '<ul>';
+    while ($query->have_posts()) {
+        $query->the_post();
+        $post_id = get_the_ID();
+
+        $mptbm_id = get_post_meta($post_id, 'mptbm_id', true);
+        $mptbm_date = get_post_meta($post_id, 'mptbm_date', true);
+        $mptbm_transport_quantity = get_post_meta($post_id, 'mptbm_transport_quantity', true);
+
+        $all_meta = get_post_meta($post_id);
+
+        echo '<li>';
+        echo '<strong>mptbm_id:</strong> ' . esc_html($mptbm_id) . '<br>';
+        echo '<strong>mptbm_date:</strong> ' . esc_html($mptbm_date) . '<br>';
+        echo '<strong>mptbm_transport_quantity:</strong> ' . esc_html($mptbm_transport_quantity) . '<br>';
+        echo '<hr>';
+
+        
+
+        echo '</li>';
+    }
+    echo '</ul>';
+} else {
+    echo 'No bookings found.';
+}
+wp_reset_postdata();
+?>
+	<div class="<?php echo esc_attr($area_class); ?> ">
+	
 		<div class="_dLayout mptbm_search_area <?php echo esc_attr($form_style_class); ?> <?php echo esc_attr($price_based == 'manual' ? 'mAuto' : ''); ?>">
 			<div class="mpForm">
 				<input type="hidden" id="mptbm_km_or_mile" name="mptbm_km_or_mile" value="<?php echo esc_attr($km_or_mile); ?>" />

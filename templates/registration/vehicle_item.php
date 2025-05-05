@@ -44,17 +44,43 @@ if ($enable_inventory == 'yes') {
     $total_quantity = MP_Global_Function::get_post_info($post_id, 'mptbm_quantity', 1);
     $available_quantity = $total_quantity;
     if ($start_date && $start_time) {
-        // Get all bookings for the same date
+        // Debug output for desired booking
+        echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">';
+        echo '<h4>Debug Information:</h4>';
+        echo '<p><strong>Desired Booking:</strong></p>';
+        echo '<p>Post ID: ' . esc_html($post_id) . '</p>';
+        echo '<p>Date: ' . esc_html($start_date) . '</p>';
+        echo '<p>Time: ' . esc_html($start_time) . '</p>';
+        echo '<p>Interval Time: ' . esc_html($booking_interval_time) . ' minutes</p>';
+        echo '</div>';
+
+        // Format the time properly
+        $hours = floor($start_time);
+        $minutes = ($start_time - $hours) * 60;
+        $formatted_time = sprintf('%02d:%02d', $hours, $minutes);
+        
+        // Convert start date and time to timestamp
+        $start_datetime = strtotime($start_date . ' ' . $formatted_time);
+        
+        // Calculate the time range to check (interval time before and after) - now in minutes
+        $interval_before = $start_datetime - ($booking_interval_time * 60); // Convert minutes to seconds
+        $interval_after = $start_datetime + ($booking_interval_time * 60);
+        
+        // Debug output for time range
+        echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">';
+        echo '<p><strong>Time Range Check:</strong></p>';
+        echo '<p>Formatted Time: ' . esc_html($formatted_time) . '</p>';
+        echo '<p>Start Time: ' . date('Y-m-d H:i:s', $start_datetime) . '</p>';
+        echo '<p>Interval Before: ' . date('Y-m-d H:i:s', $interval_before) . '</p>';
+        echo '<p>Interval After: ' . date('Y-m-d H:i:s', $interval_after) . '</p>';
+        echo '</div>';
+
+        // Get all bookings that could overlap with our time range
         $query = new WP_Query([
             'post_type' => 'mptbm_booking',
             'posts_per_page' => -1,
             'meta_query' => [
                 'relation' => 'AND',
-                [
-                    'key' => 'mptbm_date',
-                    'value' => $start_date,
-                    'compare' => 'LIKE'
-                ],
                 [
                     'key' => 'mptbm_id',
                     'value' => $post_id,
@@ -64,39 +90,45 @@ if ($enable_inventory == 'yes') {
         ]);
 
         if ($query->have_posts()) {
+            echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">';
+            echo '<p><strong>Existing Bookings:</strong></p>';
+            
             while ($query->have_posts()) {
                 $query->the_post();
                 $booking_datetime = get_post_meta(get_the_ID(), 'mptbm_date', true);
                 $booking_transport_quantity = get_post_meta(get_the_ID(), 'mptbm_transport_quantity', true);
                 $booking_transport_quantity = $booking_transport_quantity ? absint($booking_transport_quantity) : 1;
                 
-                // Extract time from datetime string (format: YYYY-MM-DD HH:MM)
-                $booking_time = '';
-                if (preg_match('/(\d{2}:\d{2})$/', $booking_datetime, $matches)) {
-                    $booking_time = $matches[1];
-                    // Convert HH:MM to minutes since midnight
-                    list($hours, $minutes) = explode(':', $booking_time);
-                    $booking_time_minutes = ((int)$hours * 60) + (int)$minutes;
-                } else {
-                    $booking_time_minutes = 0;
-                }
+                // Convert booking datetime to timestamp
+                $booking_timestamp = strtotime($booking_datetime);
                 
-                // Convert decimal hours to minutes since midnight
-                $desired_time_minutes = 0;
-                if (is_numeric($start_time)) {
-                    $hours = floor($start_time);
-                    $decimal_part = $start_time - $hours;
-                    $minutes = (int)($decimal_part * 100); // Get the decimal part as minutes (e.g., 0.4 becomes 40)
-                    $desired_time_minutes = ($hours * 60) + $minutes;
-                }
+                // Debug output for each booking
+                echo '<div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc;">';
+                echo '<p>Booking ID: ' . get_the_ID() . '</p>';
+                echo '<p>Booking DateTime: ' . esc_html($booking_datetime) . '</p>';
+                echo '<p>Booking Timestamp: ' . date('Y-m-d H:i:s', $booking_timestamp) . '</p>';
+                echo '<p>Transport Quantity: ' . esc_html($booking_transport_quantity) . '</p>';
                 
-                // Check if booking times overlap considering interval time
-                if (abs($desired_time_minutes - $booking_time_minutes) <= $booking_interval_time) {
+                // Check if booking time falls within our interval range
+                $is_in_range = ($booking_timestamp >= $interval_before && $booking_timestamp <= $interval_after);
+                echo '<p>Is in Range: ' . ($is_in_range ? 'Yes' : 'No') . '</p>';
+                
+                if ($is_in_range) {
                     $available_quantity -= $booking_transport_quantity;
+                    echo '<p style="color: red;">Quantity reduced by: ' . esc_html($booking_transport_quantity) . '</p>';
                 }
+                echo '</div>';
             }
+            echo '</div>';
         }
         wp_reset_postdata();
+
+        // Debug output for final quantity
+        echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">';
+        echo '<p><strong>Final Quantity Calculation:</strong></p>';
+        echo '<p>Total Quantity: ' . esc_html($total_quantity) . '</p>';
+        echo '<p>Available Quantity: ' . esc_html($available_quantity) . '</p>';
+        echo '</div>';
     }
 }
 
@@ -125,7 +157,7 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
         $wc_price = MP_Global_Function::wc_price($post_id, $price);
         $raw_price = MP_Global_Function::price_convert_raw($wc_price);
 ?>
-
+       
         <div class="_dLayout_dFlex mptbm_booking_item  <?php echo 'mptbm_booking_item_' . $post_id; ?> <?php echo $hidden_class; ?> <?php echo $feature_class; ?>" data-placeholder>
             <div class="_max_200_mR">
                 <div class="bg_image_area"  data-placeholder>
