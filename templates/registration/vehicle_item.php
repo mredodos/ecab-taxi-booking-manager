@@ -44,16 +44,6 @@ if ($enable_inventory == 'yes') {
     $total_quantity = MP_Global_Function::get_post_info($post_id, 'mptbm_quantity', 1);
     $available_quantity = $total_quantity;
     if ($start_date && $start_time) {
-        // Debug output for desired booking
-        echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">';
-        echo '<h4>Debug Information:</h4>';
-        echo '<p><strong>Desired Booking:</strong></p>';
-        echo '<p>Post ID: ' . esc_html($post_id) . '</p>';
-        echo '<p>Date: ' . esc_html($start_date) . '</p>';
-        echo '<p>Time: ' . esc_html($start_time) . '</p>';
-        echo '<p>Interval Time: ' . esc_html($booking_interval_time) . ' minutes</p>';
-        echo '</div>';
-
         // Format the time properly
         $hours = floor($start_time);
         $minutes = ($start_time - $hours) * 60;
@@ -66,14 +56,7 @@ if ($enable_inventory == 'yes') {
         $interval_before = $start_datetime - ($booking_interval_time * 60); // Convert minutes to seconds
         $interval_after = $start_datetime + ($booking_interval_time * 60);
         
-        // Debug output for time range
-        echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">';
-        echo '<p><strong>Time Range Check:</strong></p>';
-        echo '<p>Formatted Time: ' . esc_html($formatted_time) . '</p>';
-        echo '<p>Start Time: ' . date('Y-m-d H:i:s', $start_datetime) . '</p>';
-        echo '<p>Interval Before: ' . date('Y-m-d H:i:s', $interval_before) . '</p>';
-        echo '<p>Interval After: ' . date('Y-m-d H:i:s', $interval_after) . '</p>';
-        echo '</div>';
+        
 
         // Get all bookings that could overlap with our time range
         $query = new WP_Query([
@@ -90,8 +73,7 @@ if ($enable_inventory == 'yes') {
         ]);
 
         if ($query->have_posts()) {
-            echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">';
-            echo '<p><strong>Existing Bookings:</strong></p>';
+           
             
             while ($query->have_posts()) {
                 $query->the_post();
@@ -102,33 +84,23 @@ if ($enable_inventory == 'yes') {
                 // Convert booking datetime to timestamp
                 $booking_timestamp = strtotime($booking_datetime);
                 
-                // Debug output for each booking
-                echo '<div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc;">';
-                echo '<p>Booking ID: ' . get_the_ID() . '</p>';
-                echo '<p>Booking DateTime: ' . esc_html($booking_datetime) . '</p>';
-                echo '<p>Booking Timestamp: ' . date('Y-m-d H:i:s', $booking_timestamp) . '</p>';
-                echo '<p>Transport Quantity: ' . esc_html($booking_transport_quantity) . '</p>';
+                
                 
                 // Check if booking time falls within our interval range
                 $is_in_range = ($booking_timestamp >= $interval_before && $booking_timestamp <= $interval_after);
-                echo '<p>Is in Range: ' . ($is_in_range ? 'Yes' : 'No') . '</p>';
+                
                 
                 if ($is_in_range) {
                     $available_quantity -= $booking_transport_quantity;
-                    echo '<p style="color: red;">Quantity reduced by: ' . esc_html($booking_transport_quantity) . '</p>';
+                    
                 }
-                echo '</div>';
+                
             }
-            echo '</div>';
+           
         }
         wp_reset_postdata();
 
-        // Debug output for final quantity
-        echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">';
-        echo '<p><strong>Final Quantity Calculation:</strong></p>';
-        echo '<p>Total Quantity: ' . esc_html($total_quantity) . '</p>';
-        echo '<p>Available Quantity: ' . esc_html($available_quantity) . '</p>';
-        echo '</div>';
+        
     }
 }
 

@@ -646,7 +646,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$item->add_meta_data(esc_html__('Time ', 'ecab-taxi-booking-manager'), esc_html(MP_Global_Function::date_format($date, 'time')));
 				$item->add_meta_data(esc_html__('Transport Quantity ', 'ecab-taxi-booking-manager'), $transport_quantity);
 				// Add passenger count to order meta only if the setting is enabled
-				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'yes');
+				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
 				if ($show_passengers === 'yes') {
 					$passengers = isset($values['mptbm_passengers']) ? absint($values['mptbm_passengers']) : 1;
 					$item->add_meta_data(esc_html__('Number of Passengers', 'ecab-taxi-booking-manager'), $passengers);
@@ -886,7 +886,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							]);
 
 							// Only add passenger count if the setting is enabled
-							$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'yes');
+							$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
 							if ($show_passengers === 'yes') {
 								$data['mptbm_passengers'] = MP_Global_Function::get_order_item_meta($item_id, '_mptbm_passengers') ?? 1;
 							}
@@ -1056,7 +1056,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 							</li>
 						<?php } ?>
 						<?php 
-						$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'yes');
+						$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
 						if ($show_passengers === 'yes') { 
 						?>
 						<li>
