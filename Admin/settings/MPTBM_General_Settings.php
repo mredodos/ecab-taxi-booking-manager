@@ -17,8 +17,8 @@
 				$max_passenger = MP_Global_Function::get_post_info($post_id, 'mptbm_maximum_passenger');
 				$max_bag = MP_Global_Function::get_post_info($post_id, 'mptbm_maximum_bag');
 				$display_features = MP_Global_Function::get_post_info($post_id, 'display_mptbm_features', 'on');
-				$active = $display_features == 'off' ? '' : 'mActive';
-				$checked = $display_features == 'off' ? '' : 'checked';
+				$features_active = $display_features == 'off' ? '' : 'mActive';
+				$features_checked = $display_features == 'off' ? '' : 'checked';
 				$all_features = MP_Global_Function::get_post_info($post_id, 'mptbm_features');
 				if (!$all_features) {
 					$all_features = array(
@@ -75,16 +75,53 @@
 								<input class="formControl mp_price_validation" name="mptbm_maximum_bag" value="<?php echo esc_attr($max_bag); ?>" type="text" placeholder="<?php esc_html_e('EX:4', 'ecab-taxi-booking-manager'); ?>" />
 							</label>
 						</section>
-						<section >
+						<?php if (class_exists('MPTBM_Plugin_Pro')) { ?>
+						<section>
+							<label class="label">
+								<div>
+									<h6><?php esc_html_e('Enable Inventory', 'ecab-taxi-booking-manager'); ?></h6>
+									<span class="desc"><?php esc_html_e('Enable or disable inventory management for this vehicle', 'ecab-taxi-booking-manager'); ?></span>
+								</div>
+								<?php 
+								$enable_inventory = MP_Global_Function::get_post_info($post_id, 'mptbm_enable_inventory', 'no');
+								$inventory_checked = $enable_inventory == 'yes' ? 'checked' : '';
+								?>
+								<?php MP_Custom_Layout::switch_button('mptbm_enable_inventory', $inventory_checked); ?>
+							</label>
+						</section>
+						<section data-collapse="#mptbm_enable_inventory" class="<?php echo esc_attr($enable_inventory == 'yes' ? 'mActive' : ''); ?>">
+							<div class="mp_settings_area">
+								<section>
+									<label class="label">
+										<div>
+											<h6><?php esc_html_e('Quantity', 'ecab-taxi-booking-manager'); ?></h6>
+											<span class="desc"><?php esc_html_e('Enter the quantity of vehicles available', 'ecab-taxi-booking-manager'); ?></span>
+										</div>
+										<input class="formControl mp_price_validation" name="mptbm_quantity" value="<?php echo esc_attr(MP_Global_Function::get_post_info($post_id, 'mptbm_quantity', 1)); ?>" type="number" min="1" placeholder="<?php esc_html_e('EX:5', 'ecab-taxi-booking-manager'); ?>" />
+									</label>
+								</section>
+								<section>
+									<label class="label">
+										<div>
+											<h6><?php esc_html_e('Transport Booking Interval Time (minutes)', 'ecab-taxi-booking-manager'); ?></h6>
+											<span class="desc"><?php esc_html_e('Set the interval time between bookings in minutes', 'ecab-taxi-booking-manager'); ?></span>
+										</div>
+										<input class="formControl mp_price_validation" name="mptbm_booking_interval_time" value="<?php echo esc_attr(MP_Global_Function::get_post_info($post_id, 'mptbm_booking_interval_time', 0)); ?>" type="number" min="0" placeholder="<?php esc_html_e('EX:30', 'ecab-taxi-booking-manager'); ?>" />
+									</label>
+								</section>
+							</div>
+						</section>
+						<?php } ?>
+						<section>
 							<label class="label">
 								<div>
 									<h6><?php esc_html_e('On/Off Feature Extra feature', 'ecab-taxi-booking-manager'); ?></h6>
 									<span class="desc"><?php MPTBM_Settings::info_text('display_mptbm_features'); ?></span>
 								</div>
-								<?php MP_Custom_Layout::switch_button('display_mptbm_features', $checked); ?>
+								<?php MP_Custom_Layout::switch_button('display_mptbm_features', $features_checked); ?>
 							</label>
 						</section>
-						<section data-collapse="#display_mptbm_features" class="<?php echo esc_attr($active); ?>">
+						<section data-collapse="#display_mptbm_features" class="<?php echo esc_attr($features_active); ?>">
 								<table>
 									<thead>
 									<tr class="bg-dark">
@@ -109,7 +146,7 @@
 								<div class="my-2"></div>
 								<?php MP_Custom_Layout::add_new_button(esc_html__('Add New Item', 'ecab-taxi-booking-manager')); ?>
 								<?php do_action('add_mp_hidden_table', 'add_hidden_mptbm_features_item'); ?>
-						</section >
+						</section>
                     </div>
                 </div>
 				<?php
@@ -144,8 +181,23 @@
 					$all_features = [];
 					$max_passenger = isset($_POST['mptbm_maximum_passenger']) ? sanitize_text_field($_POST['mptbm_maximum_passenger']) : '';
 					$max_bag = isset($_POST['mptbm_maximum_bag']) ? sanitize_text_field($_POST['mptbm_maximum_bag']) : '';
-					update_post_meta($post_id, 'mptbm_maximum_passenger', $max_passenger);
-					update_post_meta($post_id, 'mptbm_maximum_bag', $max_bag);
+					
+					// Save inventory settings
+					$enable_inventory = isset($_POST['mptbm_enable_inventory']) && sanitize_text_field($_POST['mptbm_enable_inventory']) ? 'yes' : 'no';
+					update_post_meta($post_id, 'mptbm_enable_inventory', $enable_inventory);
+					
+					// Only save quantity and interval time if inventory is enabled
+					if ($enable_inventory == 'yes') {
+						$quantity = isset($_POST['mptbm_quantity']) ? absint($_POST['mptbm_quantity']) : 1;
+						$booking_interval_time = isset($_POST['mptbm_booking_interval_time']) ? absint($_POST['mptbm_booking_interval_time']) : 0;
+						update_post_meta($post_id, 'mptbm_quantity', $quantity);
+						update_post_meta($post_id, 'mptbm_booking_interval_time', $booking_interval_time);
+					} else {
+						// If inventory is disabled, set default values
+						update_post_meta($post_id, 'mptbm_quantity', 1);
+						update_post_meta($post_id, 'mptbm_booking_interval_time', 0);
+					}
+					
 					$display_features = isset($_POST['display_mptbm_features']) && sanitize_text_field($_POST['display_mptbm_features'])? 'on' : 'off';
 					update_post_meta($post_id, 'display_mptbm_features', $display_features);
 					$features_label = isset($_POST['mptbm_features_label']) ? array_map('sanitize_text_field',$_POST['mptbm_features_label']) : [];

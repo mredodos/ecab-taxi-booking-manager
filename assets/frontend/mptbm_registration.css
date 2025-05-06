@@ -205,3 +205,50 @@ div.mptbm_transport_search_area button.mptbm_transport_select:hover{
 	border-bottom-left-radius: var(--dbrl);
 	border-bottom-right-radius: var(--dbrl);
 }
+
+.mp_quantity_selector {
+	display: inline-flex;
+	align-items: center;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	overflow: hidden;
+	background: #fff;
+	height: 30px; /* Reduced height */
+  }
+
+  .mp_quantity_minus,
+  .mp_quantity_plus {
+	background: #f8f8f8;
+	border: none;
+	padding: 6px 10px; /* Reduced padding */
+	cursor: pointer;
+	color: #333;
+	transition: all 0.3s;
+	font-size: 12px; /* Reduced font size */
+  }
+
+.mp_quantity_minus:hover,
+.mp_quantity_plus:hover {
+    background: #e8e8e8;
+}
+
+.mp_quantity_input {
+	width: 35px; /* Reduced width */
+	text-align: center;
+	border: none;
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+	padding: 6px 0; /* Reduced padding */
+	font-size: 12px; /* Reduced font size */
+	-moz-appearance: textfield;
+  }
+
+  .mp_quantity_input::-webkit-outer-spin-button,
+  .mp_quantity_input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+  }
+  
+  .mp_quantity_input:focus {
+	outline: none;
+  }

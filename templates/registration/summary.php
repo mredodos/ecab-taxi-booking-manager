@@ -41,7 +41,7 @@
 					<div class="dividerL"></div>
 					<?php 
 					$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
-					if ($show_passengers === 'yes') { 
+					if ($show_passengers === 'jumpa') { 
 					?>
 					<h6 class="_mB_xs"><?php esc_html_e('Number of Passengers', 'ecab-taxi-booking-manager'); ?></h6>
 					<p class="_textLight_1 mptbm_passengers"><?php echo esc_html(isset($_POST['mptbm_passengers']) ? $_POST['mptbm_passengers'] : 1); ?></p>

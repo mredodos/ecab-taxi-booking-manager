@@ -98,10 +98,9 @@ if (sizeof($all_dates) > 0) {
 	$interval_time = MPTBM_Function::get_general_settings('mptbm_pickup_interval_time', '30');
 	$interval_hours = $interval_time / 60;
 	$waiting_time_check = MPTBM_Function::get_general_settings('taxi_waiting_time', 'enable');
-?>
-
+?>	
 	<div class="<?php echo esc_attr($area_class); ?> ">
-
+	
 		<div class="_dLayout mptbm_search_area <?php echo esc_attr($form_style_class); ?> <?php echo esc_attr($price_based == 'manual' ? 'mAuto' : ''); ?>">
 			<div class="mpForm">
 				<input type="hidden" id="mptbm_km_or_mile" name="mptbm_km_or_mile" value="<?php echo esc_attr($km_or_mile); ?>" />
@@ -135,18 +134,23 @@ if (sizeof($all_dates) > 0) {
 						<?php
 						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
 
-
 							// Calculate hours and minutes
 							$hours = floor($i / 60);
 							$minutes = $i % 60;
 
-							// Generate the data-value as hours + fraction (minutes / 60)
+							// Generate the data-value as hours + fraction (minutes / 100)
 							$data_value = $hours + ($minutes / 100);
 
 							// Format the time for display
 							$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+							
+							// Add a data-time attribute with the properly formatted time
+							$data_time = sprintf('%02d.%02d', $hours, $minutes);
+							
+							// Ensure the data-value is properly formatted
+							$data_value = sprintf('%.2f', $data_value);
 						?>
-							<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
+							<li data-value="<?php echo esc_attr($data_value); ?>" data-time="<?php echo esc_attr($data_time); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 						<?php } ?>
 
 					</ul>
@@ -159,14 +163,20 @@ if (sizeof($all_dates) > 0) {
 							$hours = floor($i / 60);
 							$minutes = $i % 60;
 
-							// Generate the data-value as hours + fraction (minutes / 60)
+							// Generate the data-value as hours + fraction (minutes / 100)
 							$data_value = $hours + ($minutes / 100);
 
 							// Format the time for display
 							$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+							
+							// Add a data-time attribute with the properly formatted time
+							$data_time = sprintf('%02d.%02d', $hours, $minutes);
+							
+							// Ensure the data-value is properly formatted
+							$data_value = sprintf('%.2f', $data_value);
 
 						?>
-							<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
+							<li data-value="<?php echo esc_attr($data_value); ?>" data-time="<?php echo esc_attr($data_time); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 						<?php } ?>
 
 					</ul>
@@ -262,14 +272,17 @@ if (sizeof($all_dates) > 0) {
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
 
-									// Generate the data-value as hours + fraction (minutes / 60)
+									// Generate the data-value as hours + fraction (minutes / 100)
 									$data_value = $hours + ($minutes / 100);
 
 									// Format the time for display
 									$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
 
+									// Add a data-time attribute with the properly formatted time
+									$data_time = sprintf('%02d.%02d', $hours, $minutes);
+
 								?>
-									<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
+									<li data-value="<?php echo esc_attr($data_value); ?>" data-time="<?php echo esc_attr($data_time); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 								<?php } ?>
 							</ul>
 							<ul class="mp_input_select_list return_time_list">
@@ -280,13 +293,17 @@ if (sizeof($all_dates) > 0) {
 									$hours = floor($i / 60);
 									$minutes = $i % 60;
 
-									// Generate the data-value as hours + fraction (minutes / 60)
+									// Generate the data-value as hours + fraction (minutes / 100)
 									$data_value = $hours + ($minutes / 100);
 
 									// Format the time for display
 									$time_formatted = sprintf('%02d:%02d', $hours, $minutes);
+
+									// Add a data-time attribute with the properly formatted time
+									$data_time = sprintf('%02d.%02d', $hours, $minutes);
+
 								?>
-									<li data-value="<?php echo esc_attr($data_value); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
+									<li data-value="<?php echo esc_attr($data_value); ?>" data-time="<?php echo esc_attr($data_time); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 								<?php } ?>
 							</ul>
 						</div>
@@ -337,7 +354,7 @@ if (sizeof($all_dates) > 0) {
 				<?php } ?>
 				<?php 
 				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
-				if ($show_passengers === 'yes') { 
+				if ($show_passengers === 'jumpa') { 
 				?>
 				<div class="inputList">
 					<label class="fdColumn">
