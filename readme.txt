@@ -97,6 +97,10 @@ Utilize Google Maps to delineate both intercity and intracity zones, along with 
 **🧢 Driver Panel to track service status**
 Driver panel feature enables administrators to assign vehicles to drivers. Additionally, email notifications are automatically sent to relevant parties whenever there is a change in the service status of an order 
 
+**🔢 Quantity with interval booking time**
+You can set quantity of transport with interval of booking time for that transport
+
+
 ## Available Addons:
 
 **⏰ [Peak Hour Addon](https://mage-people.com/product/taxi-peak-hour-pricing-addon/)**
@@ -205,6 +209,10 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 
 
 == Changelog ==
+= 1.2.6 =
+1. Added dependency for pro version 
+2. Minor issues solved
+3. Driver panel improved
 = 1.2.5 =
 1. No transport available section can be changed Now
 2. Issue fixed with transport-result page slug
