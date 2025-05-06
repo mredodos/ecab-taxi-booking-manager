@@ -122,12 +122,28 @@ if (sizeof($all_dates) > 0 && in_array($start_date, $all_dates)) {
     if ($location_exit && $post_id) {
         $thumbnail = MP_Global_Function::get_image_url($post_id);
         $price = MPTBM_Function::get_price($post_id, $distance, $duration, $start_place, $end_place, $waiting_time, $two_way, $fixed_time);
-        if(!$price || $price == 0){
+
+        // Get price display type and custom message
+        $price_display_type = MP_Global_Function::get_post_info($post_id, 'mptbm_price_display_type', 'normal');
+        $custom_message = get_transient('mptbm_custom_price_message_' . $post_id);
+
+        // Only skip display if price is 0 and we're not in zero or custom message mode
+        if (!$price && $price_display_type === 'normal') {
             return false;
         }
-        
-        $wc_price = MP_Global_Function::wc_price($post_id, $price);
-        $raw_price = MP_Global_Function::price_convert_raw($wc_price);
+
+        // Handle price display
+        if ($price_display_type === 'custom_message' && $custom_message) {
+            $price_display = '<div class="mptbm-custom-price-message" style=" font-size: 15px; ">' . wp_kses_post($custom_message) . '</div>';
+            $raw_price = 0; // Set raw price to 0 for custom message
+        } else {
+            $wc_price = MP_Global_Function::wc_price($post_id, $price);
+            $raw_price = MP_Global_Function::price_convert_raw($wc_price);
+            $price_display = $wc_price;
+        }
+
+        $display_features = MP_Global_Function::get_post_info($post_id, 'display_mptbm_features', 'on');
+        $all_features = MP_Global_Function::get_post_info($post_id, 'mptbm_features');
 ?>
        
         <div class="_dLayout_dFlex mptbm_booking_item  <?php echo 'mptbm_booking_item_' . $post_id; ?> <?php echo $hidden_class; ?> <?php echo $feature_class; ?>" data-placeholder>
