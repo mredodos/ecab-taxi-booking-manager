@@ -699,7 +699,8 @@
 								}
 
 								// If still empty and it's a special field, try with normalized key
-								if (empty($key_value) && in_array($name, $special_fields)) {
+								if (empty($key_value) && in_array($name, is_array($special_fields) ? $special_fields : [])) {
+
 									// Try with spaces replaced by underscores
 									$normalized_key = str_replace(' ', '_', $name);
 									if ($normalized_key !== $name) {
