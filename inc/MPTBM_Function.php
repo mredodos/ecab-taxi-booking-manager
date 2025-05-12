@@ -322,6 +322,7 @@ if (!class_exists('MPTBM_Function')) {
 				$selected_start_time = get_transient('start_time_schedule_transient');
 				$datetime_discount_applied = false;
 				$day_discount_applied = false;
+				$date_range_matched = false;
 				$original_price = $price;
 
 				// Get toggle states for both discount types
@@ -343,7 +344,12 @@ if (!class_exists('MPTBM_Function')) {
 							$end_date = isset($discount['end_date']) ? date('Y-m-d', strtotime($discount['end_date'])) : '';
 							$time_slots = isset($discount['time_slots']) ? $discount['time_slots'] : [];
 
-							if (strtotime($selected_start_date) >= strtotime($start_date) && strtotime($selected_start_date) <= strtotime($end_date)) {
+							if (strtotime($selected_start_date) >= strtotime($start_date) && 
+								strtotime($selected_start_date) <= strtotime($end_date)) {
+								
+								$date_range_matched = true;
+								
+								$time_slot_matched = false;
 								foreach ($time_slots as $slot) {
 									$start_time = isset($slot['start_time']) ? sanitize_text_field($slot['start_time']) : '';
 									$end_time = isset($slot['end_time']) ? sanitize_text_field($slot['end_time']) : '';
@@ -356,7 +362,9 @@ if (!class_exists('MPTBM_Function')) {
 									}
 
 									if (strtotime($start_time) > strtotime($end_time)) {
-										if (strtotime($selected_start_time) >= strtotime($start_time) || strtotime($selected_start_time) <= strtotime($end_time)) {
+										if (strtotime($selected_start_time) >= strtotime($start_time) || 
+											strtotime($selected_start_time) <= strtotime($end_time)) {
+											
 											$percentage = floatval(rtrim($slot['percentage'], '%'));
 											$type = isset($slot['type']) ? $slot['type'] : 'increase';
 
@@ -368,9 +376,12 @@ if (!class_exists('MPTBM_Function')) {
 												$price += $discount_amount;
 											}
 											$datetime_discount_applied = true;
+											$time_slot_matched = true;
 										}
 									} else {
-										if (strtotime($selected_start_time) >= strtotime($start_time) && strtotime($selected_start_time) <= strtotime($end_time)) {
+										if (strtotime($selected_start_time) >= strtotime($start_time) && 
+											strtotime($selected_start_time) <= strtotime($end_time)) {
+											
 											$percentage = floatval(rtrim($slot['percentage'], '%'));
 											$type = isset($slot['type']) ? $slot['type'] : 'increase';
 
@@ -382,21 +393,28 @@ if (!class_exists('MPTBM_Function')) {
 												$price += $discount_amount;
 											}
 											$datetime_discount_applied = true;
+											$time_slot_matched = true;
 										}
 									}
+								}
+								
+								if (!empty($time_slots) && !$time_slot_matched) {
+									continue;
 								}
 							}
 						}
 					}
 				}
 
-				// Apply Day-based discount if enabled
-				if ($day_discount_enabled === 'on' && !empty($selected_start_date)) {
+				// Apply Day-based discount if enabled and no date-range discount was applied
+				if ($day_discount_enabled === 'on' && !empty($selected_start_date) && !$date_range_matched) {
 					$day_of_week = strtolower(date('l', strtotime($selected_start_date)));
 					
 					// Get day-based discounts
 					$day_discounts = get_post_meta($post_id, 'mptbm_day_discounts', true);
-					if (is_array($day_discounts) && isset($day_discounts[$day_of_week]) && $day_discounts[$day_of_week]['status'] === 'active') {
+					if (is_array($day_discounts) && isset($day_discounts[$day_of_week]) && 
+						$day_discounts[$day_of_week]['status'] === 'active') {
+						
 						$day_data = $day_discounts[$day_of_week];
 						$amount = floatval($day_data['amount']);
 						
