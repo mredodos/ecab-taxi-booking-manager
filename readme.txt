@@ -71,7 +71,7 @@ Easily switch between different pricing models using tabs for a seamless booking
 
 **📧 📅 Google Calendar Integration **
 Automatically add booking details to the admin's Google Calendar.
-Provide a link after booking so customers can easily add the event to their own calendar.
+Provide a link after booking so customers can easily add the event to their own calendar
 
 **📧 Email Customization**
 Receive order confirmations and deliver PDF receipts easily after successful payments with dual email functions.
