@@ -237,6 +237,16 @@ if (!class_exists('MPTBM_Function')) {
 				return 0;
 			}
 
+			  // Check if mptbm_distance_tier_enabled Distance Tier Pricing addon is active and apply tier pricing if available
+			  if (class_exists('MPTBM_Distance_Tier_Pricing')) {
+				$tier_price = MPTBM_Distance_Tier_Pricing::calculate_tier_price(
+					$post_id, $distance, $duration, $start_place, $destination_place, $waiting_time, $two_way, $fixed_time
+				);
+				if ($tier_price !== false) {
+					return $tier_price;
+				}
+			}
+
 			$price = 0.0;  // Initialize price as a float
 
 			// Check if the session is active
