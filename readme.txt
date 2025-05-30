@@ -39,7 +39,7 @@ Provide customers with the flexibility to choose immediate pickups or pre-schedu
 Automatic fare calculation based on distance, time, or any custom criteria you define.
 
 📰 Customizable Rates
-Set up custom rate plans, allowing you to tailor pricing based on different zones, distances, or other factors.
+Set up custom rate plans, allowing you to tailor pricing based on different zones, distances, or other factors
 
 💰 Multiple Payment Gateways
 Easily integrate with popular payment gateways to offer secure and diverse payment options for customers.
