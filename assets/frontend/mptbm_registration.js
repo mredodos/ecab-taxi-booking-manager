@@ -304,6 +304,12 @@ function mptbm_map_area_init() {
                                         .done(function () {
                                             dLoaderRemove(parent.find(".tabsContentNext"));
                                             parent.find(".nextTab_next").trigger("click");
+                                            // iOS DOM reflow workaround
+                                            if (mptbm_is_ios()) {
+                                                target[0].style.display = 'none';
+                                                void target[0].offsetHeight;
+                                                target[0].style.display = '';
+                                            }
                                         });
                                 },
                                 error: function (response) {
@@ -384,6 +390,12 @@ function mptbm_map_area_init() {
                                     .done(function () {
                                         dLoaderRemove(parent.find(".tabsContentNext"));
                                         parent.find(".nextTab_next").trigger("click");
+                                        // iOS DOM reflow workaround
+                                        if (mptbm_is_ios()) {
+                                            target[0].style.display = 'none';
+                                            void target[0].offsetHeight;
+                                            target[0].style.display = '';
+                                        }
                                     });
                             },
                             error: function (response) {
@@ -576,6 +588,12 @@ function mptbm_map_area_init() {
                             .promise()
                             .done(function () {
                                 dLoaderRemove(target.closest(".mptbm_search_area"));
+                                // iOS DOM reflow workaround
+                                if (mptbm_is_ios()) {
+                                    target[0].style.display = 'none';
+                                    void target[0].offsetHeight;
+                                    target[0].style.display = '';
+                                }
                             });
                     },
                     error: function (response) {
@@ -651,8 +669,10 @@ function mptbm_price_calculation(parent) {
     }
     var el = target_summary.find(".mptbm_product_total_price");
     el.html(mp_price_format(total));
-    // Force reflow for iOS Safari only (safe for all browsers)
-    el.hide().show(0);
+    // iOS DOM reflow workaround
+    if (mptbm_is_ios()) {
+        el.hide().show(0);
+    }
 }
 (function ($) {
     
@@ -773,6 +793,12 @@ function mptbm_price_calculation(parent) {
                     success: function (data) {
                         target_extra_service.html(data);
                         checkAndToggleBookNowButton(parent);
+                        // iOS DOM reflow workaround
+                        if (mptbm_is_ios()) {
+                            target_extra_service[0].style.display = 'none';
+                            void target_extra_service[0].offsetHeight;
+                            target_extra_service[0].style.display = '';
+                        }
                     },
                     error: function (response) {
                         console.log(response);
@@ -799,6 +825,12 @@ function mptbm_price_calculation(parent) {
                                     parent.find('.mptbm_book_now[type="button"]').trigger('click');
                                 } else {
                                     checkAndToggleBookNowButton(parent);
+                                }
+                                // iOS DOM reflow workaround
+                                if (mptbm_is_ios()) {
+                                    target_extra_service_summary[0].style.display = 'none';
+                                    void target_extra_service_summary[0].offsetHeight;
+                                    target_extra_service_summary[0].style.display = '';
                                 }
                             });
                         },
@@ -969,6 +1001,12 @@ function mptbm_price_calculation(parent) {
                             }
                             dLoaderRemove(parent.find('.tabsContentNext'));
                             parent.find('.nextTab_next').trigger('click');
+                            // iOS DOM reflow workaround
+                            if (mptbm_is_ios()) {
+                                target_checkout[0].style.display = 'none';
+                                void target_checkout[0].offsetHeight;
+                                target_checkout[0].style.display = '';
+                            }
                         });
                     } else {
                         window.location.href = data;
@@ -1058,4 +1096,8 @@ function mptbm_price_calculation(parent) {
 function gm_authFailure() {
     var warning = jQuery('.mptbm-map-warning').html();
     jQuery('#mptbm_map_area').html('<div class="mptbm-map-warning"><h6>' + warning + '</h6></div>');
+}
+// Utility: Detect iOS
+function mptbm_is_ios() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
