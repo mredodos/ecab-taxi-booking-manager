@@ -202,6 +202,8 @@ function mptbm_map_area_init() {
             
         }
         
+
+        
         if (!start_date) {
             target_date.trigger("click");
         } else if (start_time === undefined || start_time === null || start_time === '') {
@@ -300,6 +302,13 @@ function mptbm_map_area_init() {
                                     //dLoader(target);
                                 },
                                 success: function (data) {
+                                    // Check if the response is an error
+                                    if (data.success === false) {
+                                        alert(data.data.message || 'An error occurred. Please try again.');
+                                        dLoaderRemove(parent.find(".tabsContentNext"));
+                                        return;
+                                    }
+                                    
                                     target
                                         .append(data)
                                         .promise()
@@ -346,6 +355,13 @@ function mptbm_map_area_init() {
                                     dLoader(target);
                                 },
                                 success: function (data) {
+                                    // Check if the response is an error
+                                    if (data.success === false) {
+                                        alert(data.data.message || 'An error occurred. Please try again.');
+                                        dLoaderRemove(parent.find(".tabsContentNext"));
+                                        return;
+                                    }
+                                    
                                     var cleanedURL = data.replace(/"/g, ""); // Remove all double quotes from the string
                                     window.location.href = cleanedURL; // Redirect to the URL received from the server
                                 },
@@ -389,6 +405,13 @@ function mptbm_map_area_init() {
                                 //dLoader(target);
                             },
                             success: function (data) {
+                                // Check if the response is an error
+                                if (data.success === false) {
+                                    alert(data.data.message || 'An error occurred. Please try again.');
+                                    dLoaderRemove(parent.find(".tabsContentNext"));
+                                    return;
+                                }
+                                
                                 target
                                     .append(data)
                                     .promise()
@@ -433,6 +456,13 @@ function mptbm_map_area_init() {
                                 dLoader(target);
                             },
                             success: function (data) {
+                                // Check if the response is an error
+                                if (data.success === false) {
+                                    alert(data.data.message || 'An error occurred. Please try again.');
+                                    dLoaderRemove(parent.find(".tabsContentNext"));
+                                    return;
+                                }
+                                
                                 var cleanedURL = data.replace(/"/g, ""); // Remove all double quotes from the string
                                 window.location.href = cleanedURL; // Redirect to the URL received from the server
                             },
@@ -447,11 +477,10 @@ function mptbm_map_area_init() {
     });
     $(document).on("change", "#mptbm_map_start_date", function () {
         // Clear the time slots list
-
         $('#mptbm_map_start_time').siblings('.start_time_list').empty();
         $('.start_time_input,#mptbm_map_start_time').val('');
         let mptbm_enable_return_in_different_date = $('[name="mptbm_enable_return_in_different_date"]').val();
-        let mptbm_buffer_end_minutes = $('[name="mptbm_buffer_end_minutes"]').val();
+        let mptbm_buffer_end_minutes = parseInt($('[name="mptbm_buffer_end_minutes"]').val()) || 0;
         let mptbm_first_calendar_date = $('[name="mptbm_first_calendar_date"]').val();
 
         var selectedDate = $('#mptbm_map_start_date').val();
@@ -465,37 +494,43 @@ function mptbm_map_area_init() {
         var currentDate = year + '-' + month + '-' + day;
 
         if (selectedDate == currentDate) {
+            // For today's date, apply buffer time restrictions
             var currentTime = new Date();
             var currentHour = currentTime.getHours();
             var currentMinutes = currentTime.getMinutes();
+            var currentTotalMinutes = (currentHour * 60) + currentMinutes;
 
-            // Format minutes to always have two digits (e.g., 5 -> 05)
-            var formattedMinutes = String(currentMinutes).padStart(2, '0');
-
-            // Combine hours and formatted minutes
-            var currentTimeFormatted = currentHour + '.' + formattedMinutes;
             $('.start_time_list-no-dsiplay li').each(function () {
                 const timeValue = parseFloat($(this).attr('data-value'));
-                if (timeValue > parseFloat(currentTimeFormatted) && timeValue >= mptbm_buffer_end_minutes / 60) {
+                const timeInMinutes = Math.floor(timeValue) * 60 + ((timeValue % 1) * 100);
+                
+                // Only show times that are after the buffer period
+                if (timeInMinutes > mptbm_buffer_end_minutes) {
+                    $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
+                }
+            });
+        } else if (selectedDate == mptbm_first_calendar_date) {
+            // For the first available date (which might be today or tomorrow depending on buffer)
+            $('.start_time_list-no-dsiplay li').each(function () {
+                const timeValue = parseFloat($(this).attr('data-value'));
+                const timeInMinutes = Math.floor(timeValue) * 60 + ((timeValue % 1) * 100);
+                
+                // If this is tomorrow and buffer extends to tomorrow, apply buffer
+                if (mptbm_buffer_end_minutes > 1440) {
+                    const adjustedBufferMinutes = mptbm_buffer_end_minutes - 1440;
+                    if (timeInMinutes > adjustedBufferMinutes) {
+                        $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
+                    }
+                } else {
+                    // For other dates, show all times
                     $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
                 }
             });
         } else {
-            if (selectedDate == mptbm_first_calendar_date) {
-                console.log(mptbm_first_calendar_date);
-                $('.start_time_list-no-dsiplay li').each(function () {
-                    const timeValue = parseFloat($(this).attr('data-value'));
-                    if (timeValue >= mptbm_buffer_end_minutes / 60) {
-                        $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
-                    }
-                });
-            } else {
-                $('.start_time_list-no-dsiplay li').each(function () {
-                    $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
-                });
-            }
-
-
+            // For future dates, show all available times
+            $('.start_time_list-no-dsiplay li').each(function () {
+                $('#mptbm_map_start_time').siblings('.start_time_list').append($(this).clone());
+            });
         }
 
         // Update the return date picker if needed
