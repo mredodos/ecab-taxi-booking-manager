@@ -165,6 +165,8 @@ function mptbm_map_area_init() {
         let two_way = parent.find('[name="mptbm_taxi_return"]').val();
         let waiting_time = parent.find('[name="mptbm_waiting_time"]').val();
         let fixed_time = parent.find('[name="mptbm_fixed_hours"]').val();
+        let mptbm_original_price_base = parent.find('[name="mptbm_original_price_base"]').val();
+        
         
         let mptbm_enable_view_search_result_page = parent
             .find('[name="mptbm_enable_view_search_result_page"]')
@@ -297,6 +299,7 @@ function mptbm_map_area_init() {
                                     mptbm_passengers: parent.find('#mptbm_passengers').val(),
                                     mptbm_max_passenger: parent.find('#mptbm_max_passenger').val(),
                                     mptbm_max_bag: parent.find('#mptbm_max_bag').val(),
+                                    mptbm_original_price_base: mptbm_original_price_base,
                                 },
                                 beforeSend: function () {
                                     //dLoader(target);
@@ -350,6 +353,7 @@ function mptbm_map_area_init() {
                                     mptbm_passengers: parent.find('#mptbm_passengers').val(),
                                     mptbm_max_passenger: parent.find('#mptbm_max_passenger').val(),
                                     mptbm_max_bag: parent.find('#mptbm_max_bag').val(),
+                                    mptbm_original_price_base: mptbm_original_price_base,
                                 },
                                 beforeSend: function () {
                                     dLoader(target);
@@ -400,6 +404,7 @@ function mptbm_map_area_init() {
                                 mptbm_passengers: parent.find('#mptbm_passengers').val(),
                                 mptbm_max_passenger: parent.find('#mptbm_max_passenger').val(),
                                 mptbm_max_bag: parent.find('#mptbm_max_bag').val(),
+                                mptbm_original_price_base: mptbm_original_price_base,
                             },
                             beforeSend: function () {
                                 //dLoader(target);
@@ -451,6 +456,7 @@ function mptbm_map_area_init() {
                                 mptbm_passengers: parent.find('#mptbm_passengers').val(),
                                 mptbm_max_passenger: parent.find('#mptbm_max_passenger').val(),
                                 mptbm_max_bag: parent.find('#mptbm_max_bag').val(),
+                                mptbm_original_price_base: mptbm_original_price_base,
                             },
                             beforeSend: function () {
                                 dLoader(target);
@@ -995,7 +1001,8 @@ function mptbm_price_calculation(parent) {
         let date = parent.find('[name="mptbm_date"]').val();
         let link_id = $(this).attr('data-wc_link_id');
         let quantity = parseInt(parent.find(`.mp_quantity_input[data-post-id="${post_id}"]`).val()) || 1;
-       
+        let mptbm_original_price_base = parent.find('[name="mptbm_original_price_base"]').val();
+        
         if (start_place !== '' && end_place !== '' && link_id && post_id) {
             let extra_service_name = {};
             let extra_service_qty = {};
@@ -1031,6 +1038,7 @@ function mptbm_price_calculation(parent) {
                     mptbm_passengers: parent.find('#mptbm_passengers').val(),
                     mptbm_max_passenger: parent.find('#mptbm_max_passenger').val(),
                     mptbm_max_bag: parent.find('#mptbm_max_bag').val(),
+                    mptbm_original_price_base: mptbm_original_price_base,
                 },
                 beforeSend: function () {
                     dLoader(parent.find('.tabsContentNext'));

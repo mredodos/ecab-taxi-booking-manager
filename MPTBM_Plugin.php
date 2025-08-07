@@ -247,7 +247,8 @@ if (!class_exists('MPTBM_Plugin')) {
          * Enqueue frontend assets
          */
         public function enqueue_frontend_assets() {
-            if (is_checkout()) {
+            // Check if WooCommerce is active and the is_checkout function exists
+            if (function_exists('is_checkout') && is_checkout()) {
                 wp_enqueue_style(
                     'mptbm-file-upload',
                     MPTBM_PLUGIN_URL . '/assets/css/file-upload.css',

@@ -78,6 +78,7 @@
 				// Buffer time validation
 				$buffer_time = (int) MP_Global_Function::get_settings('mptbm_general_settings', 'enable_buffer_time');
 				
+				
 				if ($buffer_time > 0) {
 					$start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : '';
 					$start_time = isset($_POST['start_time']) ? sanitize_text_field($_POST['start_time']) : '';
