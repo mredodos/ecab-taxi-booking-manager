@@ -502,33 +502,6 @@ if (!class_exists('MPTBM_Settings_Global')) {
 				));
 			}
 			
-				// Conditionally add QR settings fields
-				// Only add if Ecab_Taxi_Booking_QR_Addon exists
-			);
-			if (class_exists('Ecab_Taxi_Booking_QR_Addon')) {
-				$settings_fields['mptbm_qr_settings'] = apply_filters('filter_mptbm_qr_settings', array(
-					array(
-						'name' => 'mptbm_enable_qr_code',
-						'label' => esc_html__('Enable QR Code', 'ecab-taxi-booking-manager'),
-						'desc' => esc_html__('If you want to enable QR Code, please select Yes. Default is No', 'ecab-taxi-booking-manager'),
-						'type' => 'select',
-						'default' => 'no',
-						'options' => array(
-							'yes' => esc_html__('Yes', 'ecab-taxi-booking-manager'),
-							'no' => esc_html__('No', 'ecab-taxi-booking-manager')
-						)
-					),
-					array(
-						'name' => 'mptbm_allowed_user_roles',
-						'label' => esc_html__('Allowed User Role', 'ecab-taxi-booking-manager'),
-						'desc' => esc_html__('Select the user role that can access the QR Code. Default is Administrator', 'ecab-taxi-booking-manager'),
-						'type' => 'mp_select2_role',
-						'default' => ['administrator'],
-						'options' => []
-					)
-				));
-			}
-			
 			return array_merge($default_fields, $settings_fields);
 		}
 		public function global_taxi($default_sec)
