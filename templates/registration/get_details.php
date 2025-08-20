@@ -429,6 +429,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		?>
 			<li data-value="<?php echo esc_attr($data_value); ?>" data-time="<?php echo esc_attr($data_time); ?>"><?php echo esc_html(MP_Global_Function::date_format($time_formatted, 'time')); ?></li>
 		<?php } ?>
+		
 	</ul>
 						</div>
 					<?php
