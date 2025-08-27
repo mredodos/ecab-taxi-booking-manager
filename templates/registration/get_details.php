@@ -298,17 +298,19 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <?php endif; ?>
 				<?php
-				if (MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page')) {
+				$location_page_url = MPTBM_Function::get_page_url_from_slug(MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page'));
+				if ($location_page_url) {
 				?>
-					<a href="<?php echo MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page') ?>" class="mptbm_find_location_btn"><?php echo mptbm_get_translation('click_here_label', __('Click here', 'ecab-taxi-booking-manager')); ?></a>
+					<a href="<?php echo esc_url($location_page_url); ?>" class="mptbm_find_location_btn"><?php echo mptbm_get_translation('click_here_label', __('Click here', 'ecab-taxi-booking-manager')); ?></a>
 					<?php echo mptbm_get_translation('if_you_are_not_able_to_find_your_desired_location_label', __('If you are not able to find your desired location', 'ecab-taxi-booking-manager')); ?>
 				<?php
 				}
 				?>			
 				<?php
-				if (MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page')) {
+				$location_page_url = MPTBM_Function::get_page_url_from_slug(MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page'));
+				if ($location_page_url) {
 				?>
-					<a href="<?php echo MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page') ?>" class="mptbm_find_location_btn"><?php echo mptbm_get_translation('click_here_label', __('Click here', 'ecab-taxi-booking-manager')); ?></a>
+					<a href="<?php echo esc_url($location_page_url); ?>" class="mptbm_find_location_btn"><?php echo mptbm_get_translation('click_here_label', __('Click here', 'ecab-taxi-booking-manager')); ?></a>
 					<?php echo mptbm_get_translation('if_you_are_not_able_to_find_your_desired_location_label', __('If you are not able to find your desired location', 'ecab-taxi-booking-manager')); ?>
 				<?php
 				}
@@ -341,9 +343,10 @@ document.addEventListener('DOMContentLoaded', function() {
 				<?php endif; ?>
 			
 				<?php
-				if (MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page')) {
+				$location_page_url = MPTBM_Function::get_page_url_from_slug(MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page'));
+				if ($location_page_url) {
 				?>
-					<a href="<?php echo MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page') ?>" class="mptbm_find_location_btn"><?php esc_html_e('Click here', 'ecab-taxi-booking-manager'); ?></a>
+					<a href="<?php echo esc_url($location_page_url); ?>" class="mptbm_find_location_btn"><?php esc_html_e('Click here', 'ecab-taxi-booking-manager'); ?></a>
 					<?php esc_html_e('If you are not able to find your desired location', 'ecab-taxi-booking-manager'); ?>
 				<?php
 				}

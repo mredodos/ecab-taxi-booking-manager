@@ -160,6 +160,34 @@ if (!class_exists('MPTBM_Function')) {
 		{
 			return self::get_general_settings('organizer_slug', 'transportation-organizer');
 		}
+		
+		/**
+		 * Convert a page slug to a proper WordPress URL
+		 * 
+		 * @param string $slug_or_url The slug or URL to convert
+		 * @return string The proper URL
+		 */
+		public static function get_page_url_from_slug($slug_or_url)
+		{
+			// If it's already a full URL, return it as is
+			if (filter_var($slug_or_url, FILTER_VALIDATE_URL)) {
+				return $slug_or_url;
+			}
+			
+			// If it's empty, return empty
+			if (empty($slug_or_url)) {
+				return '';
+			}
+			
+			// Try to find the page by slug
+			$page = get_page_by_path($slug_or_url, OBJECT, 'page');
+			if ($page) {
+				return get_permalink($page->ID);
+			}
+			
+			// Fallback to home URL with slug
+			return home_url('/' . $slug_or_url . '/');
+		}
 		//*************************************************************Full Custom Function******************************//
 		//*************Date*********************************//
 		public static function get_date($post_id, $expire = false)

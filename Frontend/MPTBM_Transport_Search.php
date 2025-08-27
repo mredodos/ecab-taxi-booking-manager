@@ -165,10 +165,21 @@
 					$_SESSION['custom_content'] = $content;
 					
 					session_write_close(); // Close the session to release the lock
-					$redirect_url = isset($_POST['mptbm_enable_view_search_result_page']) ? sanitize_text_field($_POST['mptbm_enable_view_search_result_page']) : '';
-					if($redirect_url == ''){
-						$redirect_url = 'transport-result';	
+					$redirect_slug = isset($_POST['mptbm_enable_view_search_result_page']) ? sanitize_text_field($_POST['mptbm_enable_view_search_result_page']) : '';
+					
+					// If no slug is provided, get it from settings
+					if(empty($redirect_slug)){
+						$redirect_slug = MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_search_result_page');
 					}
+					
+					// If still no slug, use default
+					if(empty($redirect_slug)){
+						$redirect_slug = 'transport-result';	
+					}
+					
+					// Convert slug to proper WordPress page URL
+					$redirect_url = MPTBM_Function::get_page_url_from_slug($redirect_slug);
+					
 					echo wp_json_encode($redirect_url);
 				die(); // Ensure further execution stops after outputting the JavaScript
 			}
