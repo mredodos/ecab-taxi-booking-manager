@@ -273,7 +273,7 @@ if (sizeof($all_dates) > 0) {
                 <option class="textCapitalize" selected disabled><?php echo mptbm_get_translation('select_destination_location_label', __(' Select Destination Location', 'ecab-taxi-booking-manager')); ?></option>
             </select>
         <?php } else { ?>
-            <input class="formControl textCapitalize" type="text" id="mptbm_map_end_place" class="formControl" placeholder="<?php echo mptbm_get_translation('enter_dropoff_location_placeholder', __(' Enter Drop-Off Location', 'ecab-taxi-booking-manager')); ?>" value="" />
+            <input type="text" id="mptbm_map_end_place" class="formControl textCapitalize" placeholder="<?php echo mptbm_get_translation('enter_dropoff_location_placeholder', __(' Enter Drop-Off Location', 'ecab-taxi-booking-manager')); ?>" value="" />
         <?php } ?>
         <i class="fas fa-map-marker-alt mptbm_left_icon allCenter"></i>
     </label>
@@ -297,24 +297,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php endif; ?>
-				<?php
-				$location_page_url = MPTBM_Function::get_page_url_from_slug(MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page'));
-				if ($location_page_url) {
-				?>
-					<a href="<?php echo esc_url($location_page_url); ?>" class="mptbm_find_location_btn"><?php echo mptbm_get_translation('click_here_label', __('Click here', 'ecab-taxi-booking-manager')); ?></a>
-					<?php echo mptbm_get_translation('if_you_are_not_able_to_find_your_desired_location_label', __('If you are not able to find your desired location', 'ecab-taxi-booking-manager')); ?>
-				<?php
-				}
-				?>			
-				<?php
-				$location_page_url = MPTBM_Function::get_page_url_from_slug(MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page'));
-				if ($location_page_url) {
-				?>
-					<a href="<?php echo esc_url($location_page_url); ?>" class="mptbm_find_location_btn"><?php echo mptbm_get_translation('click_here_label', __('Click here', 'ecab-taxi-booking-manager')); ?></a>
-					<?php echo mptbm_get_translation('if_you_are_not_able_to_find_your_desired_location_label', __('If you are not able to find your desired location', 'ecab-taxi-booking-manager')); ?>
-				<?php
-				}
-				?>
 				<?php if ($pro_active && $enable_max_passenger_filter === 'yes'): ?>
 				<div class="inputList mp_input_select">
 					<label class="fdColumn">
@@ -346,8 +328,8 @@ document.addEventListener('DOMContentLoaded', function() {
 				$location_page_url = MPTBM_Function::get_page_url_from_slug(MP_Global_Function::get_settings('mptbm_general_settings', 'enable_view_find_location_page'));
 				if ($location_page_url) {
 				?>
-					<a href="<?php echo esc_url($location_page_url); ?>" class="mptbm_find_location_btn"><?php esc_html_e('Click here', 'ecab-taxi-booking-manager'); ?></a>
-					<?php esc_html_e('If you are not able to find your desired location', 'ecab-taxi-booking-manager'); ?>
+					<a href="<?php echo esc_url($location_page_url); ?>" class="mptbm_find_location_btn"><?php echo mptbm_get_translation('click_here_label', __('Click here', 'ecab-taxi-booking-manager')); ?></a>
+					<?php echo mptbm_get_translation('if_you_are_not_able_to_find_your_desired_location_label', __('If you are not able to find your desired location', 'ecab-taxi-booking-manager')); ?>
 				<?php
 				}
 				?>
@@ -564,8 +546,9 @@ document.addEventListener('DOMContentLoaded', function() {
 						</h1>
 						<div class="fdColumn">
 							<div class="fdColumn">
-							<h6><?php echo mptbm_get_translation('total_time_label', __('TOTAL TIME', 'ecab-taxi-booking-manager')); ?></h6>
-							<strong class="mptbm_total_time"><?php echo mptbm_get_translation('zero_hour_label', __('0 Hour', 'ecab-taxi-booking-manager')); ?></strong>
+								<h6><?php echo mptbm_get_translation('total_time_label', __('TOTAL TIME', 'ecab-taxi-booking-manager')); ?></h6>
+								<strong class="mptbm_total_time"><?php echo mptbm_get_translation('zero_hour_label', __('0 Hour', 'ecab-taxi-booking-manager')); ?></strong>
+							</div>
 						</div>
 					</div>
 				</div>
