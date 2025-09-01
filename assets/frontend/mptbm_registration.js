@@ -269,6 +269,32 @@ function mptbm_map_area_init() {
                     // Mark as initialized to prevent duplicate initialization
                     startPlaceInput.setAttribute('data-autocomplete-initialized', 'true');
                 }
+
+            // Initialize Google Places autocomplete for dropoff location as well (independent of map visibility)
+            var endPlaceInput = document.getElementById('mptbm_map_end_place');
+            if (endPlaceInput && !endPlaceInput.hasAttribute('data-autocomplete-initialized') && endPlaceInput.type !== 'hidden') {
+                console.log('Initializing Google Places autocomplete for dropoff location');
+                var endPlaceAutocomplete = new google.maps.places.Autocomplete(endPlaceInput);
+                var restrictToCountry = $('[name="mptbm_restrict_search_country"]').val();
+                var countryCode = $('[name="mptbm_country"]').val();
+
+                if (restrictToCountry == 'yes') {
+                    endPlaceAutocomplete.setComponentRestrictions({
+                        country: [countryCode]
+                    });
+                }
+
+                google.maps.event.addListener(endPlaceAutocomplete, 'place_changed', function () {
+                    var startInput = document.getElementById('mptbm_map_start_place');
+                    mptbm_set_cookie_distance_duration(
+                        startInput ? startInput.value : '',
+                        endPlaceInput ? endPlaceInput.value : ''
+                    );
+                });
+
+                // Mark as initialized to prevent duplicate initialization
+                endPlaceInput.setAttribute('data-autocomplete-initialized', 'true');
+            }
         }
 
         // Initialize Google Places autocomplete on page load with a delay to ensure API is loaded
