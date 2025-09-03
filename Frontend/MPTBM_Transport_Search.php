@@ -75,6 +75,38 @@
 				wp_die(); // End AJAX call
 			}
 			public function get_mptbm_map_search_result() {
+				// Debug logging for search initiation
+				error_log('=== MPTBM DEBUG: get_mptbm_map_search_result started ===');
+				error_log('MPTBM DEBUG: POST data - ' . print_r($_POST, true));
+				error_log('MPTBM DEBUG: COOKIE data - ' . print_r($_COOKIE, true));
+				
+				// Clear location-based pricing cache for fresh calculations on each search
+				// This prevents cached pricing data from affecting subsequent searches with same locations
+				// BUT preserve essential pricing data like original_price_based
+				global $wpdb;
+				$cache_patterns = array(
+					'weather_pricing_%',
+					'traffic_data_%',
+					'mptbm_custom_price_message_%'
+				);
+
+				foreach ($cache_patterns as $pattern) {
+					$deleted_transients = $wpdb->query($wpdb->prepare(
+						"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+						'_transient_' . $pattern
+					));
+					$deleted_timeouts = $wpdb->query($wpdb->prepare(
+						"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+						'_transient_timeout_' . $pattern
+					));
+					error_log("MPTBM DEBUG: Cleared {$deleted_transients} transients and {$deleted_timeouts} timeouts for pattern: {$pattern}");
+				}
+				
+				// Ensure original_price_based is set for proper pricing calculations
+				$price_based = isset($_POST['price_based']) ? sanitize_text_field($_POST['price_based']) : 'dynamic';
+				set_transient('original_price_based', $price_based, HOUR_IN_SECONDS);
+				error_log("MPTBM DEBUG: Set original_price_based transient to: {$price_based}");
+				
 				// Buffer time validation
 				$buffer_time = (int) MP_Global_Function::get_settings('mptbm_general_settings', 'enable_buffer_time');
 				
@@ -111,13 +143,51 @@
 				
 				$distance = isset($_COOKIE['mptbm_distance']) ? absint($_COOKIE['mptbm_distance']) : '';
 				$duration = isset($_COOKIE['mptbm_duration']) ? absint($_COOKIE['mptbm_duration']) : '';
+				
+				error_log("MPTBM DEBUG: Distance from cookie: {$distance}, Duration from cookie: {$duration}");
+				error_log('MPTBM DEBUG: About to include choose_vehicles.php template');
+				
 				// if ($distance && $duration) {
 					include(MPTBM_Function::template_path('registration/choose_vehicles.php'));
 				// }
+				
+				error_log('=== MPTBM DEBUG: get_mptbm_map_search_result completed ===');
 			
 			die(); // Ensure further execution stops after outputting the JavaScript
 			}
 			public function get_mptbm_map_search_result_redirect(){
+				// Debug logging for redirect search initiation
+				error_log('=== MPTBM DEBUG: get_mptbm_map_search_result_redirect started ===');
+				error_log('MPTBM DEBUG: POST data - ' . print_r($_POST, true));
+				error_log('MPTBM DEBUG: COOKIE data - ' . print_r($_COOKIE, true));
+				
+				// Clear location-based pricing cache for fresh calculations on each search
+				// This prevents cached pricing data from affecting subsequent searches with same locations
+				// BUT preserve essential pricing data like original_price_based
+				global $wpdb;
+				$cache_patterns = array(
+					'weather_pricing_%',
+					'traffic_data_%',
+					'mptbm_custom_price_message_%'
+				);
+
+				foreach ($cache_patterns as $pattern) {
+					$deleted_transients = $wpdb->query($wpdb->prepare(
+						"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+						'_transient_' . $pattern
+					));
+					$deleted_timeouts = $wpdb->query($wpdb->prepare(
+						"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+						'_transient_timeout_' . $pattern
+					));
+					error_log("MPTBM DEBUG: Cleared {$deleted_transients} transients and {$deleted_timeouts} timeouts for pattern: {$pattern}");
+				}
+				
+				// Ensure original_price_based is set for proper pricing calculations
+				$price_based = isset($_POST['price_based']) ? sanitize_text_field($_POST['price_based']) : 'dynamic';
+				set_transient('original_price_based', $price_based, HOUR_IN_SECONDS);
+				error_log("MPTBM DEBUG: Set original_price_based transient to: {$price_based}");
+				
 				// Buffer time validation
 				$buffer_time = (int) MP_Global_Function::get_settings('mptbm_general_settings', 'enable_buffer_time');
 				

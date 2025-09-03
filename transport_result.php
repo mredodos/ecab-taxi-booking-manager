@@ -13,13 +13,41 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Debug logging for transport result page
+error_log('=== MPTBM DEBUG: Transport Result Page Started ===');
+error_log('MPTBM DEBUG: Session data available: ' . (isset($_SESSION['custom_content']) ? 'YES' : 'NO'));
+
 // Retrieve the content from the session variable
 $content = isset($_SESSION['custom_content']) ? $_SESSION['custom_content'] : '';
 
+error_log('MPTBM DEBUG: Content length: ' . strlen($content));
+
 // Check if $content is empty, redirect to homepage if it is
 if (empty($content)) {
+    error_log('MPTBM DEBUG: No content found, redirecting to homepage');
     wp_redirect(home_url());
     exit;
+}
+
+// Clear only pricing-related caches to ensure fresh pricing calculations
+// This prevents object caching from showing only minimum-priced vehicles
+// but preserves essential search data
+global $wpdb;
+$cache_patterns = array(
+    'weather_pricing_%',
+    'traffic_data_%',
+    'mptbm_custom_price_message_%'
+);
+
+foreach ($cache_patterns as $pattern) {
+    $wpdb->query($wpdb->prepare(
+        "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+        '_transient_' . $pattern
+    ));
+    $wpdb->query($wpdb->prepare(
+        "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+        '_transient_timeout_' . $pattern
+    ));
 }
 
 // Store content in a variable before unsetting session
@@ -259,7 +287,9 @@ if (function_exists('wp_is_block_theme') && wp_is_block_theme()) {
                     <div class="tabsContentNext">
                         <div data-tabs-next="#mptbm_search_result" class="mptbm_map_search_result">
                             <?php 
-                            // Check if content exists
+                            // Use cached content but with fresh pricing calculations
+                            // This preserves the search context while ensuring all vehicles show with correct prices
+                            
                             if (!empty($display_content)) {
                                 // Remove the outer div wrapper if it exists in the content
                                 $clean_content = $display_content;
@@ -273,7 +303,7 @@ if (function_exists('wp_is_block_theme') && wp_is_block_theme()) {
                                 // Output the cleaned content
                                 echo $clean_content;
                             } else {
-                                error_log('Transport Result - Display content is empty');
+                                error_log('Transport Result - No display content available');
                                 echo '<div style="text-align: center; padding: 50px; color: #666;">';
                                 echo '<h3>No content available</h3>';
                                 echo '<p>Please go back and search for transport again.</p>';
@@ -288,6 +318,48 @@ if (function_exists('wp_is_block_theme') && wp_is_block_theme()) {
         </div>
     </div>
 </main>
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    // Force refresh of all pricing displays and vehicle visibility on transport result page
+    // This ensures object caching doesn't affect the display of all available vehicles
+    
+    setTimeout(function() {
+        // Show all vehicles that might be hidden by caching
+        $('.mptbm_booking_item').each(function() {
+            var $item = $(this);
+            
+            // Remove any hidden classes that might be applied by caching
+            $item.removeClass('mptbm_booking_item_hidden');
+            
+            // Ensure the item is visible
+            $item.show().css({
+                'display': 'flex !important',
+                'visibility': 'visible !important',
+                'opacity': '1 !important'
+            });
+        });
+        
+        // Show any vehicles that might be hidden due to caching
+        $('.mptbm_booking_item_hidden').removeClass('mptbm_booking_item_hidden').show();
+        
+        // If all vehicles were hidden and "No Transport Available" is showing, hide it
+        if ($('.mptbm_booking_item:visible').length > 0) {
+            $('.geo-fence-no-transport').hide();
+        }
+        
+        // Force refresh of price calculations by triggering mptbm_price_calculation
+        if (typeof mptbm_price_calculation === 'function') {
+            $('.mptbm_booking_item').each(function() {
+                mptbm_price_calculation($(this));
+            });
+        }
+        
+        console.log('Transport Result Page: Forced refresh of vehicle pricing and visibility. Vehicles visible:', $('.mptbm_booking_item:visible').length);
+        
+    }, 100); // Small delay to ensure DOM is ready
+});
+</script>
 
 <?php
 // Handle theme footer - works with both classic and block themes
