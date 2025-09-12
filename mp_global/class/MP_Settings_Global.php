@@ -70,14 +70,15 @@
 								'custom_api_key' => esc_html__('Custom API Key', 'ecab-taxi-booking-manager'),
 							)
 						),
-						array(
-							'name' => 'api_custom_key',
-							'label' => esc_html__('Custom API Key', 'ecab-taxi-booking-manager'),
-							'desc' => esc_html__('Enter a custom API key for authentication. This key must be included in API requests as "X-API-Key" header. Required when Custom API Key authentication is selected.', 'ecab-taxi-booking-manager'),
-							'type' => 'text',
-							'default' => '',
-							'placeholder' => 'Enter your custom API key'
-						),
+                array(
+                    'name' => 'api_custom_key',
+                    'label' => esc_html__('Custom API Key', 'ecab-taxi-booking-manager'),
+                    'desc' => esc_html__('Enter a custom API key for authentication. This key must be included in API requests as "X-API-Key" header. Required when Custom API Key authentication is selected.', 'ecab-taxi-booking-manager'),
+                    'type' => 'text',
+                    'default' => '',
+                    'placeholder' => 'Enter your custom API key',
+                    'data-depends' => '[{"mp_global_settings[api_authentication_type]": {"type": "equal", "value": "custom_api_key"}}]'
+                ),
 						array(
 							'name' => 'api_rate_limit',
 							'label' => esc_html__('API Rate Limit', 'ecab-taxi-booking-manager'),

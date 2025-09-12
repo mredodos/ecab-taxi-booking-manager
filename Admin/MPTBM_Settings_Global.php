@@ -322,17 +322,28 @@ if (!class_exists('MPTBM_Settings_Global')) {
 							'no' => esc_html__('No', 'ecab-taxi-booking-manager')
 						)
 					),
-					// array(
-					// 	'name' => 'show_number_of_passengers',
-					// 	'label' => esc_html__('Show Number of Passengers', 'ecab-taxi-booking-manager'),
-					// 	'desc' => esc_html__('If you want to show the Number of Passengers field, select Yes. Default is Yes', 'ecab-taxi-booking-manager'),
-					// 	'type' => 'select',
-					// 	'default' => 'no',
-					// 	'options' => array(
-					// 		'yes' => esc_html__('Yes', 'ecab-taxi-booking-manager'),
-					// 		'no' => esc_html__('No', 'ecab-taxi-booking-manager')
-					// 	)
-					// ),
+					array(
+						'name' => 'show_number_of_passengers',
+						'label' => esc_html__('Show Number of Passengers', 'ecab-taxi-booking-manager'),
+						'desc' => esc_html__('If you want to show the Number of Passengers field in cart and order, select Yes. Default is No', 'ecab-taxi-booking-manager'),
+						'type' => 'select',
+						'default' => 'no',
+						'options' => array(
+							'yes' => esc_html__('Yes', 'ecab-taxi-booking-manager'),
+							'no' => esc_html__('No', 'ecab-taxi-booking-manager')
+						)
+					),
+					array(
+						'name' => 'show_number_of_bags',
+						'label' => esc_html__('Show Number of Bags', 'ecab-taxi-booking-manager'),
+						'desc' => esc_html__('If you want to show the Number of Bags field in cart and order, select Yes. Default is No', 'ecab-taxi-booking-manager'),
+						'type' => 'select',
+						'default' => 'no',
+						'options' => array(
+							'yes' => esc_html__('Yes', 'ecab-taxi-booking-manager'),
+							'no' => esc_html__('No', 'ecab-taxi-booking-manager')
+						)
+					),
 					array(
 						'name' => 'no_transport_message',
 						'label' => esc_html__('No Transport Available Message', 'ecab-taxi-booking-manager'),

@@ -108,6 +108,28 @@ if (!function_exists('mptbm_get_translation')) {
 						<h6 class="_mB_xs"><?php echo mptbm_get_translation('service_times_label', __('Service Times', 'ecab-taxi-booking-manager')); ?></h6>
 						<p class="_textLight_1"><?php echo esc_html($fixed_time); ?> &nbsp;<?php echo mptbm_get_translation('hours_in_waiting_label', __('Hours', 'ecab-taxi-booking-manager')); ?></p>
 					<?php } ?>
+					
+					<?php 
+					// Get passengers and bags from POST data
+					$passengers = isset($_POST['mptbm_passengers']) ? absint($_POST['mptbm_passengers']) : (isset($_POST['mptbm_max_passenger']) ? absint($_POST['mptbm_max_passenger']) : 1);
+					$bags = isset($_POST['mptbm_bags']) ? absint($_POST['mptbm_bags']) : (isset($_POST['mptbm_max_bag']) ? absint($_POST['mptbm_max_bag']) : 0);
+					
+					// Show passengers if > 0
+					if ($passengers > 0) {
+					?>
+						<div class="divider"></div>
+						<h6 class="_mB_xs"><?php echo mptbm_get_translation('number_of_passengers_label', __('Number of Passengers', 'ecab-taxi-booking-manager')); ?></h6>
+						<p class="_textLight_1"><?php echo esc_html($passengers); ?></p>
+					<?php } ?>
+					
+					<?php 
+					// Show bags if > 0
+					if ($bags > 0) {
+					?>
+						<div class="divider"></div>
+						<h6 class="_mB_xs"><?php echo mptbm_get_translation('number_of_bags_label', __('Number of Bags', 'ecab-taxi-booking-manager')); ?></h6>
+						<p class="_textLight_1"><?php echo esc_html($bags); ?></p>
+					<?php } ?>
 					<div class="mptbm_transport_summary">
 						<div class="divider"></div>
 						<h6 class="_mB_xs"><?php echo esc_html($label) . ' ' . esc_html__(' Details', 'ecab-taxi-booking-manager') ?></h6>

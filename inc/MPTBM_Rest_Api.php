@@ -38,6 +38,7 @@ if (!class_exists('MPTBM_Rest_Api')) {
                     'methods' => WP_REST_Server::READABLE,
                     'callback' => array($this, 'get_all_bookings'),
                     'permission_callback' => array($this, 'check_booking_read_permission'),
+                    'args' => $this->get_bookings_query_args(),
                 ),
                 array(
                     'methods' => WP_REST_Server::CREATABLE,
@@ -82,6 +83,7 @@ if (!class_exists('MPTBM_Rest_Api')) {
                     'methods' => WP_REST_Server::READABLE,
                     'callback' => array($this, 'get_orders'),
                     'permission_callback' => array($this, 'check_booking_read_permission'),
+                    'args' => $this->get_orders_query_args(),
                 ),
                 array(
                     'methods' => WP_REST_Server::CREATABLE,
@@ -208,6 +210,15 @@ if (!class_exists('MPTBM_Rest_Api')) {
                     'args' => $this->get_settings_args(),
                 )
             ));
+            
+            // Generate API Key - NEW ENDPOINT
+            register_rest_route($this->namespace, '/generate-api-key', array(
+                array(
+                    'methods' => WP_REST_Server::CREATABLE,
+                    'callback' => array($this, 'generate_api_key'),
+                    'permission_callback' => array($this, 'check_booking_admin_permission'),
+                )
+            ));
         }
 
         private function check_rate_limit($request) {
@@ -281,29 +292,46 @@ if (!class_exists('MPTBM_Rest_Api')) {
             
             // Application password authentication
             if ($auth_type === 'application_password') {
-                // Require authentication for application passwords
-                if (!is_user_logged_in()) {
+                // For REST API requests, check if user is authenticated through WordPress REST API
+                $current_user = wp_get_current_user();
+                
+                // If no user is authenticated, return false
+                if (!$current_user || $current_user->ID === 0) {
                     return false;
                 }
                 
                 // Check if user has read capability
-                return current_user_can('read');
+                return user_can($current_user, 'read');
             }
             
             // Default: require authentication
-            if (!is_user_logged_in()) {
+            $current_user = wp_get_current_user();
+            if (!$current_user || $current_user->ID === 0) {
                 return false;
             }
             
-            return current_user_can('read');
+            return user_can($current_user, 'read');
         }
 
         public function get_transport_services($request) {
+            $params = $request->get_params();
+
             $args = array(
                 'post_type' => 'mptbm_rent',
                 'posts_per_page' => -1,
                 'post_status' => 'publish'
             );
+
+            // Optional filter by pricing type to match documentation
+            if (isset($params['price_based']) && !empty($params['price_based'])) {
+                $args['meta_query'] = array(
+                    array(
+                        'key' => 'mptbm_price_based',
+                        'value' => sanitize_text_field($params['price_based']),
+                        'compare' => '='
+                    )
+                );
+            }
 
             $posts = get_posts($args);
             $data = array();
@@ -316,11 +344,82 @@ if (!class_exists('MPTBM_Rest_Api')) {
         }
 
         public function get_all_bookings($request) {
+            // Get query parameters for filtering
+            $params = $request->get_params();
+            $status = isset($params['status']) ? sanitize_text_field($params['status']) : 'publish';
+            $per_page = isset($params['per_page']) ? intval($params['per_page']) : -1;
+            $offset = isset($params['offset']) ? intval($params['offset']) : 0;
+            $orderby = isset($params['orderby']) ? sanitize_text_field($params['orderby']) : 'date';
+            $order = isset($params['order']) ? strtoupper(sanitize_text_field($params['order'])) : 'DESC';
+            $customer_id = isset($params['customer_id']) ? intval($params['customer_id']) : 0;
+            $transport_id = isset($params['transport_id']) ? intval($params['transport_id']) : 0;
+            $order_id = isset($params['order_id']) ? intval($params['order_id']) : 0;
+            
             $args = array(
                 'post_type' => 'mptbm_booking',
-                'posts_per_page' => -1,
-                'post_status' => 'any'
+                'posts_per_page' => $per_page,
+                'offset' => $offset,
+                'post_status' => $status === 'any' ? 'any' : $status,
+                'orderby' => $orderby,
+                'order' => $order,
+                'meta_query' => array()
             );
+
+            // Add customer filter
+            if ($customer_id > 0) {
+                $args['meta_query'][] = array(
+                    'relation' => 'OR',
+                    array(
+                        'key' => 'mptbm_user_id',
+                        'value' => $customer_id,
+                        'compare' => '='
+                    ),
+                    array(
+                        'key' => '_customer_user',
+                        'value' => $customer_id,
+                        'compare' => '='
+                    )
+                );
+            }
+
+            // Add transport filter
+            if ($transport_id > 0) {
+                $args['meta_query'][] = array(
+                    'relation' => 'OR',
+                    array(
+                        'key' => 'mptbm_transport_id',
+                        'value' => $transport_id,
+                        'compare' => '='
+                    ),
+                    array(
+                        'key' => 'mptbm_id',
+                        'value' => $transport_id,
+                        'compare' => '='
+                    )
+                );
+            }
+
+            // Add order filter
+            if ($order_id > 0) {
+                $args['meta_query'][] = array(
+                    'relation' => 'OR',
+                    array(
+                        'key' => 'mptbm_order_id',
+                        'value' => $order_id,
+                        'compare' => '='
+                    ),
+                    array(
+                        'key' => 'mptbm_wc_order_id',
+                        'value' => $order_id,
+                        'compare' => '='
+                    )
+                );
+            }
+
+            // Set relation for meta_query if we have multiple conditions
+            if (count($args['meta_query']) > 1) {
+                $args['meta_query']['relation'] = 'AND';
+            }
 
             $posts = get_posts($args);
             $data = array();
@@ -347,12 +446,12 @@ if (!class_exists('MPTBM_Rest_Api')) {
             $data = $this->prepare_booking_data($booking);
             
             // Add extra booking details
-            $data['extra_services'] = get_post_meta($booking_id, 'mptbm_extra_services', true);
-            $data['pickup_location'] = get_post_meta($booking_id, 'mptbm_pickup_location', true);
-            $data['dropoff_location'] = get_post_meta($booking_id, 'mptbm_dropoff_location', true);
-            $data['journey_date'] = get_post_meta($booking_id, 'mptbm_journey_date', true);
-            $data['journey_time'] = get_post_meta($booking_id, 'mptbm_journey_time', true);
-            $data['total_price'] = get_post_meta($booking_id, 'mptbm_total_price', true);
+            $data['extra_services'] = get_post_meta($booking_id, 'mptbm_service_info', true);
+            $data['pickup_location'] = get_post_meta($booking_id, 'mptbm_start_place', true);
+            $data['dropoff_location'] = get_post_meta($booking_id, 'mptbm_end_place', true);
+            $data['journey_date'] = get_post_meta($booking_id, 'mptbm_date', true);
+            $data['journey_time'] = get_post_meta($booking_id, 'mptbm_time', true);
+            $data['total_price'] = get_post_meta($booking_id, 'mptbm_tp', true);
 
             return new WP_REST_Response($data, 200);
         }
@@ -366,17 +465,117 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 );
             }
 
-            $orders = wc_get_orders(array(
-                'limit' => -1,
-                'type' => 'shop_order',
-            ));
-
-            $data = array();
-            foreach ($orders as $order) {
-                $data[] = $this->prepare_order_data($order);
+            // Get query parameters for filtering and pagination
+            $params = $request->get_params();
+            $limit = isset($params['per_page']) ? intval($params['per_page']) : 20;
+            $offset = isset($params['offset']) ? intval($params['offset']) : 0;
+            $status = isset($params['status']) ? $params['status'] : 'any';
+            $orderby = isset($params['orderby']) ? $params['orderby'] : 'date';
+            $order = isset($params['order']) ? $params['order'] : 'DESC';
+            $customer_id = isset($params['customer_id']) ? intval($params['customer_id']) : 0;
+            $start_date = isset($params['start_date']) ? $params['start_date'] : '';
+            $end_date = isset($params['end_date']) ? $params['end_date'] : '';
+            
+            // Ensure reasonable limits to prevent memory issues
+            if ($limit > 100) {
+                $limit = 100;
+            }
+            if ($limit <= 0) {
+                $limit = 20;
             }
 
-            return new WP_REST_Response($data, 200);
+            // Build WooCommerce order query arguments
+            $args = array(
+                'limit' => $limit,
+                'offset' => $offset,
+                'type' => 'shop_order',
+                'orderby' => $orderby,
+                'order' => $order,
+                'return' => 'objects',
+                'meta_query' => array(),
+                'date_query' => array()
+            );
+            
+            // Add status filter
+            if ($status !== 'any') {
+                $args['status'] = $status;
+            }
+            
+            // Add customer filter
+            if ($customer_id > 0) {
+                $args['customer_id'] = $customer_id;
+            }
+            
+            // Add date range filter
+            if (!empty($start_date) && !empty($end_date)) {
+                $args['date_query'] = array(
+                    array(
+                        'after' => $start_date,
+                        'before' => $end_date,
+                        'inclusive' => true,
+                    )
+                );
+            }
+            
+            // Filter to only get taxi booking related orders (optional)
+            if (isset($params['taxi_orders_only']) && $params['taxi_orders_only'] === 'true') {
+                $args['meta_query'][] = array(
+                    'key' => 'mptbm_booking_id',
+                    'compare' => 'EXISTS'
+                );
+            }
+
+            $orders = wc_get_orders($args);
+            
+            // Get total count for pagination info
+            $total_args = $args;
+            $total_args['limit'] = -1;
+            $total_args['offset'] = 0;
+            unset($total_args['return']);
+            $total_orders = wc_get_orders($total_args);
+            $total_count = is_array($total_orders) ? count($total_orders) : 0;
+
+            $data = array();
+            $processed_ids = array(); // Track processed order IDs to avoid duplicates
+            
+            foreach ($orders as $order) {
+                // Skip if we've already processed this order ID (prevents duplicates)
+                if (in_array($order->get_id(), $processed_ids)) {
+                    continue;
+                }
+                
+                $processed_ids[] = $order->get_id();
+                $order_data = $this->prepare_order_data($order);
+                
+                // Add taxi booking specific metadata if available
+                $booking_id = $order->get_meta('mptbm_booking_id');
+                if ($booking_id) {
+                    $order_data['taxi_booking_id'] = $booking_id;
+                    $order_data['is_taxi_order'] = true;
+                    
+                    // Get booking details
+                    $booking = get_post($booking_id);
+                    if ($booking && $booking->post_type === 'mptbm_booking') {
+                        $order_data['booking_details'] = array(
+                            'pickup_location' => get_post_meta($booking_id, 'mptbm_pickup_location', true),
+                            'dropoff_location' => get_post_meta($booking_id, 'mptbm_dropoff_location', true),
+                            'journey_date' => get_post_meta($booking_id, 'mptbm_journey_date', true),
+                            'journey_time' => get_post_meta($booking_id, 'mptbm_journey_time', true)
+                        );
+                    }
+                } else {
+                    $order_data['is_taxi_order'] = false;
+                }
+                
+                $data[] = $order_data;
+            }
+
+            // Prepare response with pagination headers
+            $response = new WP_REST_Response($data, 200);
+            $response->header('X-WP-Total', $total_count);
+            $response->header('X-WP-TotalPages', ceil($total_count / $limit));
+            
+            return $response;
         }
 
         public function get_order_details($request) {
@@ -493,18 +692,199 @@ if (!class_exists('MPTBM_Rest_Api')) {
         }
 
         private function prepare_booking_data($booking) {
+            // Get booking ID
+            $booking_id = $booking->ID;
+            
+            // Try to get customer ID from different possible meta fields
+            $customer_id = get_post_meta($booking_id, 'mptbm_user_id', true);
+            if (empty($customer_id)) {
+                $customer_id = get_post_meta($booking_id, '_customer_user', true);
+            }
+            
+            // Fallback: get customer ID from WooCommerce order if available
+            if (empty($customer_id) && class_exists('WooCommerce')) {
+                $order_id = get_post_meta($booking_id, 'mptbm_order_id', true);
+                if (!empty($order_id)) {
+                    $order = wc_get_order($order_id);
+                    if ($order) {
+                        $customer_id = $order->get_customer_id();
+                    }
+                }
+            }
+            
+            // Try to get transport ID from different possible meta fields
+            $transport_id = get_post_meta($booking_id, 'mptbm_transport_id', true);
+            if (empty($transport_id)) {
+                $transport_id = get_post_meta($booking_id, 'mptbm_id', true);
+            }
+            
+            // Try to get pickup location from different possible meta fields
+            $pickup_location = get_post_meta($booking_id, 'mptbm_pickup_location', true);
+            if (empty($pickup_location)) {
+                $pickup_location = get_post_meta($booking_id, 'mptbm_start_place', true);
+            }
+            
+            // Try to get dropoff location from different possible meta fields
+            $dropoff_location = get_post_meta($booking_id, 'mptbm_dropoff_location', true);
+            if (empty($dropoff_location)) {
+                $dropoff_location = get_post_meta($booking_id, 'mptbm_end_place', true);
+            }
+            
+            // Try to get journey date from different possible meta fields
+            $journey_date = get_post_meta($booking_id, 'mptbm_journey_date', true);
+            if (empty($journey_date)) {
+                $journey_date = get_post_meta($booking_id, 'mptbm_date', true);
+            }
+            
+            // Try to get journey time from different possible meta fields
+            $journey_time = get_post_meta($booking_id, 'mptbm_journey_time', true);
+            if (empty($journey_time)) {
+                $journey_time = get_post_meta($booking_id, 'mptbm_time', true);
+            }
+            
+            // Try to get total price from different possible meta fields
+            $total_price = get_post_meta($booking_id, 'mptbm_total_price', true);
+            if (empty($total_price)) {
+                $total_price = get_post_meta($booking_id, 'mptbm_tp', true);
+            }
+            
+            // Get order ID if available
+            $order_id = get_post_meta($booking_id, 'mptbm_order_id', true);
+            if (empty($order_id)) {
+                $order_id = get_post_meta($booking_id, 'mptbm_wc_order_id', true);
+            }
+            
+            // Get customer information
+            $customer_name = get_post_meta($booking_id, 'mptbm_customer_name', true);
+            if (empty($customer_name)) {
+                $customer_name = get_post_meta($booking_id, 'mptbm_billing_name', true);
+            }
+            
+            $customer_email = get_post_meta($booking_id, 'mptbm_customer_email', true);
+            if (empty($customer_email)) {
+                $customer_email = get_post_meta($booking_id, 'mptbm_billing_email', true);
+            }
+            
+            $customer_phone = get_post_meta($booking_id, 'mptbm_customer_phone', true);
+            if (empty($customer_phone)) {
+                $customer_phone = get_post_meta($booking_id, 'mptbm_billing_phone', true);
+            }
+            
+            // Get passengers and bags information
+            $passengers = get_post_meta($booking_id, 'mptbm_passenger', true);
+            if (empty($passengers)) {
+                $passengers = get_post_meta($booking_id, 'mptbm_passengers', true);
+            }
+            if (empty($passengers)) {
+                $passengers = 1; // Default value
+            }
+            
+            $bags = get_post_meta($booking_id, 'mptbm_bags', true);
+            if (empty($bags)) {
+                $bags = 0; // Default value
+            }
+            
+            
+            // Get extra services
+            $extra_services = get_post_meta($booking_id, 'mptbm_extra_services', true);
+            if (empty($extra_services)) {
+                $extra_services = get_post_meta($booking_id, 'mptbm_service_info', true);
+            }
+            if (!is_array($extra_services)) {
+                $extra_services = array();
+            }
+            
+            // Get return trip information
+            $is_return = get_post_meta($booking_id, 'mptbm_return', true);
+            if (empty($is_return)) {
+                $is_return = get_post_meta($booking_id, 'mptbm_taxi_return', true);
+            }
+            
+            $return_date = get_post_meta($booking_id, 'mptbm_return_date', true);
+            $return_time = get_post_meta($booking_id, 'mptbm_return_time', true);
+            
+            // Get waiting time and fixed hours
+            $waiting_time = get_post_meta($booking_id, 'mptbm_waiting_time', true);
+            $fixed_hours = get_post_meta($booking_id, 'mptbm_fixed_hours', true);
+            
+            // Get distance and duration
+            $distance = get_post_meta($booking_id, 'mptbm_distance', true);
+            $duration = get_post_meta($booking_id, 'mptbm_duration', true);
+            
+            // Get pricing breakdown
+            $base_price = get_post_meta($booking_id, 'mptbm_base_price', true);
+            $extra_service_price = get_post_meta($booking_id, 'mptbm_extra_service_price', true);
+            
+            // Get transport quantity
+            $transport_quantity = get_post_meta($booking_id, 'mptbm_transport_quantity', true);
+            if (empty($transport_quantity)) {
+                $transport_quantity = 1;
+            }
+            
+            // Get payment information
+            $payment_method = get_post_meta($booking_id, 'mptbm_payment_method', true);
+            $order_status = get_post_meta($booking_id, 'mptbm_order_status', true);
+            
+            // Get vehicle details from transport_id using existing function
+            $vehicle_details = array();
+            if (!empty($transport_id)) {
+                $transport_post = get_post($transport_id);
+                if ($transport_post && $transport_post->post_type === 'mptbm_rent') {
+                    $transport_data = $this->prepare_transport_service($transport_post);
+                    $vehicle_details = isset($transport_data['vehicle_details']) ? $transport_data['vehicle_details'] : array();
+                }
+            }
+            
             return array(
-                'id' => $booking->ID,
+                'id' => $booking_id,
                 'status' => $booking->post_status,
                 'date_created' => $booking->post_date,
-                'customer_id' => get_post_meta($booking->ID, '_customer_user', true),
-                'transport_id' => get_post_meta($booking->ID, 'mptbm_transport_id', true),
-                'pickup_location' => get_post_meta($booking->ID, 'mptbm_pickup_location', true),
-                'dropoff_location' => get_post_meta($booking->ID, 'mptbm_dropoff_location', true),
-                'journey_date' => get_post_meta($booking->ID, 'mptbm_journey_date', true),
-                'total_price' => get_post_meta($booking->ID, 'mptbm_total_price', true)
+                'customer_id' => $customer_id,
+                'transport_id' => $transport_id,
+                'pickup_location' => $pickup_location,
+                'dropoff_location' => $dropoff_location,
+                'journey_date' => $journey_date,
+                'journey_time' => $journey_time,
+                'total_price' => $total_price,
+                'order_id' => $order_id,
+                
+                // Customer information
+                'customer_name' => $customer_name,
+                'customer_email' => $customer_email,
+                'customer_phone' => $customer_phone,
+                
+                // Trip details
+                'passengers' => intval($passengers),
+                'bags' => intval($bags),
+                'transport_quantity' => intval($transport_quantity),
+                
+                // Vehicle details
+                'vehicle_details' => $vehicle_details,
+                
+                // Return trip
+                'is_return' => !empty($is_return) && $is_return != '0',
+                'return_date' => $return_date,
+                'return_time' => $return_time,
+                
+                // Additional services
+                'waiting_time' => $waiting_time,
+                'fixed_hours' => $fixed_hours,
+                'extra_services' => $extra_services,
+                
+                // Route information
+                'distance' => $distance,
+                'duration' => $duration,
+                
+                // Pricing breakdown
+                'base_price' => $base_price,
+                'extra_service_price' => $extra_service_price,
+                
+                // Payment information
+                'payment_method' => $payment_method,
+                'order_status' => $order_status
             );
         }
+
 
         private function prepare_order_data($order) {
             return array(
@@ -533,14 +913,60 @@ if (!class_exists('MPTBM_Rest_Api')) {
             $price_based = get_post_meta($post->ID, 'mptbm_price_based', true);
             
             // Get vehicle details
-            $max_passenger = get_post_meta($post->ID, 'mptbm_max_passenger', true);
-            $max_bag = get_post_meta($post->ID, 'mptbm_max_bag', true);
-            $vehicle_name = get_post_meta($post->ID, 'mptbm_vehicle_name', true) ?: $post->post_title;
-            $vehicle_model = get_post_meta($post->ID, 'mptbm_vehicle_model', true) ?: '';
-            $vehicle_type = get_post_meta($post->ID, 'mptbm_vehicle_type', true) ?: '';
-            $engine_type = get_post_meta($post->ID, 'mptbm_engine_type', true) ?: '';
-            $fuel_type = get_post_meta($post->ID, 'mptbm_fuel_type', true) ?: '';
-            $transmission = get_post_meta($post->ID, 'mptbm_transmission', true) ?: '';
+            $max_passenger = get_post_meta($post->ID, 'mptbm_maximum_passenger', true);
+            $max_bag = get_post_meta($post->ID, 'mptbm_maximum_bag', true);
+            $vehicle_name = $post->post_title;
+            
+            // Get features from mptbm_features array
+            $features = get_post_meta($post->ID, 'mptbm_features', true);
+            $vehicle_name_custom = '';
+            $vehicle_model = '';
+            $engine_type = '';
+            $fuel_type = '';
+            $transmission = '';
+            $seating_capacity = '';
+            $custom_features = array();
+            
+            if (is_array($features)) {
+                foreach ($features as $feature) {
+                    if (isset($feature['label']) && isset($feature['text'])) {
+                        switch ($feature['label']) {
+                            case 'Name':
+                                $vehicle_name_custom = $feature['text'];
+                                break;
+                            case 'Model':
+                                $vehicle_model = $feature['text'];
+                                break;
+                            case 'Engine':
+                                $engine_type = $feature['text'];
+                                break;
+                            case 'Fuel Type':
+                                $fuel_type = $feature['text'];
+                                break;
+                            case 'Transmission':
+                                $transmission = $feature['text'];
+                                break;
+                            case 'Seating Capacity':
+                                $seating_capacity = $feature['text'];
+                                break;
+                            default:
+                                // Handle custom features
+                                $custom_features[] = array(
+                                    'label' => $feature['label'],
+                                    'value' => $feature['text'],
+                                    'icon' => isset($feature['icon']) ? $feature['icon'] : '',
+                                    'image' => isset($feature['image']) ? $feature['image'] : ''
+                                );
+                                break;
+                        }
+                    }
+                }
+            }
+            
+            // Use custom name if available, otherwise use post title
+            if (!empty($vehicle_name_custom)) {
+                $vehicle_name = $vehicle_name_custom;
+            }
             
             // Get vehicle image
             $image_id = get_post_thumbnail_id($post->ID);
@@ -558,13 +984,14 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 'vehicle_details' => array(
                     'name' => $vehicle_name,
                     'model' => $vehicle_model,
-                    'type' => $vehicle_type,
                     'engine' => $engine_type,
                     'fuel' => $fuel_type,
                     'transmission' => $transmission,
-                    'max_passenger' => $max_passenger,
-                    'max_bag' => $max_bag,
-                    'image' => $image_url
+                    'seating_capacity' => $seating_capacity,
+                    'max_passenger' => !empty($max_passenger) ? intval($max_passenger) : null,
+                    'max_bag' => !empty($max_bag) ? intval($max_bag) : null,
+                    'image' => $image_url,
+                    'custom_features' => $custom_features
                 ),
                 'schedule' => get_post_meta($post->ID, 'mptbm_schedule', true),
                 'currency' => $this->get_currency_symbol()
@@ -584,21 +1011,25 @@ if (!class_exists('MPTBM_Rest_Api')) {
             
             // Application password authentication
             if ($auth_type === 'application_password') {
-                // Require authentication for application passwords
-                if (!is_user_logged_in()) {
+                // For REST API requests, check if user is authenticated through WordPress REST API
+                $current_user = wp_get_current_user();
+                
+                // If no user is authenticated, return false
+                if (!$current_user || $current_user->ID === 0) {
                     return false;
                 }
                 
                 // Check if user has appropriate capabilities
-                return current_user_can('edit_posts') || current_user_can('manage_options');
+                return user_can($current_user, 'edit_posts') || user_can($current_user, 'manage_options');
             }
             
             // Default: require authentication
-            if (!is_user_logged_in()) {
+            $current_user = wp_get_current_user();
+            if (!$current_user || $current_user->ID === 0) {
                 return false;
             }
             
-            return current_user_can('edit_posts') || current_user_can('manage_options');
+            return user_can($current_user, 'edit_posts') || user_can($current_user, 'manage_options');
         }
 
         // Argument definitions
@@ -1643,7 +2074,7 @@ if (!class_exists('MPTBM_Rest_Api')) {
             $params = $request->get_params();
             
             // Additional security check: Only allow users to update their own data unless they're admin
-            $current_user_id = get_current_user_id();
+            $current_user = wp_get_current_user();
             $auth_type = MP_Global_Function::get_settings('mp_global_settings', 'api_authentication_type', 'application_password');
             
             // For custom API key authentication, allow updates (key provides authentication)
@@ -1652,7 +2083,7 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 // Allow the operation to proceed
             } else {
                 // For application password authentication, enforce user permissions
-                if (!$current_user_id) {
+                if (!$current_user || $current_user->ID === 0) {
                     return new WP_Error(
                         'authentication_required',
                         esc_html__('Authentication required to update customer data', 'ecab-taxi-booking-manager'),
@@ -1661,7 +2092,7 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 }
                 
                 // Only allow users to update their own data, or admins to update any data
-                if ($current_user_id != $customer_id && !current_user_can('manage_options')) {
+                if ($current_user->ID != $customer_id && !user_can($current_user, 'manage_options')) {
                     return new WP_Error(
                         'insufficient_permissions',
                         esc_html__('You can only update your own customer data', 'ecab-taxi-booking-manager'),
@@ -1749,20 +2180,24 @@ if (!class_exists('MPTBM_Rest_Api')) {
             
             // Application password authentication
             if ($auth_type === 'application_password') {
-                // Require authentication and admin capabilities
-                if (!is_user_logged_in()) {
+                // For REST API requests, check if user is authenticated through WordPress REST API
+                $current_user = wp_get_current_user();
+                
+                // If no user is authenticated, return false
+                if (!$current_user || $current_user->ID === 0) {
                     return false;
                 }
                 
-                return current_user_can('manage_options');
+                return user_can($current_user, 'manage_options');
             }
             
             // Default: require authentication and admin capabilities
-            if (!is_user_logged_in()) {
+            $current_user = wp_get_current_user();
+            if (!$current_user || $current_user->ID === 0) {
                 return false;
             }
             
-            return current_user_can('manage_options');
+            return user_can($current_user, 'manage_options');
         }
         
         // Get locations
@@ -2619,6 +3054,128 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 )
             );
         }
+        
+        private function get_orders_query_args() {
+            return array(
+                'per_page' => array(
+                    'required' => false,
+                    'type' => 'integer',
+                    'description' => 'Number of orders per page (max 100)',
+                    'default' => 20,
+                    'validate_callback' => function($param) { return is_numeric($param) && $param >= 1; }
+                ),
+                'offset' => array(
+                    'required' => false,
+                    'type' => 'integer',
+                    'description' => 'Offset for pagination',
+                    'default' => 0,
+                    'validate_callback' => function($param) { return is_numeric($param) && $param >= 0; }
+                ),
+                'status' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'Order status (e.g., pending, processing, completed, any)',
+                    'default' => 'any'
+                ),
+                'orderby' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'Field to order by (date, id, total)',
+                    'default' => 'date'
+                ),
+                'order' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'Order direction (ASC or DESC)',
+                    'default' => 'DESC'
+                ),
+                'customer_id' => array(
+                    'required' => false,
+                    'type' => 'integer',
+                    'description' => 'Filter by customer ID'
+                ),
+                'start_date' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'Filter by start date (YYYY-MM-DD)'
+                ),
+                'end_date' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'Filter by end date (YYYY-MM-DD)'
+                ),
+                'taxi_orders_only' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'If "true", only include taxi booking related orders'
+                )
+            );
+        }
+
+        private function get_bookings_query_args() {
+            return array(
+                'status' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'Booking status (publish, trash, any)',
+                    'default' => 'publish',
+                    'validate_callback' => function($param) {
+                        $allowed_statuses = array('publish', 'trash', 'any', 'draft', 'private');
+                        return in_array($param, $allowed_statuses);
+                    }
+                ),
+                'per_page' => array(
+                    'required' => false,
+                    'type' => 'integer',
+                    'description' => 'Number of bookings per page (max 100)',
+                    'default' => -1,
+                    'validate_callback' => function($param) { 
+                        return is_numeric($param) && ($param == -1 || ($param >= 1 && $param <= 100)); 
+                    }
+                ),
+                'offset' => array(
+                    'required' => false,
+                    'type' => 'integer',
+                    'description' => 'Offset for pagination',
+                    'default' => 0,
+                    'validate_callback' => function($param) { return is_numeric($param) && $param >= 0; }
+                ),
+                'orderby' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'Field to order by (date, id, title)',
+                    'default' => 'date',
+                    'validate_callback' => function($param) {
+                        $allowed_fields = array('date', 'id', 'title', 'modified');
+                        return in_array($param, $allowed_fields);
+                    }
+                ),
+                'order' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'Order direction (ASC or DESC)',
+                    'default' => 'DESC',
+                    'validate_callback' => function($param) {
+                        return in_array(strtoupper($param), array('ASC', 'DESC'));
+                    }
+                ),
+                'customer_id' => array(
+                    'required' => false,
+                    'type' => 'integer',
+                    'description' => 'Filter by customer ID'
+                ),
+                'transport_id' => array(
+                    'required' => false,
+                    'type' => 'integer',
+                    'description' => 'Filter by transport service ID'
+                ),
+                'order_id' => array(
+                    'required' => false,
+                    'type' => 'integer',
+                    'description' => 'Filter by WooCommerce order ID'
+                )
+            );
+        }
 
         // Validate custom API key
         private function validate_custom_api_key($request) {
@@ -2652,6 +3209,39 @@ if (!class_exists('MPTBM_Rest_Api')) {
         private function generate_custom_api_key() {
             $key = wp_generate_password(32, false); // Generate 32 character key without special chars
             return $key;
+        }
+        
+        // Generate API Key endpoint
+        public function generate_api_key($request) {
+            $new_key = $this->generate_custom_api_key();
+            
+            // Optionally save it immediately
+            $save_immediately = $request->get_param('save_immediately');
+            
+            if ($save_immediately === 'true') {
+                $global_settings = get_option('mp_global_settings', array());
+                $global_settings['api_custom_key'] = $new_key;
+                update_option('mp_global_settings', $global_settings);
+                
+                return new WP_REST_Response(
+                    array(
+                        'message' => esc_html__('New API key generated and saved successfully', 'ecab-taxi-booking-manager'),
+                        'api_key' => $new_key,
+                        'saved' => true
+                    ), 
+                    200
+                );
+            }
+            
+            return new WP_REST_Response(
+                array(
+                    'message' => esc_html__('New API key generated successfully', 'ecab-taxi-booking-manager'),
+                    'api_key' => $new_key,
+                    'saved' => false,
+                    'note' => esc_html__('Save this key securely. You can use it in your API requests or save it via the settings endpoint.', 'ecab-taxi-booking-manager')
+                ), 
+                200
+            );
         }
         
         // Add a helper method to ensure consistent currency formatting

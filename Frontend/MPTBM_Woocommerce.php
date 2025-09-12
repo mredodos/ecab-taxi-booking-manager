@@ -132,6 +132,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$cart_item_data['line_total'] = $total_price;
 				$cart_item_data['line_subtotal'] = $total_price;
 				$cart_item_data['mptbm_passengers'] = isset($_POST['mptbm_passengers']) ? absint($_POST['mptbm_passengers']) : 1;
+				$cart_item_data['mptbm_bags'] = isset($_POST['mptbm_bags']) ? absint($_POST['mptbm_bags']) : 0;
 				if ($return > 1 && MP_Global_Function::get_settings('mptbm_general_settings', 'enable_return_in_different_date') == 'yes') {
 					$return_target_date = isset($_POST['mptbm_return_date']) ? sanitize_text_field($_POST['mptbm_return_date']) : '';
 					$return_target_time = isset($_POST['mptbm_return_time']) ? sanitize_text_field($_POST['mptbm_return_time']) : '';
@@ -250,10 +251,18 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$item->add_meta_data(esc_html__('Transport Quantity ', 'ecab-taxi-booking-manager'), $transport_quantity);
 				// Add passenger count to order meta only if the setting is enabled
 				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
-				if ($show_passengers === 'yes') {
+        if ($show_passengers === 'yes') {
 					$passengers = isset($values['mptbm_passengers']) ? absint($values['mptbm_passengers']) : 1;
 					$item->add_meta_data(esc_html__('Number of Passengers', 'ecab-taxi-booking-manager'), $passengers);
 					$item->add_meta_data('_mptbm_passengers', $passengers);
+				}
+				
+				// Add bag count to order meta only if the setting is enabled
+				$show_bags = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_bags', 'no');
+        if ($show_bags === 'yes') {
+					$bags = isset($values['mptbm_bags']) ? absint($values['mptbm_bags']) : 0;
+					$item->add_meta_data(esc_html__('Number of Bags', 'ecab-taxi-booking-manager'), $bags);
+					$item->add_meta_data('_mptbm_bags', $bags);
 				}
 
 				if ($return && $return > 1) {
@@ -434,7 +443,7 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$order_status = $order->get_status();
 				$order_meta = get_post_meta($order_id);
 				$payment_method = isset($order_meta['_payment_method_title'][0]) ? $order_meta['_payment_method_title'][0] : '';
-				$user_id = isset($order_meta['_customer_user'][0]) ? $order_meta['_customer_user'][0] : '';
+				$user_id = $order->get_customer_id();
 
 				if ($order_status != 'failed') {
 					foreach ($order->get_items() as $item_id => $item) {
@@ -498,8 +507,14 @@ if (!class_exists('MPTBM_Woocommerce')) {
 
 							// Only add passenger count if the setting is enabled
 							$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
-							if ($show_passengers === 'yes') {
+        if ($show_passengers === 'yes') {
 								$data['mptbm_passengers'] = MP_Global_Function::get_order_item_meta($item_id, '_mptbm_passengers') ?? 1;
+							}
+							
+							// Only add bag count if the setting is enabled
+							$show_bags = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_bags', 'no');
+        if ($show_bags === 'yes') {
+								$data['mptbm_bags'] = MP_Global_Function::get_order_item_meta($item_id, '_mptbm_bags') ?? 0;
 							}
 
 							$booking_data = apply_filters('add_mptbm_booking_data', $data, $post_id);
@@ -671,12 +686,22 @@ if (!class_exists('MPTBM_Woocommerce')) {
 						<?php } ?>
 						<?php 
 						$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
-						if ($show_passengers === 'yes') { 
+        if ($show_passengers === 'yes') {
 						?>
 						<li>
 							<span class="fas fa-users"></span>
 							<h6 class="_mR_xs"><?php esc_html_e('Number of Passengers', 'ecab-taxi-booking-manager'); ?> :</h6>
 							<span><?php echo esc_html($cart_item['mptbm_passengers']); ?></span>
+						</li>
+						<?php } ?>
+						<?php 
+						$show_bags = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_bags', 'no');
+        if ($show_bags === 'yes') {
+						?>
+						<li>
+							<span class="fa fa-shopping-bag"></span>
+							<h6 class="_mR_xs"><?php esc_html_e('Number of Bags', 'ecab-taxi-booking-manager'); ?> :</h6>
+							<span><?php echo esc_html($cart_item['mptbm_bags']); ?></span>
 						</li>
 						<?php } ?>
 						<li>

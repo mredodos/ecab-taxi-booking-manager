@@ -479,13 +479,25 @@ document.addEventListener('DOMContentLoaded', function() {
 				<?php } ?>
 				<?php 
 				$show_passengers = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_passengers', 'no');
-				if ($show_passengers === 'jumpa') { 
+        if ($show_passengers === 'jumpa') {
 				?>
 				<div class="inputList">
 					<label class="fdColumn">
 						<span><?php echo mptbm_get_translation('number_of_passengers_label', __('Number of Passengers', 'ecab-taxi-booking-manager')); ?></span>
 						<input type="number" class="formControl" name="mptbm_passengers" id="mptbm_passengers" min="1" value="1" />
 						<i class="fas fa-users mptbm_left_icon allCenter" style="position: absolute; left: 87%;"></i>
+					</label>
+				</div>
+				<?php } ?>
+				<?php 
+				$show_bags = MP_Global_Function::get_settings('mptbm_general_settings', 'show_number_of_bags', 'no');
+        if ($show_bags === 'jumpa') {
+				?>
+				<div class="inputList">
+					<label class="fdColumn">
+						<span><?php echo mptbm_get_translation('number_of_bags_label', __('Number of Bags', 'ecab-taxi-booking-manager')); ?></span>
+						<input type="number" class="formControl" name="mptbm_bags" id="mptbm_bags" min="0" value="0" />
+						<i class="fa fa-shopping-bag mptbm_left_icon allCenter" style="position: absolute; left: 87%;"></i>
 					</label>
 				</div>
 				<?php } ?>

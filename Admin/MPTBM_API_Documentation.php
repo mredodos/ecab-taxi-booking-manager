@@ -55,6 +55,17 @@ if (!class_exists('MPTBM_API_Documentation')) {
                         our taxi booking system with your applications. All endpoints are accessible via HTTPS at:
                         <code><?php echo esc_html($rest_url); ?></code>
                     </p>
+                    
+                    <div class="notice notice-success" style="margin: 20px 0; padding: 15px;">
+                        <h3 style="margin-top: 0;">✅ Recent API Improvements</h3>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Authentication Fixed:</strong> Both Application Passwords and Custom API Keys now work correctly</li>
+                            <li><strong>Orders Endpoint Enhanced:</strong> No more duplicates, added pagination and filtering options</li>
+                            <li><strong>Endpoint Consistency:</strong> All endpoints use proper naming (e.g., <code>/bookings/{id}</code> not <code>/booking/{id}</code>)</li>
+                            <li><strong>New Features:</strong> API key generation, better error handling, rate limiting</li>
+                        </ul>
+                        <p><strong>Important:</strong> Use <code>/bookings/{id}</code> (plural) for individual booking access, not <code>/booking/{id}</code>.</p>
+                    </div>
                 </div>
 
                 <div class="mptbm-api-settings">
@@ -88,11 +99,16 @@ if (!class_exists('MPTBM_API_Documentation')) {
                                     echo 'No Authentication Required';
                                     break;
                                 case 'application_password':
-                                    echo 'Application Passwords';
+                                    echo 'Application Passwords (Recommended)';
+                                    break;
+                                case 'custom_api_key':
+                                    echo 'Custom API Key';
                                     break;
                                 case 'jwt':
                                     echo 'JWT Authentication';
                                     break;
+                                default:
+                                    echo ucfirst(str_replace('_', ' ', $auth_type));
                             }
                             ?>
                         </li>
@@ -121,6 +137,22 @@ if (!class_exists('MPTBM_API_Documentation')) {
                         <p>
                             For more details, see the <a href="https://developer.wordpress.org/rest-api/using-the-rest-api/authentication/#application-passwords" target="_blank">WordPress REST API Authentication Documentation</a>.
                         </p>
+                    <?php elseif ($auth_type === 'custom_api_key'): ?>
+                        <p>
+                            This API uses Custom API Key for authentication. To use the API:
+                        </p>
+                        <ol>
+                            <li>Generate or set a custom API key in the Global Settings</li>
+                            <li>Include the API key in your requests using one of these methods:</li>
+                        </ol>
+                        <p><strong>Method 1: X-API-Key Header</strong></p>
+                        <pre><code>X-API-Key: your-custom-api-key</code></pre>
+                        <p><strong>Method 2: Authorization Header</strong></p>
+                        <pre><code>Authorization: Bearer your-custom-api-key</code></pre>
+                        <p>
+                            <strong>Generate API Key:</strong> You can generate a secure API key by making a POST request to:
+                            <code>/wp-json/mptbm/v1/generate-api-key</code> (requires admin authentication)
+                        </p>
                     <?php elseif ($auth_type === 'jwt'): ?>
                         <p>JWT Authentication is currently not implemented.</p>
                     <?php endif; ?>
@@ -134,12 +166,11 @@ if (!class_exists('MPTBM_API_Documentation')) {
                         If you exceed this limit, you'll receive a 429 (Too Many Requests) response.
                     </p>
                     <p>
-                        The following headers are included in API responses:
+                        Note: Rate-limit headers are not included. For listing endpoints that support pagination (e.g., <code>/orders</code>), the following pagination headers are provided:
                     </p>
                     <ul>
-                        <li><code>X-RateLimit-Limit</code>: The number of requests allowed per minute</li>
-                        <li><code>X-RateLimit-Remaining</code>: The number of requests remaining in the current window</li>
-                        <li><code>X-RateLimit-Reset</code>: The time when the rate limit will reset (Unix timestamp)</li>
+                        <li><code>X-WP-Total</code>: The total number of matching items</li>
+                        <li><code>X-WP-TotalPages</code>: Total number of pages for the current <code>per_page</code> value</li>
                     </ul>
                 </div>
                 <?php endif; ?>
@@ -202,6 +233,32 @@ if (!class_exists('MPTBM_API_Documentation')) {
                     <!-- Booking Endpoints -->
                     <div class="endpoint-section">
                         <h3>Manage Bookings</h3>
+                        
+                        <!-- Get All Bookings -->
+                        <div class="endpoint-details">
+                            <h4>Get All Bookings</h4>
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/bookings</code></p>
+                            <p><strong>Authentication Required:</strong> Yes</p>
+                            
+                            <div class="example-response">
+                                <h4>Example Response</h4>
+                                <pre>
+[
+    {
+        "id": 123,
+        "status": "publish",
+        "date_created": "2023-05-10T14:30:45",
+        "customer_id": "456",
+        "transport_id": "789",
+        "pickup_location": "Downtown",
+        "dropoff_location": "Airport",
+        "journey_date": "2023-05-15",
+        "total_price": "75.00"
+    }
+]
+                                </pre>
+                            </div>
+                        </div>
                         
                         <!-- Create Booking -->
                         <div class="endpoint-details">
@@ -334,8 +391,28 @@ if (!class_exists('MPTBM_API_Documentation')) {
                         <!-- Get Booking -->
                         <div class="endpoint-details">
                             <h4>Get Booking Details</h4>
-                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/booking/{id}</code></p>
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/bookings/{id}</code></p>
                             <p><strong>Authentication Required:</strong> Yes</p>
+                            
+                            <div class="example-response">
+                                <h4>Example Response</h4>
+                                <pre>
+{
+    "id": 123,
+    "status": "publish",
+    "date_created": "2023-05-10T14:30:45",
+    "customer_id": "456",
+    "transport_id": "789",
+    "pickup_location": "Downtown",
+    "dropoff_location": "Airport",
+    "journey_date": "2023-05-15",
+    "journey_time": "14:00",
+    "total_price": "75.00",
+    "extra_services": [],
+    "return": false
+}
+                                </pre>
+                            </div>
                         </div>
 
                         <!-- Update Booking -->
@@ -622,6 +699,307 @@ if (!class_exists('MPTBM_API_Documentation')) {
                         </div>
                     </div>
 
+                    <!-- Orders Endpoint -->
+                    <div class="endpoint-section">
+                        <h3>Manage Orders (WooCommerce Integration)</h3>
+                        
+                        <!-- Get All Orders -->
+                        <div class="endpoint-details">
+                            <h4>Get All Orders (Enhanced with Filtering)</h4>
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/orders</code></p>
+                            <p><strong>Authentication Required:</strong> Yes</p>
+                            <p><strong>Note:</strong> Requires WooCommerce to be active. Fixed to prevent duplicates and includes advanced filtering.</p>
+                            
+                            <div class="parameters">
+                                <h4>Query Parameters</h4>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Default</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>per_page</td>
+                                            <td>integer</td>
+                                            <td>20</td>
+                                            <td>Number of orders per page (max 100)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>offset</td>
+                                            <td>integer</td>
+                                            <td>0</td>
+                                            <td>Pagination offset</td>
+                                        </tr>
+                                        <tr>
+                                            <td>status</td>
+                                            <td>string</td>
+                                            <td>any</td>
+                                            <td>Filter by order status (pending, processing, completed, any)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>orderby</td>
+                                            <td>string</td>
+                                            <td>date</td>
+                                            <td>Sort field (date, id, total)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>order</td>
+                                            <td>string</td>
+                                            <td>DESC</td>
+                                            <td>Sort direction (ASC, DESC)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>customer_id</td>
+                                            <td>integer</td>
+                                            <td>-</td>
+                                            <td>Filter by customer ID</td>
+                                        </tr>
+                                        <tr>
+                                            <td>start_date</td>
+                                            <td>string</td>
+                                            <td>-</td>
+                                            <td>Filter by start date (YYYY-MM-DD)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>end_date</td>
+                                            <td>string</td>
+                                            <td>-</td>
+                                            <td>Filter by end date (YYYY-MM-DD)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>taxi_orders_only</td>
+                                            <td>string</td>
+                                            <td>-</td>
+                                            <td>Set to "true" to only include taxi booking related orders</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="example-response">
+                                <h4>Example Usage</h4>
+                                <pre><code>GET /wp-json/mptbm/v1/orders?per_page=10&orderby=date&order=DESC&taxi_orders_only=true</code></pre>
+                                
+                                <h4>Example Response</h4>
+                                <pre>
+[
+    {
+        "id": 789,
+        "status": "completed",
+        "date_created": "2023-05-15 10:30:45",
+        "total": "75.00",
+        "customer_id": 456,
+        "payment_method": "stripe",
+        "payment_method_title": "Credit Card",
+        "is_taxi_order": true,
+        "taxi_booking_id": 123,
+        "booking_details": {
+            "pickup_location": "Downtown",
+            "dropoff_location": "Airport",
+            "journey_date": "2023-05-15",
+            "journey_time": "14:00"
+        }
+    }
+]
+                                </pre>
+                                
+                                <h4>Response Headers</h4>
+                                <ul>
+                                    <li><code>X-WP-Total</code>: Total number of matching orders</li>
+                                    <li><code>X-WP-TotalPages</code>: Total pages for current per_page value</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Get Order Details -->
+                        <div class="endpoint-details">
+                            <h4>Get Order Details</h4>
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/orders/{id}</code></p>
+                            <p><strong>Authentication Required:</strong> Yes</p>
+                            
+                            <div class="example-response">
+                                <h4>Example Response</h4>
+                                <pre>
+{
+    "id": 789,
+    "status": "completed",
+    "date_created": "2023-05-15 10:30:45",
+    "total": "75.00",
+    "customer_id": 456,
+    "payment_method": "stripe",
+    "payment_method_title": "Credit Card",
+    "items": [
+        {
+            "product_id": 101,
+            "name": "Taxi Booking Service",
+            "quantity": 1,
+            "total": "75.00",
+            "tax": "0.00"
+        }
+    ]
+}
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customers Endpoint -->
+                    <div class="endpoint-section">
+                        <h3>Manage Customers</h3>
+                        
+                        <!-- Get All Customers -->
+                        <div class="endpoint-details">
+                            <h4>Get All Customers</h4>
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/customers</code></p>
+                            <p><strong>Authentication Required:</strong> Yes</p>
+                            
+                            <div class="example-response">
+                                <h4>Example Response</h4>
+                                <pre>
+[
+    {
+        "id": 456,
+        "username": "johndoe",
+        "email": "john@example.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_registered": "2023-01-15 09:30:00"
+    }
+]
+                                </pre>
+                            </div>
+                        </div>
+                        
+                        <!-- Get Customer Details -->
+                        <div class="endpoint-details">
+                            <h4>Get Customer Details</h4>
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/customers/{id}</code></p>
+                            <p><strong>Authentication Required:</strong> Yes</p>
+                            
+                            <div class="example-response">
+                                <h4>Example Response</h4>
+                                <pre>
+{
+    "id": 456,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "date_registered": "2023-01-15 09:30:00",
+    "billing_address": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "company": "Example Corp",
+        "address_1": "123 Main St",
+        "address_2": "Suite 100",
+        "city": "Anytown",
+        "state": "CA",
+        "postcode": "12345",
+        "country": "US",
+        "email": "john@example.com",
+        "phone": "+1-555-123-4567"
+    }
+}
+                                </pre>
+                            </div>
+                        </div>
+                        
+                        <!-- Get Customer Bookings -->
+                        <div class="endpoint-details">
+                            <h4>Get Customer's Bookings</h4>
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/customers/{id}/bookings</code></p>
+                            <p><strong>Authentication Required:</strong> Yes</p>
+                            
+                            <div class="example-response">
+                                <h4>Example Response</h4>
+                                <pre>
+[
+    {
+        "id": 123,
+        "status": "publish",
+        "date_created": "2023-05-10T14:30:45",
+        "customer_id": "456",
+        "transport_id": "789",
+        "pickup_location": "Downtown",
+        "dropoff_location": "Airport",
+        "journey_date": "2023-05-15",
+        "total_price": "75.00"
+    }
+]
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Management Endpoints -->
+                    <div class="endpoint-section">
+                        <h3>API Management (Admin Only)</h3>
+                        
+                        <!-- Generate API Key -->
+                        <div class="endpoint-details">
+                            <h4>Generate API Key</h4>
+                            <p><strong>Endpoint:</strong> <code>POST /wp-json/mptbm/v1/generate-api-key</code></p>
+                            <p><strong>Authentication Required:</strong> Admin only</p>
+                            
+                            <div class="parameters">
+                                <h4>Parameters</h4>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Required</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>save_immediately</td>
+                                            <td>string</td>
+                                            <td>No</td>
+                                            <td>Set to "true" to save the key automatically</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="example-response">
+                                <h4>Example Response</h4>
+                                <pre>
+{
+    "message": "New API key generated successfully",
+    "api_key": "abc123def456ghi789jkl012mno345pq",
+    "saved": false,
+    "note": "Save this key securely. You can use it in your API requests or save it via the settings endpoint."
+}
+                                </pre>
+                            </div>
+                        </div>
+                        
+                        <!-- Get API Settings -->
+                        <div class="endpoint-details">
+                            <h4>Get API Settings</h4>
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/settings</code></p>
+                            <p><strong>Authentication Required:</strong> Admin only</p>
+                            
+                            <div class="example-response">
+                                <h4>Example Response</h4>
+                                <pre>
+{
+    "api_enabled": "on",
+    "api_authentication_type": "custom_api_key",
+    "api_custom_key": "abc123def456ghi789jkl012mno345pq",
+    "api_rate_limit": 60
+}
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Quote Endpoint -->
                     <div class="endpoint-section">
                         <h3>Get Fare Quote</h3>
@@ -666,8 +1044,9 @@ if (!class_exists('MPTBM_API_Documentation')) {
 
                     <!-- Locations Endpoint -->
                     <div class="endpoint-section">
-                        <h3>Get Locations</h3>
+                        <h3>Locations</h3>
                         <div class="endpoint-details">
+                            <h4>Get Locations</h4>
                             <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/locations</code></p>
                             
                             <div class="parameters">
@@ -694,6 +1073,136 @@ if (!class_exists('MPTBM_API_Documentation')) {
                                             <td>No</td>
                                             <td>Get available end locations for a start location</td>
                                         </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="endpoint-details">
+                            <h4>Add/Update Location Price</h4>
+                            <p><strong>Endpoint:</strong> <code>POST /wp-json/mptbm/v1/locations</code></p>
+                            <p><strong>Authentication Required:</strong> Yes</p>
+                            <div class="parameters">
+                                <h4>Body Parameters</h4>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Required</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>transport_id</td>
+                                            <td>integer</td>
+                                            <td>Yes</td>
+                                            <td>ID of the transport service (manual pricing)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>start_location</td>
+                                            <td>string</td>
+                                            <td>Yes</td>
+                                            <td>Start location name</td>
+                                        </tr>
+                                        <tr>
+                                            <td>end_location</td>
+                                            <td>string</td>
+                                            <td>Yes</td>
+                                            <td>End location name</td>
+                                        </tr>
+                                        <tr>
+                                            <td>price</td>
+                                            <td>number</td>
+                                            <td>Yes</td>
+                                            <td>Price for this route</td>
+                                        </tr>
+                                        <tr>
+                                            <td>return_enabled</td>
+                                            <td>boolean</td>
+                                            <td>No</td>
+                                            <td>Whether return is enabled for this route</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Transports Endpoint -->
+                    <div class="endpoint-section">
+                        <h3>Filter Transports</h3>
+                        <div class="endpoint-details">
+                            <p><strong>Endpoint:</strong> <code>POST /wp-json/mptbm/v1/filter</code></p>
+                            <div class="parameters">
+                                <h4>Body Parameters</h4>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Required</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>price_based</td><td>string</td><td>No</td><td>Filter by price type (dynamic, manual, fixed_hourly)</td></tr>
+                                        <tr><td>passengers</td><td>integer</td><td>No</td><td>Minimum passenger capacity</td></tr>
+                                        <tr><td>bags</td><td>integer</td><td>No</td><td>Minimum baggage capacity</td></tr>
+                                        <tr><td>start_location</td><td>string</td><td>No</td><td>Start location for route filtering</td></tr>
+                                        <tr><td>end_location</td><td>string</td><td>No</td><td>End location for route filtering</td></tr>
+                                        <tr><td>booking_date</td><td>string</td><td>No</td><td>Booking date (YYYY-MM-DD)</td></tr>
+                                        <tr><td>return</td><td>boolean</td><td>No</td><td>Whether return journey is required</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extra Services Endpoint -->
+                    <div class="endpoint-section">
+                        <h3>Extra Services</h3>
+                        <div class="endpoint-details">
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/extra-services</code></p>
+                            <div class="parameters">
+                                <h4>Query Parameters</h4>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Required</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>transport_id</td><td>integer</td><td>Yes</td><td>ID of the transport service</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Endpoint -->
+                    <div class="endpoint-section">
+                        <h3>Statistics</h3>
+                        <div class="endpoint-details">
+                            <p><strong>Endpoint:</strong> <code>GET /wp-json/mptbm/v1/statistics</code></p>
+                            <div class="parameters">
+                                <h4>Query Parameters</h4>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Required</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>period</td><td>string</td><td>No</td><td>Preset range: week, month, year (default: month)</td></tr>
+                                        <tr><td>date_from</td><td>string</td><td>No</td><td>Start date (YYYY-MM-DD)</td></tr>
+                                        <tr><td>date_to</td><td>string</td><td>No</td><td>End date (YYYY-MM-DD)</td></tr>
                                     </tbody>
                                 </table>
                             </div>
