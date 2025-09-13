@@ -164,7 +164,7 @@
 						
 						if (!isset(MPTBM_Wc_Checkout_Fields_Helper::$default_woocommerce_checkout_fields[$key][$name]) && 
 							(!isset($options[$key][$name]) || (isset($options[$key][$name]) && $options[$key][$name]['deleted'] == 'deleted'))) {
-							$options[$key][$name] = $this->prepare_field_data($type);
+							$options[$key][$name] = $this->prepare_field_data($type, false);
 							update_option('mptbm_custom_checkout_fields', $options);
 						}
 					}
@@ -186,15 +186,30 @@
 							$options = array();
 						}
 						
-						if (substr($name, 0, strlen($key . '_')) !== $key . '_') {
-							$name = $key . '_' . $name;
+						// Initialize section if not exists
+						if (!isset($options[$key])) {
+							$options[$key] = array();
 						}
 						
-						if (isset($options[$key][$old_name]) && $old_name != $name) {
-							unset($options[$key][$old_name]);
+						// If it's a WooCommerce default field, just apply modifications
+						$default_fields = MPTBM_Wc_Checkout_Fields_Helper::woocommerce_default_checkout_fields();
+						if (isset($default_fields[$key][$name])) {
+							// It's a default WooCommerce field, apply modifications
+							$field_data = $this->prepare_field_data($type, true);
+							$options[$key][$name] = $field_data;
+						} else {
+							// It's a custom field, handle name changes
+							if (substr($name, 0, strlen($key . '_')) !== $key . '_') {
+								$name = $key . '_' . $name;
+							}
+							
+							if (isset($options[$key][$old_name]) && $old_name != $name) {
+								unset($options[$key][$old_name]);
+							}
+							
+							$options[$key][$name] = $this->prepare_field_data($type, false);
 						}
 						
-						$options[$key][$name] = $this->prepare_field_data($type);
 						update_option('mptbm_custom_checkout_fields', $options);
 					}
 				}
@@ -234,7 +249,7 @@
 			/**
 			 * Prepare field data based on type
 			 */
-			private function prepare_field_data($type) {
+			private function prepare_field_data($type, $is_default_field = false) {
 				$label = isset($_POST['label']) ? sanitize_text_field($_POST['label']) : null;
 				$class = isset($_POST['class']) ? sanitize_text_field($_POST['class']) : null;
 				$validate = isset($_POST['validate']) ? sanitize_text_field($_POST['validate']) : null;
@@ -246,14 +261,18 @@
 				$field_data = array(
 					'type' => $type,
 					'label' => $label,
-					'class' => explode(',', $class),
-					'validate' => explode(',', $validate),
+					'class' => !empty($class) ? explode(',', $class) : array(),
+					'validate' => !empty($validate) ? explode(',', $validate) : array(),
 					'placeholder' => $placeholder,
 					'priority' => $priority,
 					'required' => $required == 'on' ? '1' : '',
 					'disabled' => $disabled == 'on' ? '1' : '',
-					'custom_field' => '1',
 				);
+				
+				// Only mark as custom field if it's not a default WooCommerce field
+				if (!$is_default_field) {
+					$field_data['custom_field'] = '1';
+				}
 				
 				// Add options if type is select
 				if ($type == 'select' && isset($_POST['option_value']) && isset($_POST['option_text'])) {

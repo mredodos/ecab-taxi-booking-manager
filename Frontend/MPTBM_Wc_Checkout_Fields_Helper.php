@@ -846,98 +846,84 @@
 			if (!isset($custom['billing'])) {
 				$custom['billing'] = array();
 			}
-				
-				// Handle default WooCommerce fields that might be disabled
-				$default_fields = self::woocommerce_default_checkout_fields();
-				if (isset($default_fields['billing'])) {
-					foreach ($default_fields['billing'] as $key => $default_field) {
-						// Check if this field is disabled in custom settings
-						if (isset($custom['billing'][$key]) && 
-							!empty($custom['billing'][$key]['disabled']) && 
-							$custom['billing'][$key]['disabled'] === '1') {
-							// Remove the field completely
-							unset($fields[$key]);
-						}
+			
+			// Apply custom modifications to existing fields
+			foreach ($custom['billing'] as $key => $field) {
+				// Skip deleted fields
+				if (!empty($field['deleted']) && $field['deleted'] === 'deleted') {
+					// Remove the field completely
+					if (isset($fields[$key])) {
+						unset($fields[$key]);
 					}
+					continue;
 				}
 				
-				// Ensure all default WooCommerce fields are present if not explicitly disabled
-				$default_fields = self::woocommerce_default_checkout_fields();
-				if (isset($default_fields['billing'])) {
-					foreach ($default_fields['billing'] as $key => $default_field) {
-						// If field is not in custom settings, it should be visible by default
-						if (!isset($custom['billing'][$key]) && !isset($fields[$key])) {
-							$fields[$key] = $default_field;
-						}
+				// Handle disabled fields
+				if (!empty($field['disabled']) && $field['disabled'] === '1') {
+					// Remove the field completely
+					if (isset($fields[$key])) {
+						unset($fields[$key]);
 					}
+					continue;
 				}
 				
-				// Handle custom fields
-				if (!isset($custom['billing']) || !is_array($custom['billing'])) {
-					return $fields;
-				}
-				
-				foreach ($custom['billing'] as $key => $field) {
-					// Skip deleted fields
-					if (!empty($field['deleted']) && $field['deleted'] === 'deleted') {
-						continue;
+				// Apply modifications to existing fields
+				if (isset($fields[$key])) {
+					// Apply ONLY the specific modifications, don't overwrite everything
+					
+					// Handle label modification
+					if (isset($field['label']) && $field['label'] !== '') {
+						$fields[$key]['label'] = $field['label'];
 					}
 					
-					// Skip fields with empty type - let them be handled by default logic
-					if (empty($field['type'])) {
-						continue;
+					// Handle required field properly
+					if (isset($field['required'])) {
+						$fields[$key]['required'] = ($field['required'] === '1') ? true : false;
 					}
 					
-					// Handle disabled fields
-					if (!empty($field['disabled']) && $field['disabled'] === '1') {
-						if (isset($fields[$key])) {
-							// Remove the field completely from the array
-							unset($fields[$key]);
-						}
-					} else {
-						// Field is enabled, merge custom settings
-						if (isset($fields[$key])) {
-							// Merge custom settings with existing field
-							$fields[$key] = array_merge($fields[$key], $field);
-							
-							// Preserve important default values
-										foreach (['type', 'autocomplete'] as $important_key) {
-								if (isset($fields[$key][$important_key]) && 
-												(!isset($field[$important_key]) || $field[$important_key] === '')) {
-									// Keep the original value
-											}
-										}
-										
-							// Handle required field properly
-										if (isset($field['required'])) {
-								$fields[$key]['required'] = ($field['required'] === '1') ? true : false;
-										}
-										
-										// Ensure validate array is properly handled
-										if (isset($field['validate']) && is_array($field['validate']) && 
-											isset($field['validate'][0]) && $field['validate'][0] === '') {
-								// Keep original validate array
-								unset($fields[$key]['validate']);
-											}
-									} else {
-										// It's a completely new custom field
-										if (isset($field['required'])) {
-											$field['required'] = ($field['required'] === '1') ? true : false;
-										}
-							
-							// Add data attribute for JavaScript targeting
-							if (!isset($field['custom_attributes'])) {
-								$field['custom_attributes'] = array();
-							}
-							$field['custom_attributes']['data-mptbm-custom-field'] = '1';
-							
-							$fields[$key] = $field;
-						}
+					// Handle priority (position)
+					if (isset($field['priority']) && $field['priority'] !== '') {
+						$fields[$key]['priority'] = intval($field['priority']);
 					}
+					
+					// Handle placeholder
+					if (isset($field['placeholder']) && $field['placeholder'] !== '') {
+						$fields[$key]['placeholder'] = $field['placeholder'];
+					}
+					
+					// Handle class array properly
+					if (isset($field['class']) && is_array($field['class']) && !empty($field['class'])) {
+						$fields[$key]['class'] = $field['class'];
+					}
+					
+					// Handle validate array properly
+					if (isset($field['validate']) && is_array($field['validate']) && !empty($field['validate'])) {
+						$fields[$key]['validate'] = $field['validate'];
+					}
+					
+				} else {
+					// It's a completely new custom field
+					if (isset($field['required'])) {
+						$field['required'] = ($field['required'] === '1') ? true : false;
+					}
+					
+					// Handle priority (position)
+					if (isset($field['priority']) && $field['priority'] !== '') {
+						$field['priority'] = intval($field['priority']);
+					}
+					
+					// Add data attribute for JavaScript targeting
+					if (!isset($field['custom_attributes'])) {
+						$field['custom_attributes'] = array();
+					}
+					$field['custom_attributes']['data-mptbm-custom-field'] = '1';
+					
+					$fields[$key] = $field;
 				}
-				
-				return $fields;
 			}
+			
+			return $fields;
+		}
 			
 			/**
 			 * Modify shipping fields using WooCommerce's specific filter
@@ -950,71 +936,78 @@
 					$custom['shipping'] = array();
 				}
 				
-				// Handle default WooCommerce fields that might be disabled
-				$default_fields = self::woocommerce_default_checkout_fields();
-				if (isset($default_fields['shipping'])) {
-					foreach ($default_fields['shipping'] as $key => $default_field) {
-						// Check if this field is disabled in custom settings
-						if (isset($custom['shipping'][$key]) && 
-							!empty($custom['shipping'][$key]['disabled']) && 
-							$custom['shipping'][$key]['disabled'] === '1') {
-							// Remove the field completely
-							unset($fields[$key]);
-						}
-					}
-				}
-				
-				// Ensure all default WooCommerce fields are present if not explicitly disabled
-				$default_fields = self::woocommerce_default_checkout_fields();
-				if (isset($default_fields['shipping'])) {
-					foreach ($default_fields['shipping'] as $key => $default_field) {
-						// If field is not in custom settings, it should be visible by default
-						if (!isset($custom['shipping'][$key]) && !isset($fields[$key])) {
-							$fields[$key] = $default_field;
-						}
-					}
-				}
-				
-				// Handle custom fields
-				if (!isset($custom['shipping']) || !is_array($custom['shipping'])) {
-					return $fields;
-				}
-				
+				// Apply custom modifications to existing fields
 				foreach ($custom['shipping'] as $key => $field) {
 					// Skip deleted fields
 					if (!empty($field['deleted']) && $field['deleted'] === 'deleted') {
+						// Remove the field completely
+						if (isset($fields[$key])) {
+							unset($fields[$key]);
+						}
 						continue;
 					}
 					
 					// Handle disabled fields
 					if (!empty($field['disabled']) && $field['disabled'] === '1') {
+						// Remove the field completely
 						if (isset($fields[$key])) {
-							// Remove the field completely from the array
 							unset($fields[$key]);
 						}
-					} else {
-						// Field is enabled, merge custom settings
-						if (isset($fields[$key])) {
-							$fields[$key] = array_merge($fields[$key], $field);
-							
-							// Handle required field properly
-							if (isset($field['required'])) {
-								$fields[$key]['required'] = ($field['required'] === '1') ? true : false;
+						continue;
+					}
+					
+					// Apply modifications to existing fields
+					if (isset($fields[$key])) {
+						// Apply ONLY the specific modifications, don't overwrite everything
+						
+						// Handle label modification
+						if (isset($field['label']) && $field['label'] !== '') {
+							$fields[$key]['label'] = $field['label'];
 						}
-					} else {
-							// It's a completely new custom field
-							if (isset($field['required'])) {
-								$field['required'] = ($field['required'] === '1') ? true : false;
-							}
-							
-							// Add data attribute for JavaScript targeting
-							if (!isset($field['custom_attributes'])) {
-								$field['custom_attributes'] = array();
-							}
-							$field['custom_attributes']['data-mptbm-custom-field'] = '1';
-							
-							$fields[$key] = $field;
+						
+						// Handle required field properly
+						if (isset($field['required'])) {
+							$fields[$key]['required'] = ($field['required'] === '1') ? true : false;
 						}
+						
+						// Handle priority (position)
+						if (isset($field['priority']) && $field['priority'] !== '') {
+							$fields[$key]['priority'] = intval($field['priority']);
+						}
+						
+						// Handle placeholder
+						if (isset($field['placeholder']) && $field['placeholder'] !== '') {
+							$fields[$key]['placeholder'] = $field['placeholder'];
+						}
+						
+						// Handle class array properly
+						if (isset($field['class']) && is_array($field['class']) && !empty($field['class'])) {
+							$fields[$key]['class'] = $field['class'];
+						}
+						
+						// Handle validate array properly
+						if (isset($field['validate']) && is_array($field['validate']) && !empty($field['validate'])) {
+							$fields[$key]['validate'] = $field['validate'];
+						}
+						
+					} else {
+						// It's a completely new custom field
+						if (isset($field['required'])) {
+							$field['required'] = ($field['required'] === '1') ? true : false;
+						}
+						
+						// Handle priority (position)
+						if (isset($field['priority']) && $field['priority'] !== '') {
+							$field['priority'] = intval($field['priority']);
+						}
+						
+						// Add data attribute for JavaScript targeting
+						if (!isset($field['custom_attributes'])) {
+							$field['custom_attributes'] = array();
+						}
+						$field['custom_attributes']['data-mptbm-custom-field'] = '1';
+						
+						$fields[$key] = $field;
 					}
 				}
 				
@@ -1032,64 +1025,78 @@
 					$custom['order'] = array();
 				}
 				
-				// Handle default WooCommerce fields that might be disabled
-				$default_fields = self::woocommerce_default_checkout_fields();
-				if (isset($default_fields['order'])) {
-					foreach ($default_fields['order'] as $key => $default_field) {
-						// Check if this field is disabled in custom settings
-						if (isset($custom['order'][$key]) && 
-							!empty($custom['order'][$key]['disabled']) && 
-							$custom['order'][$key]['disabled'] === '1') {
-							// Remove the field completely
-							unset($fields['order'][$key]);
-						}
-					}
-				}
-				
-				// Ensure all default WooCommerce fields are present if not explicitly disabled
-				$default_fields = self::woocommerce_default_checkout_fields();
-				if (isset($default_fields['order'])) {
-					foreach ($default_fields['order'] as $key => $default_field) {
-						// If field is not in custom settings, it should be visible by default
-						if (!isset($custom['order'][$key]) && !isset($fields['order'][$key])) {
-							$fields['order'][$key] = $default_field;
-						}
-					}
-				}
-				
-				// Handle custom fields
-				if (!isset($custom['order']) || !is_array($custom['order'])) {
-					return $fields;
-				}
-				
+				// Apply custom modifications to existing fields
 				foreach ($custom['order'] as $key => $field) {
 					// Skip deleted fields
 					if (!empty($field['deleted']) && $field['deleted'] === 'deleted') {
+						// Remove the field completely
+						if (isset($fields['order'][$key])) {
+							unset($fields['order'][$key]);
+						}
 						continue;
 					}
 					
 					// Handle disabled fields
 					if (!empty($field['disabled']) && $field['disabled'] === '1') {
+						// Remove the field completely
 						if (isset($fields['order'][$key])) {
-							// Remove the field completely from the array
 							unset($fields['order'][$key]);
 						}
-							} else {
-						// Field is enabled, merge custom settings
-						if (isset($fields['order'][$key])) {
-							$fields['order'][$key] = array_merge($fields['order'][$key], $field);
-							
-							// Handle required field properly
-							if (isset($field['required'])) {
-								$fields['order'][$key]['required'] = ($field['required'] === '1') ? true : false;
-							}
-						} else {
-							// It's a completely new custom field
-							if (isset($field['required'])) {
-								$field['required'] = ($field['required'] === '1') ? true : false;
-							}
-							$fields['order'][$key] = $field;
+						continue;
+					}
+					
+					// Apply modifications to existing fields
+					if (isset($fields['order'][$key])) {
+						// Apply ONLY the specific modifications, don't overwrite everything
+						
+						// Handle label modification
+						if (isset($field['label']) && $field['label'] !== '') {
+							$fields['order'][$key]['label'] = $field['label'];
 						}
+						
+						// Handle required field properly
+						if (isset($field['required'])) {
+							$fields['order'][$key]['required'] = ($field['required'] === '1') ? true : false;
+						}
+						
+						// Handle priority (position)
+						if (isset($field['priority']) && $field['priority'] !== '') {
+							$fields['order'][$key]['priority'] = intval($field['priority']);
+						}
+						
+						// Handle placeholder
+						if (isset($field['placeholder']) && $field['placeholder'] !== '') {
+							$fields['order'][$key]['placeholder'] = $field['placeholder'];
+						}
+						
+						// Handle class array properly
+						if (isset($field['class']) && is_array($field['class']) && !empty($field['class'])) {
+							$fields['order'][$key]['class'] = $field['class'];
+						}
+						
+						// Handle validate array properly
+						if (isset($field['validate']) && is_array($field['validate']) && !empty($field['validate'])) {
+							$fields['order'][$key]['validate'] = $field['validate'];
+						}
+						
+					} else {
+						// It's a completely new custom field
+						if (isset($field['required'])) {
+							$field['required'] = ($field['required'] === '1') ? true : false;
+						}
+						
+						// Handle priority (position)
+						if (isset($field['priority']) && $field['priority'] !== '') {
+							$field['priority'] = intval($field['priority']);
+						}
+						
+						// Add data attribute for JavaScript targeting
+						if (!isset($field['custom_attributes'])) {
+							$field['custom_attributes'] = array();
+						}
+						$field['custom_attributes']['data-mptbm-custom-field'] = '1';
+						
+						$fields['order'][$key] = $field;
 					}
 				}
 				
