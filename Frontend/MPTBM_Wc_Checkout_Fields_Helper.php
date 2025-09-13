@@ -122,11 +122,18 @@
 			return $fields;
 		}
 		
-			public static function woocommerce_default_checkout_fields() {
-				// Use a static variable to cache the fields once translations are available
-				static $cached_fields = null;
-				
-				if ($cached_fields === null) {
+		public static function woocommerce_default_checkout_fields() {
+			// Use a static variable to cache the fields once translations are available
+			static $cached_fields = null;
+			
+			// Check if we need to force cache refresh
+			$force_refresh = get_transient('mptbm_force_cache_refresh');
+			if ($force_refresh) {
+				$cached_fields = null;
+				delete_transient('mptbm_force_cache_refresh');
+			}
+			
+			if ($cached_fields === null) {
 					$cached_fields = array
 					(
 						"billing" => array(
@@ -1151,6 +1158,34 @@
 				print_r($custom);
 				echo '</pre>';
 				echo '</div>';
+			}
+			
+			/**
+			 * Clear cache and reload fields
+			 */
+			public static function clear_cache_and_reload() {
+				// Clear the static cache by calling the function with a special flag
+				// Since $cached_fields is a static local variable, we need to reset it differently
+				// We'll use a different approach - set a transient to force cache refresh
+				set_transient('mptbm_force_cache_refresh', time(), 60);
+				
+				// Clear any transients
+				delete_transient('mptbm_checkout_fields_cache');
+				delete_transient('mptbm_checkout_fields_cache_timestamp');
+				
+				// Clear any options cache
+				wp_cache_delete('mptbm_custom_checkout_fields', 'options');
+				
+				// Clear WooCommerce checkout fields cache
+				wp_cache_delete('checkout_fields', 'woocommerce');
+				wp_cache_delete('checkout_fields_billing', 'woocommerce');
+				wp_cache_delete('checkout_fields_shipping', 'woocommerce');
+				wp_cache_delete('checkout_fields_order', 'woocommerce');
+				
+				// Clear all object cache
+				wp_cache_flush();
+				
+				return true;
 			}
 		}
 		

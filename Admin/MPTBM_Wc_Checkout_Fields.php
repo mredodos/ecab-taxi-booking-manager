@@ -103,7 +103,28 @@
 				$post_action = isset($_POST['action']) ? sanitize_text_field($_POST['action']) : null;
 				$get_action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : null;
 				
-				if ($post_action == 'add' || $post_action == 'edit') {
+				// Handle cache clear action
+				if ($post_action == 'mptbm_clear_cache') {
+					if (check_admin_referer('mptbm_clear_cache', 'mptbm_clear_cache_nonce')) {
+						MPTBM_Wc_Checkout_Fields_Helper::clear_cache_and_reload();
+						add_action('admin_notices', function() {
+							echo '<div class="notice notice-success is-dismissible"><p><strong>Cache cleared successfully!</strong> All checkout fields have been reloaded from WooCommerce.</p></div>';
+						});
+					}
+				} else if ($post_action == 'mptbm_reset_fields') {
+					if (check_admin_referer('mptbm_reset_fields', 'mptbm_reset_fields_nonce')) {
+						// Clear all custom field modifications
+						delete_option('mptbm_custom_checkout_fields');
+						delete_option('mptbm_custom_checkout_fields_timestamp');
+						
+						// Clear all caches
+						MPTBM_Wc_Checkout_Fields_Helper::clear_cache_and_reload();
+						
+						add_action('admin_notices', function() {
+							echo '<div class="notice notice-success is-dismissible"><p><strong>Fields reset successfully!</strong> All custom modifications have been deleted and fields reset to default WooCommerce fields.</p></div>';
+						});
+					}
+				} else if ($post_action == 'add' || $post_action == 'edit') {
 					$this->process_checkout_field_form();
 				} else if ($get_action == 'delete') {
 					$this->process_checkout_field_delete();
@@ -312,6 +333,33 @@
                                 <li class="tab-item" data-tabs-target="#mptbm_wc_order_field_settings"><i class="dashicons dashicons-format-status text-primary"></i> Order Fields <i class="i i-chevron-right dashicons dashicons-arrow-right-alt2"></i></li>
                             </ul>
                             <div class="tab-content-container">
+                                <!-- Cache Management Header -->
+                                <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px;">
+                                    <h4 style="margin: 0 0 10px 0;">Cache Management</h4>
+                                    <p style="margin: 0 0 10px 0; color: #666;">If field modifications are not appearing, try these options:</p>
+                                    
+                                    <div style="margin: 10px 0;">
+                                        <form method="post" style="display: inline-block; margin-right: 10px;">
+                                            <?php wp_nonce_field('mptbm_clear_cache', 'mptbm_clear_cache_nonce'); ?>
+                                            <input type="hidden" name="action" value="mptbm_clear_cache">
+                                            <input type="submit" name="clear_cache" class="button button-secondary" value="🔄 Clear Cache Only" 
+                                                   onclick="return confirm('Clear cache and reload fields from WooCommerce?');">
+                                        </form>
+                                        
+                                        <form method="post" style="display: inline-block;">
+                                            <?php wp_nonce_field('mptbm_reset_fields', 'mptbm_reset_fields_nonce'); ?>
+                                            <input type="hidden" name="action" value="mptbm_reset_fields">
+                                            <input type="submit" name="reset_fields" class="button button-secondary" value="🗑️ Reset All Fields" 
+                                                   onclick="return confirm('WARNING: This will delete ALL custom field modifications and reset to default WooCommerce fields. Are you sure?');">
+                                        </form>
+                                    </div>
+                                    
+                                    <div style="font-size: 11px; color: #666;">
+                                        <strong>Clear Cache Only:</strong> Reloads fields but keeps modifications. | 
+                                        <strong>Reset All Fields:</strong> Deletes all custom modifications.
+                                    </div>
+                                </div>
+                                
 								<?php do_action('mptbm_wc_checkout_tab_content', MPTBM_Wc_Checkout_Fields_Helper::get_checkout_fields_for_list()); ?>
                             </div>
                         </div>

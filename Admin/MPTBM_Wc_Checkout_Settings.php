@@ -71,6 +71,7 @@
                                     <input type="submit" name="submit" class="button-primary" value="Submit">
                                 </p>
                             </div>
+                            
                         </form>
                     </div>
                 </div>
@@ -80,6 +81,7 @@
 				if (!current_user_can('administrator')) {
 					wp_die(esc_html__('You do not have sufficient permissions to access this page.'));
 				}
+				
 				$action = isset($_POST['action']) ? sanitize_text_field($_POST['action']) : null;
 				if (isset($action) && $action == 'mptbm_wc_checkout_settings') {
 					if (check_admin_referer('mptbm_wc_checkout_settings', 'mptbm_wc_checkout_settings_nonce')) {
