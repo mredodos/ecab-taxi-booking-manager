@@ -17,18 +17,28 @@
 			public static $default_app_required_fields;
 			private $allowed_extensions;
 			private $allowed_mime_types;
-			public function __construct() {
-				$this->error = new WP_Error();
-				$this->init();
+		public function __construct() {
+			$this->error = new WP_Error();
+			$this->init();
+			
+			// Handle section visibility using proper WooCommerce hooks (after init)
+			$this->handle_section_visibility();
 				
 				// Check if custom checkout system is disabled
 				if (self::disable_custom_checkout_system()) {
 					// If disabled, don't add any filters or actions that modify checkout
+				// BUT still allow custom fields to be added
+				add_action('woocommerce_after_checkout_billing_form', function() { $this->output_file_fields_for_section('billing'); });
+				add_action('woocommerce_after_checkout_shipping_form', function() { $this->output_file_fields_for_section('shipping'); });
+				add_action('woocommerce_after_checkout_order_form', function() { $this->output_file_fields_for_section('order'); });
 					return;
 				}
 				
-				// Always inject our fields, even if Pro is active - use high priority to run last
-				add_filter('woocommerce_checkout_fields', array($this, 'inject_checkout_fields'), 999);
+			// Use WooCommerce's specific filters instead of woocommerce_checkout_fields
+			// This follows WooCommerce best practices and doesn't interfere with other plugins
+			add_filter('woocommerce_billing_fields', array($this, 'modify_billing_fields'), 10, 1);
+			add_filter('woocommerce_shipping_fields', array($this, 'modify_shipping_fields'), 10, 1);
+			add_filter('woocommerce_checkout_fields', array($this, 'modify_order_fields'), 10, 1);
 				
 				// Render file fields after WooCommerce fields in each section
 				add_action('woocommerce_after_checkout_billing_form', function() { $this->output_file_fields_for_section('billing'); });
@@ -37,7 +47,81 @@
 				
 				// Add CSS for hidden fields
 				add_action('wp_head', array($this, 'add_hidden_field_css'));
+			
+			// Debug info for administrators (uncomment if needed)
+			// add_action('woocommerce_before_checkout_form', array($this, 'debug_field_status'));
+		}
+		
+		/**
+		 * Handle section visibility using proper WooCommerce hooks
+		 */
+		private function handle_section_visibility() {
+			// Debug: Log the settings options
+			if (current_user_can('administrator')) {
+				error_log('MPTBM Debug - Settings Options: ' . print_r(self::$settings_options, true));
+				error_log('MPTBM Debug - hide_checkout_order_additional_information_section function exists: ' . (method_exists($this, 'hide_checkout_order_additional_information_section') ? 'yes' : 'no'));
 			}
+			
+			// Handle hiding the order review section (only the review, not payment)
+			if (self::hide_checkout_order_review_section()) {
+				if (current_user_can('administrator')) {
+					error_log('MPTBM Debug - Hiding Order Review Section (review only, keeping payment)');
+				}
+				// Only remove the order review, keep the payment section
+				remove_action('woocommerce_checkout_order_review', 'woocommerce_order_review', 10);
+			}
+			
+		// Handle hiding the additional information section
+		$hide_additional_info = self::hide_checkout_order_additional_information_section();
+		if (current_user_can('administrator')) {
+			error_log('MPTBM Debug - hide_checkout_order_additional_information_section() returned: ' . ($hide_additional_info ? 'true' : 'false'));
+			error_log('MPTBM Debug - Settings options array: ' . print_r(self::$settings_options, true));
+			if (is_array(self::$settings_options)) {
+				error_log('MPTBM Debug - hide_checkout_order_additional_information key exists: ' . (array_key_exists('hide_checkout_order_additional_information', self::$settings_options) ? 'yes' : 'no'));
+				if (array_key_exists('hide_checkout_order_additional_information', self::$settings_options)) {
+					error_log('MPTBM Debug - hide_checkout_order_additional_information value: ' . self::$settings_options['hide_checkout_order_additional_information']);
+				}
+			}
+		}
+		
+		if ($hide_additional_info) {
+			if (current_user_can('administrator')) {
+				error_log('MPTBM Debug - Hiding Additional Information Section using woocommerce_enable_order_notes_field filter');
+			}
+			// Usa il filtro corretto per nascondere la sezione "Additional Information"
+			add_filter('woocommerce_enable_order_notes_field', '__return_false', 9999);
+		}
+			
+		// Check if order comments field is disabled (only disable the field, not the whole section)
+		// Solo se "Hide Order Additional Information Section" NON è attivo
+		if (!$hide_additional_info) {
+			$custom = get_option('mptbm_custom_checkout_fields', array());
+			$order_comments_disabled = false;
+			if (isset($custom['order']['order_comments']) && isset($custom['order']['order_comments']['disabled']) && $custom['order']['order_comments']['disabled'] == '1') {
+				$order_comments_disabled = true;
+			}
+			
+			// If order comments is disabled, only disable the field, not the whole section
+			if ($order_comments_disabled) {
+				if (current_user_can('administrator')) {
+					error_log('MPTBM Debug - Order Comments Disabled, disabling only the field using unset');
+				}
+				// Usa unset per rimuovere solo il campo, non l'intera sezione
+				add_filter('woocommerce_checkout_fields', array($this, 'remove_order_comments_field_only'), 20);
+			}
+		}
+		}
+		
+		/**
+		 * Remove only the order_comments field, not the entire section
+		 */
+		public function remove_order_comments_field_only($fields) {
+			if (isset($fields['order']['order_comments'])) {
+				unset($fields['order']['order_comments']);
+			}
+			return $fields;
+		}
+		
 			public static function woocommerce_default_checkout_fields() {
 				// Use a static variable to cache the fields once translations are available
 				static $cached_fields = null;
@@ -324,30 +408,31 @@
 				$fields['billing'] = $checkout_fields['billing'];
 				$fields['shipping'] = $checkout_fields['shipping'];
 				$fields['order'] = $checkout_fields['order'];
-				if (isset(self::$settings_options) && is_array(self::$settings_options)) {
-					foreach (self::$settings_options as $key => $key_fields) {
-						if (is_array($key_fields)) {
-							foreach ($key_fields as $name => $field_array) {
-								if (self::check_deleted_field($key, $name)) {
-									unset($fields[$key][$name]);
-								} else {
-									$fields[$key][$name] = $field_array;
-								}
+				
+				// Get custom fields from admin/pro
+				$custom = get_option('mptbm_custom_checkout_fields', array());
+				
+				// Process custom fields for each section
+				foreach (['billing', 'shipping', 'order'] as $section) {
+					if (isset($custom[$section]) && is_array($custom[$section])) {
+						foreach ($custom[$section] as $name => $field_array) {
+							// Skip deleted fields
+							if (self::check_deleted_field($section, $name)) {
+								unset($fields[$section][$name]);
+								continue;
+							}
+							
+							// Add or update field
+							$fields[$section][$name] = $field_array;
+							
+							// Mark as disabled if needed
+							if (self::check_disabled_field($section, $name)) {
+								$fields[$section][$name]['disabled'] = '1';
 							}
 						}
 					}
 				}
-				if (isset($checkout_fields) && is_array($checkout_fields)) {
-					foreach ($checkout_fields as $key => $key_fields) {
-						if (is_array($key_fields)) {
-							foreach ($key_fields as $name => $field_array) {
-								if (self::check_disabled_field($key, $name)) {
-									$fields[$key][$name]['disabled'] = '1';
-								}
-							}
-						}
-					}
-				}
+				
 				return $fields;
 			}
 			public function get_checkout_fields_for_checkout() {
@@ -383,26 +468,21 @@
 					}
 				}
 				
-				// Handle section visibility
-				if (self::hide_checkout_order_review_section()) {
-					remove_action('woocommerce_checkout_order_review', 'woocommerce_order_review', 10);
-				}
-				
-				if (self::hide_checkout_order_additional_information_section() || (isset($fields['order']) && is_array($fields['order']) && count($fields['order']) == 0)) {
-					add_filter('woocommerce_enable_order_notes_field', '__return_false');
-				}
+				// Section visibility is now handled in the constructor via handle_section_visibility()
 				
 				return $fields;
 			}
 			public static function hide_checkout_order_additional_information_section() {
-				if (!self::$settings_options || (is_array(self::$settings_options) && ((!array_key_exists('hide_checkout_order_additional_information', self::$settings_options)) || (array_key_exists('hide_checkout_order_additional_information', self::$settings_options) && self::$settings_options['hide_checkout_order_additional_information'] == 'on')))) {
+				if (is_array(self::$settings_options) && array_key_exists('hide_checkout_order_additional_information', self::$settings_options) && self::$settings_options['hide_checkout_order_additional_information'] == 'on') {
 					return true;
 				}
+				return false;
 			}
 			public static function hide_checkout_order_review_section() {
-				if ((is_array(self::$settings_options) && ((array_key_exists('hide_checkout_order_review', self::$settings_options) && self::$settings_options['hide_checkout_order_review'] == 'on')))) {
+				if (is_array(self::$settings_options) && array_key_exists('hide_checkout_order_review', self::$settings_options) && self::$settings_options['hide_checkout_order_review'] == 'on') {
 					return true;
 				}
+				return false;
 			}
 			public static function disable_custom_checkout_system() {
 				if ((is_array(self::$settings_options) && ((array_key_exists('disable_custom_checkout_system', self::$settings_options) && self::$settings_options['disable_custom_checkout_system'] == 'on')))) {
@@ -418,12 +498,13 @@
 				}
 			}
 			public static function check_disabled_field($key, $name) {
-				$default_disabled_field = array('billing' => array('billing_company' => '', 'billing_country' => '', 'billing_address_1' => '', 'billing_address_2' => '', 'billing_city' => '', 'billing_state' => '', 'billing_postcode' => ''));
-				if ((!isset(self::$settings_options[$key][$name]) && isset($default_disabled_field[$key][$name])) || (isset(self::$settings_options[$key][$name]) && (isset(self::$settings_options[$key][$name]['disabled']) && self::$settings_options[$key][$name]['disabled'] == '1'))) {
+				// Only check if field is explicitly disabled in custom settings
+				if (isset(self::$settings_options[$key][$name]) && 
+					isset(self::$settings_options[$key][$name]['disabled']) && 
+					self::$settings_options[$key][$name]['disabled'] == '1') {
 					return true;
-				} else {
-					return false;
 				}
+					return false;
 			}
 			public static function default_woocommerce_checkout_required_fields() {
 				return array(
@@ -748,164 +829,259 @@
 				return $fields;
 			}
 			/**
-			 * Inject merged default and custom fields into WooCommerce checkout
+			 * Modify billing fields using WooCommerce's specific filter
+			 * This follows WooCommerce best practices and doesn't interfere with other plugins
 			 */
-			public function inject_checkout_fields($fields) {
-				// Get default fields
-				$default = self::woocommerce_default_checkout_fields();
-				// Get custom fields from admin/pro
-				$custom = get_option('mptbm_custom_checkout_fields', array());
+		public function modify_billing_fields($fields) {
+			$custom = get_option('mptbm_custom_checkout_fields', array());
+			
+			// Initialize custom fields if not exists
+			if (!isset($custom['billing'])) {
+				$custom['billing'] = array();
+			}
 				
-				// Core WooCommerce fields that should not be completely removed
-				$core_fields = array(
-					'billing' => array('billing_first_name', 'billing_last_name', 'billing_email', 'billing_phone'),
-					'shipping' => array('shipping_first_name', 'shipping_last_name'),
-					'order' => array()
-				);
+				// Handle default WooCommerce fields that might be disabled
+				$default_fields = self::woocommerce_default_checkout_fields();
+				if (isset($default_fields['billing'])) {
+					foreach ($default_fields['billing'] as $key => $default_field) {
+						// Check if this field is disabled in custom settings
+						if (isset($custom['billing'][$key]) && 
+							!empty($custom['billing'][$key]['disabled']) && 
+							$custom['billing'][$key]['disabled'] === '1') {
+							// Remove the field completely
+							unset($fields[$key]);
+						}
+					}
+				}
 				
-				// Merge for each section
-				foreach (['billing','shipping','order'] as $section) {
-					$section_fields = isset($default[$section]) ? $default[$section] : array();
-					if (isset($custom[$section]) && is_array($custom[$section])) {
-						foreach ($custom[$section] as $key => $field) {
-							if ((empty($field['deleted']) || $field['deleted'] !== 'deleted')) {
-								if ((empty($field['disabled']) || $field['disabled'] !== '1')) {
-									// Field is enabled, merge custom settings with default field
-									if (isset($section_fields[$key])) {
-										// Merge custom settings with existing default field, but preserve important defaults
-										$merged_field = array_merge($section_fields[$key], $field);
-										
-										// Preserve important default values if custom field has empty values
+				// Ensure all default WooCommerce fields are present if not explicitly disabled
+				$default_fields = self::woocommerce_default_checkout_fields();
+				if (isset($default_fields['billing'])) {
+					foreach ($default_fields['billing'] as $key => $default_field) {
+						// If field is not in custom settings, it should be visible by default
+						if (!isset($custom['billing'][$key]) && !isset($fields[$key])) {
+							$fields[$key] = $default_field;
+						}
+					}
+				}
+				
+				// Handle custom fields
+				if (!isset($custom['billing']) || !is_array($custom['billing'])) {
+					return $fields;
+				}
+				
+				foreach ($custom['billing'] as $key => $field) {
+					// Skip deleted fields
+					if (!empty($field['deleted']) && $field['deleted'] === 'deleted') {
+						continue;
+					}
+					
+					// Skip fields with empty type - let them be handled by default logic
+					if (empty($field['type'])) {
+						continue;
+					}
+					
+					// Handle disabled fields
+					if (!empty($field['disabled']) && $field['disabled'] === '1') {
+						if (isset($fields[$key])) {
+							// Remove the field completely from the array
+							unset($fields[$key]);
+						}
+					} else {
+						// Field is enabled, merge custom settings
+						if (isset($fields[$key])) {
+							// Merge custom settings with existing field
+							$fields[$key] = array_merge($fields[$key], $field);
+							
+							// Preserve important default values
 										foreach (['type', 'autocomplete'] as $important_key) {
-											if (isset($section_fields[$key][$important_key]) && 
+								if (isset($fields[$key][$important_key]) && 
 												(!isset($field[$important_key]) || $field[$important_key] === '')) {
-												$merged_field[$important_key] = $section_fields[$key][$important_key];
+									// Keep the original value
 											}
 										}
 										
-										// Handle required field properly - use custom setting when available
+							// Handle required field properly
 										if (isset($field['required'])) {
-											// Custom setting exists, use it (could be '1', '', or '0')
-											$merged_field['required'] = ($field['required'] === '1') ? true : false;
-										} else {
-											// No custom setting, keep default
-											$merged_field['required'] = isset($section_fields[$key]['required']) ? $section_fields[$key]['required'] : false;
+								$fields[$key]['required'] = ($field['required'] === '1') ? true : false;
 										}
 										
 										// Ensure validate array is properly handled
 										if (isset($field['validate']) && is_array($field['validate']) && 
 											isset($field['validate'][0]) && $field['validate'][0] === '') {
-											if (isset($section_fields[$key]['validate'])) {
-												$merged_field['validate'] = $section_fields[$key]['validate'];
+								// Keep original validate array
+								unset($fields[$key]['validate']);
 											}
-										}
-										
-										$section_fields[$key] = $merged_field;
 									} else {
 										// It's a completely new custom field
-										// Handle required field for new custom fields
 										if (isset($field['required'])) {
 											$field['required'] = ($field['required'] === '1') ? true : false;
 										}
-										$section_fields[$key] = $field;
-									}
-								} else {
-									// Field is disabled
-									if (in_array($key, $core_fields[$section])) {
-										// For core fields, keep them but mark as not required and hidden via CSS
-										$section_fields[$key] = array_merge($section_fields[$key] ?? array(), $field);
-										$section_fields[$key]['required'] = false;
-										
-										// Handle class as array
-										$existing_classes = isset($section_fields[$key]['class']) ? $section_fields[$key]['class'] : array();
-										if (!is_array($existing_classes)) {
-											$existing_classes = array($existing_classes);
-										}
-										$existing_classes[] = 'mptbm-hidden-field';
-										$section_fields[$key]['class'] = $existing_classes;
-									} else {
-										// For custom fields, remove them completely
-										unset($section_fields[$key]);
-									}
-								}
-							} else {
-								// Field is deleted, remove it
-								unset($section_fields[$key]);
+							
+							// Add data attribute for JavaScript targeting
+							if (!isset($field['custom_attributes'])) {
+								$field['custom_attributes'] = array();
 							}
+							$field['custom_attributes']['data-mptbm-custom-field'] = '1';
+							
+							$fields[$key] = $field;
 						}
 					}
-					
-					// Ensure core fields are always present with default values if missing
-					foreach ($core_fields[$section] as $core_field) {
-						if (!isset($section_fields[$core_field]) && isset($default[$section][$core_field])) {
-							$section_fields[$core_field] = $default[$section][$core_field];
-						}
-					}
-					
-					// Remove file fields from the array so WooCommerce doesn't render them
-					foreach ($section_fields as $k => $f) {
-						if (isset($f['type']) && $f['type'] === 'file') {
-							unset($section_fields[$k]);
-						}
-					}
-					// Sort by priority if set
-					uasort($section_fields, function($a, $b) {
-						return ($a['priority'] ?? 0) <=> ($b['priority'] ?? 0);
-					});
-					$fields[$section] = $section_fields;
 				}
 				
-				// Force ensure these critical fields are properly structured and present
-				$critical_fields = ['billing_first_name', 'billing_last_name', 'billing_phone', 'billing_email'];
-				foreach ($critical_fields as $critical_field) {
-					if (!isset($fields['billing'][$critical_field])) {
-						if (isset($default['billing'][$critical_field])) {
-							$fields['billing'][$critical_field] = $default['billing'][$critical_field];
+				return $fields;
+			}
+			
+			/**
+			 * Modify shipping fields using WooCommerce's specific filter
+			 */
+			public function modify_shipping_fields($fields) {
+				$custom = get_option('mptbm_custom_checkout_fields', array());
+				
+				// Initialize custom fields if not exists
+				if (!isset($custom['shipping'])) {
+					$custom['shipping'] = array();
+				}
+				
+				// Handle default WooCommerce fields that might be disabled
+				$default_fields = self::woocommerce_default_checkout_fields();
+				if (isset($default_fields['shipping'])) {
+					foreach ($default_fields['shipping'] as $key => $default_field) {
+						// Check if this field is disabled in custom settings
+						if (isset($custom['shipping'][$key]) && 
+							!empty($custom['shipping'][$key]['disabled']) && 
+							$custom['shipping'][$key]['disabled'] === '1') {
+							// Remove the field completely
+							unset($fields[$key]);
+						}
+					}
+				}
+				
+				// Ensure all default WooCommerce fields are present if not explicitly disabled
+				$default_fields = self::woocommerce_default_checkout_fields();
+				if (isset($default_fields['shipping'])) {
+					foreach ($default_fields['shipping'] as $key => $default_field) {
+						// If field is not in custom settings, it should be visible by default
+						if (!isset($custom['shipping'][$key]) && !isset($fields[$key])) {
+							$fields[$key] = $default_field;
+						}
+					}
+				}
+				
+				// Handle custom fields
+				if (!isset($custom['shipping']) || !is_array($custom['shipping'])) {
+					return $fields;
+				}
+				
+				foreach ($custom['shipping'] as $key => $field) {
+					// Skip deleted fields
+					if (!empty($field['deleted']) && $field['deleted'] === 'deleted') {
+						continue;
+					}
+					
+					// Handle disabled fields
+					if (!empty($field['disabled']) && $field['disabled'] === '1') {
+						if (isset($fields[$key])) {
+							// Remove the field completely from the array
+							unset($fields[$key]);
 						}
 					} else {
-						// Ensure the field has the minimum required structure
-						$field = &$fields['billing'][$critical_field];
-						
-						// Ensure it's not marked as deleted or disabled improperly
-						if (isset($field['deleted']) && $field['deleted'] === 'deleted') {
-							unset($field['deleted']);
+						// Field is enabled, merge custom settings
+						if (isset($fields[$key])) {
+							$fields[$key] = array_merge($fields[$key], $field);
+							
+							// Handle required field properly
+							if (isset($field['required'])) {
+								$fields[$key]['required'] = ($field['required'] === '1') ? true : false;
 						}
-						
-						if (isset($field['disabled']) && $field['disabled'] === '1') {
-							$field['disabled'] = '';
-						}
-						
-						// Ensure required structure with proper defaults
-						if (!isset($field['label']) || $field['label'] === '') {
-							$field['label'] = $default['billing'][$critical_field]['label'];
-						}
-						if (!isset($field['type']) || $field['type'] === '') {
-							$field['type'] = $default['billing'][$critical_field]['type'] ?? 'text';
-						}
-						// Handle required field - keep custom setting if it exists, otherwise use default
-						if (!isset($field['required'])) {
-							$field['required'] = $default['billing'][$critical_field]['required'];
-						} else {
-							// Ensure boolean value
-							$field['required'] = ($field['required'] === '1' || $field['required'] === true) ? true : false;
-						}
-						if (!isset($field['class']) || !is_array($field['class'])) {
-							$field['class'] = $default['billing'][$critical_field]['class'];
-						}
-						if (!isset($field['priority']) || $field['priority'] === '') {
-							$field['priority'] = $default['billing'][$critical_field]['priority'];
-						}
-						if (!isset($field['autocomplete']) || $field['autocomplete'] === '') {
-							$field['autocomplete'] = $default['billing'][$critical_field]['autocomplete'];
-						}
-						// Fix validate array if it's empty or malformed
-						if (!isset($field['validate']) || 
-							(is_array($field['validate']) && count($field['validate']) === 1 && $field['validate'][0] === '')) {
-							if (isset($default['billing'][$critical_field]['validate'])) {
-								$field['validate'] = $default['billing'][$critical_field]['validate'];
-							} else {
-								unset($field['validate']); // Remove empty validate array
+					} else {
+							// It's a completely new custom field
+							if (isset($field['required'])) {
+								$field['required'] = ($field['required'] === '1') ? true : false;
 							}
+							
+							// Add data attribute for JavaScript targeting
+							if (!isset($field['custom_attributes'])) {
+								$field['custom_attributes'] = array();
+							}
+							$field['custom_attributes']['data-mptbm-custom-field'] = '1';
+							
+							$fields[$key] = $field;
+						}
+					}
+				}
+				
+				return $fields;
+			}
+			
+			/**
+			 * Modify order fields using WooCommerce's specific filter
+			 */
+			public function modify_order_fields($fields) {
+				$custom = get_option('mptbm_custom_checkout_fields', array());
+				
+				// Initialize custom fields if not exists
+				if (!isset($custom['order'])) {
+					$custom['order'] = array();
+				}
+				
+				// Handle default WooCommerce fields that might be disabled
+				$default_fields = self::woocommerce_default_checkout_fields();
+				if (isset($default_fields['order'])) {
+					foreach ($default_fields['order'] as $key => $default_field) {
+						// Check if this field is disabled in custom settings
+						if (isset($custom['order'][$key]) && 
+							!empty($custom['order'][$key]['disabled']) && 
+							$custom['order'][$key]['disabled'] === '1') {
+							// Remove the field completely
+							unset($fields['order'][$key]);
+						}
+					}
+				}
+				
+				// Ensure all default WooCommerce fields are present if not explicitly disabled
+				$default_fields = self::woocommerce_default_checkout_fields();
+				if (isset($default_fields['order'])) {
+					foreach ($default_fields['order'] as $key => $default_field) {
+						// If field is not in custom settings, it should be visible by default
+						if (!isset($custom['order'][$key]) && !isset($fields['order'][$key])) {
+							$fields['order'][$key] = $default_field;
+						}
+					}
+				}
+				
+				// Handle custom fields
+				if (!isset($custom['order']) || !is_array($custom['order'])) {
+					return $fields;
+				}
+				
+				foreach ($custom['order'] as $key => $field) {
+					// Skip deleted fields
+					if (!empty($field['deleted']) && $field['deleted'] === 'deleted') {
+						continue;
+					}
+					
+					// Handle disabled fields
+					if (!empty($field['disabled']) && $field['disabled'] === '1') {
+						if (isset($fields['order'][$key])) {
+							// Remove the field completely from the array
+							unset($fields['order'][$key]);
+						}
+							} else {
+						// Field is enabled, merge custom settings
+						if (isset($fields['order'][$key])) {
+							$fields['order'][$key] = array_merge($fields['order'][$key], $field);
+							
+							// Handle required field properly
+							if (isset($field['required'])) {
+								$fields['order'][$key]['required'] = ($field['required'] === '1') ? true : false;
+							}
+						} else {
+							// It's a completely new custom field
+							if (isset($field['required'])) {
+								$field['required'] = ($field['required'] === '1') ? true : false;
+							}
+							$fields['order'][$key] = $field;
 						}
 					}
 				}
@@ -917,7 +1093,8 @@
 			 */
 			public function output_file_fields_for_section($section) {
 				
-				$all_fields = $this->inject_checkout_fields([]);
+				// Get current checkout fields from WooCommerce
+				$all_fields = WC()->checkout->get_checkout_fields();
 				
 				$fields = $this->get_file_fields_for_section($section);
 				
@@ -947,15 +1124,33 @@
 					));
 				}
 			}
-			// Add CSS for hidden fields
+			// Add CSS for hidden fields (fallback)
 			public function add_hidden_field_css() {
 				?>
 				<style>
+				/* Fallback for any remaining hidden fields */
 				.mptbm-hidden-field {
-					display: none;
+					display: none !important;
 				}
 				</style>
 				<?php
+			}
+			
+			/**
+			 * Debug method to check field status (only for administrators)
+			 */
+			public function debug_field_status() {
+				if (!current_user_can('administrator')) {
+					return;
+				}
+				
+				$custom = get_option('mptbm_custom_checkout_fields', array());
+				echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">';
+				echo '<h4>Debug: Field Status</h4>';
+				echo '<pre>';
+				print_r($custom);
+				echo '</pre>';
+				echo '</div>';
 			}
 		}
 		

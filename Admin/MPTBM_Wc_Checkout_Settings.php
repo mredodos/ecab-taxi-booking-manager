@@ -36,6 +36,15 @@
 				?>
                 <div class="tab-content" id="mptbm_wc_checkout_settings">
                     <h2>Checkout Settings</h2>
+                    
+                    <!-- Debug Information -->
+                    <div class="notice notice-info">
+                        <p><strong>Debug Information:</strong></p>
+                        <p>Custom Checkout System Status: <strong><?php echo MPTBM_Wc_Checkout_Fields_Helper::disable_custom_checkout_system() ? 'DISABLED' : 'ENABLED'; ?></strong></p>
+                        <p>If disabled, only custom fields will be added. WooCommerce default fields will remain unchanged.</p>
+                        <p>If enabled, WooCommerce default fields will be managed by this plugin.</p>
+                    </div>
+                    
                     <!-- <table class="wc_gateways wp-list-table widefat striped"> -->
                     <div>
                         <form method="POST">
