@@ -13,11 +13,21 @@ function mptbm_cleanup_map() {
         mptbm_map_window = null;
     }
 }
-function mptbm_set_cookie_distance_duration(start_place = "", end_place = "") {
+function mptbm_set_cookie_distance_duration(start_place, end_place) {
+    // Safari compatibility: provide default values
+    start_place = start_place || "";
+    end_place = end_place || "";
+    
     // Check if map container exists before initializing
-    const mapContainer = document.getElementById("mptbm_map_area");
+    var mapContainer = document.getElementById("mptbm_map_area");
     if (!mapContainer) {
         console.warn("Map container #mptbm_map_area not found. Map initialization skipped.");
+        return false;
+    }
+    
+    // Check if Google Maps API is loaded
+    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        console.warn("Google Maps API not loaded. Distance calculation skipped.");
         return false;
     }
     
@@ -26,89 +36,118 @@ function mptbm_set_cookie_distance_duration(start_place = "", end_place = "") {
         center: mp_lat_lng,
         zoom: 15,
     });
+    
     if (start_place && end_place) {
-        let directionsService = new google.maps.DirectionsService();
-        let directionsRenderer = new google.maps.DirectionsRenderer();
+        var directionsService = new google.maps.DirectionsService();
+        var directionsRenderer = new google.maps.DirectionsRenderer();
         directionsRenderer.setMap(mptbm_map);
-        let request = {
+        
+        var request = {
             origin: start_place,
             destination: end_place,
             travelMode: google.maps.TravelMode.DRIVING,
             unitSystem: google.maps.UnitSystem.METRIC,
         };
-        let now = new Date();
-        let time = now.getTime();
-        let expireTime = time + 3600 * 1000 * 12;
+        
+        var now = new Date();
+        var time = now.getTime();
+        var expireTime = time + 3600 * 1000 * 12;
         now.setTime(expireTime);
-        directionsService.route(request, (result, status) => {
+        
+        // Safari compatibility: use function instead of arrow function
+        directionsService.route(request, function(result, status) {
+            console.log("Directions API status:", status);
+            
             if (status === google.maps.DirectionsStatus.OK) {
-                let distance = result.routes[0].legs[0].distance.value;
-                let kmOrMile = document.getElementById("mptbm_km_or_mile").value;
-                let distance_text = result.routes[0].legs[0].distance.text;
-                let duration = result.routes[0].legs[0].duration.value;
-                var duration_text = result.routes[0].legs[0].duration.text;
-                if (kmOrMile == 'mile') {
-                    // Convert distance from kilometers to miles
-                    var distanceInKilometers = distance / 1000;
-                    var distanceInMiles = distanceInKilometers * 0.621371;
-                    distance_text = distanceInMiles.toFixed(1) + ' miles'; // Format to 2 decimal places
+                try {
+                    var distance = result.routes[0].legs[0].distance.value;
+                    var kmOrMileElement = document.getElementById("mptbm_km_or_mile");
+                    var kmOrMile = kmOrMileElement ? kmOrMileElement.value : 'km';
+                    var distance_text = result.routes[0].legs[0].distance.text;
+                    var duration = result.routes[0].legs[0].duration.value;
+                    var duration_text = result.routes[0].legs[0].duration.text;
+                    
+                    if (kmOrMile == 'mile') {
+                        // Convert distance from kilometers to miles
+                        var distanceInKilometers = distance / 1000;
+                        var distanceInMiles = distanceInKilometers * 0.621371;
+                        distance_text = distanceInMiles.toFixed(1) + ' miles';
+                    }
+                    
+                    // Safari compatibility: set cookies with proper encoding
+                    var cookieOptions = "; expires=" + now.toUTCString() + "; path=/; SameSite=Lax";
+                    document.cookie = "mptbm_distance=" + encodeURIComponent(distance) + cookieOptions;
+                    document.cookie = "mptbm_distance_text=" + encodeURIComponent(distance_text) + cookieOptions;
+                    document.cookie = "mptbm_duration=" + encodeURIComponent(duration) + cookieOptions;
+                    document.cookie = "mptbm_duration_text=" + encodeURIComponent(duration_text) + cookieOptions;
+                    
+                    directionsRenderer.setDirections(result);
+                    
+                    // Update UI elements
+                    jQuery(".mptbm_total_distance").html(distance_text);
+                    jQuery(".mptbm_total_time").html(duration_text);
+                    jQuery(".mptbm_distance_time").slideDown("fast");
+                    
+                    console.log("Distance calculation successful:", distance_text, duration_text);
+                    
+                } catch (error) {
+                    console.error("Error processing directions result:", error);
+                    // Use fallback for Safari
+                    if (mptbm_is_safari()) {
+                        mptbm_fallback_distance_calculation(start_place, end_place);
+                    }
                 }
-                // Build the set-cookie string:
-                document.cookie =
-                    "mptbm_distance=" + distance + "; expires=" + now + "; path=/; ";
-                document.cookie =
-                    "mptbm_distance_text=" +
-                    distance_text +
-                    "; expires=" +
-                    now +
-                    "; path=/; ";
-                document.cookie =
-                    "mptbm_duration=" + duration + ";  expires=" + now + "; path=/; ";
-                document.cookie =
-                    "mptbm_duration_text=" +
-                    duration_text +
-                    ";  expires=" +
-                    now +
-                    "; path=/; ";
-                directionsRenderer.setDirections(result);
-                jQuery(".mptbm_total_distance").html(distance_text);
-                jQuery(".mptbm_total_time").html(duration_text);
-                jQuery(".mptbm_distance_time").slideDown("fast");
             } else {
-                //directionsRenderer.setDirections({routes: []})
-                //alert('location error');
+                console.error("Directions API error:", status);
+                
+                // Use fallback for Safari when API fails
+                if (mptbm_is_safari()) {
+                    mptbm_fallback_distance_calculation(start_place, end_place);
+                } else {
+                    // Show user-friendly error message for other browsers
+                    jQuery(".mptbm_total_distance").html("Error calculating distance");
+                    jQuery(".mptbm_total_time").html("Error calculating time");
+                    jQuery(".mptbm_distance_time").slideDown("fast");
+                }
             }
         });
     } else if (start_place || end_place) {
-        let place = start_place ? start_place : end_place;
+        var place = start_place ? start_place : end_place;
         mptbm_map_window = new google.maps.InfoWindow();
         
         // Check if map container exists before initializing
-        const mapContainer = document.getElementById("mptbm_map_area");
+        var mapContainer = document.getElementById("mptbm_map_area");
         if (!mapContainer) {
             console.warn("Map container #mptbm_map_area not found. Map initialization skipped.");
             return false;
         }
         
-        map = new google.maps.Map(mapContainer, {
+        var map = new google.maps.Map(mapContainer, {
             center: mp_lat_lng,
             zoom: 15,
         });
-        const request = {
+        
+        var request = {
             query: place,
             fields: ["name", "geometry"],
         };
-        service = new google.maps.places.PlacesService(map);
-        service.findPlaceFromQuery(request, (results, status) => {
+        
+        var service = new google.maps.places.PlacesService(map);
+        // Safari compatibility: use function instead of arrow function
+        service.findPlaceFromQuery(request, function(results, status) {
+            console.log("Places API status:", status);
+            
             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                for (let i = 0; i < results.length; i++) {
+                for (var i = 0; i < results.length; i++) {
                     mptbmCreateMarker(results[i]);
                 }
                 map.setCenter(results[0].geometry.location);
+            } else {
+                console.error("Places API error:", status);
             }
         });
     } else {
-        let directionsRenderer = new google.maps.DirectionsRenderer();
+        var directionsRenderer = new google.maps.DirectionsRenderer();
         directionsRenderer.setMap(mptbm_map);
         //document.getElementById('mptbm_map_start_place').focus();
     }
@@ -116,13 +155,17 @@ function mptbm_set_cookie_distance_duration(start_place = "", end_place = "") {
 }
 function mptbmCreateMarker(place) {
     if (!place.geometry || !place.geometry.location) return;
-    const marker = new google.maps.Marker({
-        map,
+    
+    // Safari compatibility: use var instead of const
+    var marker = new google.maps.Marker({
+        map: mptbm_map,
         position: place.geometry.location,
     });
-    google.maps.event.addListener(marker, "click", () => {
+    
+    // Safari compatibility: use function instead of arrow function
+    google.maps.event.addListener(marker, "click", function() {
         mptbm_map_window.setContent(place.name || "");
-        mptbm_map_window.open(map);
+        mptbm_map_window.open(mptbm_map);
     });
 }
 function mptbm_map_area_init() {
@@ -133,14 +176,14 @@ function mptbm_map_area_init() {
     }
     
     // Check if map container exists and is visible before initializing
-    const mapContainer = document.getElementById("mptbm_map_area");
+    var mapContainer = document.getElementById("mptbm_map_area");
     if (!mapContainer) {
         console.warn("Map container #mptbm_map_area not found. Skipping map initialization.");
         return false;
     }
     
     // Check if the map container is visible (not hidden by CSS)
-    const mapArea = document.querySelector('.mptbm_map_area');
+    var mapArea = document.querySelector('.mptbm_map_area');
     if (mapArea && mapArea.style.display === 'none') {
         console.warn("Map area is hidden. Skipping map initialization.");
         return false;
@@ -150,10 +193,10 @@ function mptbm_map_area_init() {
 
     // Initialize Google Places autocomplete for pickup location
     if (jQuery("#mptbm_map_start_place").length > 0) {
-        let start_place = document.getElementById("mptbm_map_start_place");
-        let start_place_autoload = new google.maps.places.Autocomplete(start_place);
-        let mptbm_restrict_search_to_country = jQuery('[name="mptbm_restrict_search_country"]').val();
-        let mptbm_country = jQuery('[name="mptbm_country"]').val();
+        var start_place = document.getElementById("mptbm_map_start_place");
+        var start_place_autoload = new google.maps.places.Autocomplete(start_place);
+        var mptbm_restrict_search_to_country = jQuery('[name="mptbm_restrict_search_country"]').val();
+        var mptbm_country = jQuery('[name="mptbm_country"]').val();
 
         if (mptbm_restrict_search_to_country == 'yes') {
             start_place_autoload.setComponentRestrictions({
@@ -162,7 +205,7 @@ function mptbm_map_area_init() {
         }
 
         google.maps.event.addListener(start_place_autoload, "place_changed", function () {
-            let end_place = document.getElementById("mptbm_map_end_place");
+            var end_place = document.getElementById("mptbm_map_end_place");
             
             // Only sync dropoff with pickup if dropoff is hidden (hourly pricing with disabled dropoff)
             if (end_place && end_place.type === 'hidden') {
@@ -201,10 +244,10 @@ function mptbm_map_area_init() {
 
     // Initialize Google Places autocomplete for dropoff location (only if it exists and is visible)
     if (jQuery("#mptbm_map_end_place").length > 0 && jQuery("#mptbm_map_end_place").is(":visible")) {
-        let end_place = document.getElementById("mptbm_map_end_place");
-        let end_place_autoload = new google.maps.places.Autocomplete(end_place);
-        let mptbm_restrict_search_to_country = jQuery('[name="mptbm_restrict_search_country"]').val();
-        let mptbm_country = jQuery('[name="mptbm_country"]').val();
+        var end_place = document.getElementById("mptbm_map_end_place");
+        var end_place_autoload = new google.maps.places.Autocomplete(end_place);
+        var mptbm_restrict_search_to_country = jQuery('[name="mptbm_restrict_search_country"]').val();
+        var mptbm_country = jQuery('[name="mptbm_country"]').val();
 
         if (mptbm_restrict_search_to_country == 'yes') {
             end_place_autoload.setComponentRestrictions({
@@ -213,7 +256,7 @@ function mptbm_map_area_init() {
         }
 
         google.maps.event.addListener(end_place_autoload, "place_changed", function () {
-            let start_place = document.getElementById("mptbm_map_start_place");
+            var start_place = document.getElementById("mptbm_map_start_place");
             mptbm_set_cookie_distance_duration(
                 start_place ? start_place.value : '',
                 end_place ? end_place.value : ''
@@ -227,13 +270,25 @@ function mptbm_map_area_init() {
         $(".mpStyle ul.mp_input_select_list").hide();
 
         // Function to initialize Google Places autocomplete (global scope)
-        window.initializeGooglePlacesAutocomplete = function() {
+        window.initializeGooglePlacesAutocomplete = function(retryCount = 0) {
+            // Maximum retry attempts to prevent infinite loops
+            const MAX_RETRIES = 10;
+            const INITIAL_DELAY = 100; // Start with 100ms instead of 500ms
+            
             // Check if Google Maps API is loaded
             if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.places === 'undefined') {
-                console.log('Google Maps API not loaded yet, retrying in 500ms...');
+                if (retryCount >= MAX_RETRIES) {
+                    console.warn('Google Maps API failed to load after', MAX_RETRIES, 'attempts. Please check your API key and connection.');
+                    return;
+                }
+                
+                // Exponential backoff: 100ms, 200ms, 400ms, 800ms, etc.
+                const delay = INITIAL_DELAY * Math.pow(2, retryCount);
+                console.log('Google Maps API not loaded yet, retrying in', delay, 'ms... (attempt', retryCount + 1, 'of', MAX_RETRIES, ')');
+                
                 setTimeout(function() {
-                    initializeGooglePlacesAutocomplete();
-                }, 500);
+                    initializeGooglePlacesAutocomplete(retryCount + 1);
+                }, delay);
                 return;
             }
             
@@ -302,7 +357,7 @@ function mptbm_map_area_init() {
         setTimeout(function() {
             console.log('Attempting to initialize Google Places autocomplete...');
             initializeGooglePlacesAutocomplete();
-        }, 500);
+        }, 100); // Reduced from 500ms to 100ms for faster initialization
         
         // Handle Previous/Next button positioning after tab changes
         $(document).on('click', '.nextTab_prev, .nextTab_next', function() {
@@ -499,14 +554,22 @@ function mptbm_map_area_init() {
             function getGeometryLocation(address, callback) {
                 var geocoder = new google.maps.Geocoder();
                 var coordinatesOfPlace = {};
+                
                 geocoder.geocode({ address: address }, function (results, status) {
+                    console.log("Geocoding status for", address, ":", status);
+                    
                     if (status === "OK") {
-                        var latitude = results[0].geometry.location.lat();
-                        var longitude = results[0].geometry.location.lng();
-                        coordinatesOfPlace["latitude"] = latitude;
-                        coordinatesOfPlace["longitude"] = longitude;
-                        // Call the callback function with the coordinates
-                        callback(coordinatesOfPlace);
+                        try {
+                            var latitude = results[0].geometry.location.lat();
+                            var longitude = results[0].geometry.location.lng();
+                            coordinatesOfPlace["latitude"] = latitude;
+                            coordinatesOfPlace["longitude"] = longitude;
+                            // Call the callback function with the coordinates
+                            callback(coordinatesOfPlace);
+                        } catch (error) {
+                            console.error("Error processing geocoding results:", error);
+                            callback(null);
+                        }
                     } else {
                         console.error(
                             "Geocode was not successful for the following reason: " + status
@@ -1567,8 +1630,49 @@ function mptbm_price_calculation(parent) {
         // Keep the original select visible - don't hide it
         // $select.hide(); // REMOVED - keep select visible
         
-        // Create custom select wrapper positioned below the select element
-        var $customWrapper = $('<div class="mptbm-custom-select-wrapper" style="position: absolute !important; top: ' + (selectOffset.top + selectHeight + 2) + 'px !important; left: ' + selectOffset.left + 'px !important; width: ' + selectWidth + 'px !important; z-index: 9999 !important; background: white !important; border: 1px solid #ddd !important; border-radius: 4px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;"></div>');
+        // Create custom select wrapper with dynamic positioning
+        var $customWrapper = $('<div class="mptbm-custom-select-wrapper" style="position: fixed !important; z-index: 9999 !important; background: white !important; border: 1px solid #ddd !important; border-radius: 4px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;"></div>');
+        
+        // Function to update dropdown position
+        function updateDropdownPosition() {
+            var currentOffset = $select.offset();
+            var currentWidth = $select.outerWidth();
+            var currentHeight = $select.outerHeight();
+            
+            // Calculate position relative to viewport
+            var top = currentOffset.top + currentHeight + 2;
+            var left = currentOffset.left;
+            var width = currentWidth;
+            
+            // Check if dropdown would go off-screen and adjust
+            var windowHeight = $(window).height();
+            var windowWidth = $(window).width();
+            var dropdownHeight = 250; // Approximate dropdown height
+            
+            // If dropdown would go below viewport, position it above the select
+            if (top + dropdownHeight > windowHeight) {
+                top = currentOffset.top - dropdownHeight - 2;
+            }
+            
+            // If dropdown would go off right edge, adjust left position
+            if (left + width > windowWidth) {
+                left = windowWidth - width - 10;
+            }
+            
+            // Ensure dropdown doesn't go off left edge
+            if (left < 10) {
+                left = 10;
+            }
+            
+            $customWrapper.css({
+                'top': top + 'px',
+                'left': left + 'px',
+                'width': width + 'px'
+            });
+        }
+        
+        // Set initial position
+        updateDropdownPosition();
         
         // Create search input
         var $searchInput = $('<input type="text" class="mptbm-custom-search-input" placeholder="Search locations..." style="width: 100% !important; padding: 8px !important; border: none !important; border-bottom: 1px solid #eee !important; border-radius: 4px 4px 0 0 !important; font-size: 14px !important; box-sizing: border-box !important; background: #F5F6F8 !important; color: #222222 !important; font-weight: 400 !important; outline: none !important;" />');
@@ -1664,14 +1768,24 @@ function mptbm_price_calculation(parent) {
             }
         });
         
-        // Handle window resize to reposition dropdown
-        $(window).one('resize scroll', function() {
-            $customWrapper.remove();
-            // Restore map z-index
-            $('.mptbm_map_area').css('z-index', '');
-            $('.mptbm_map_area #mptbm_map_area').css('z-index', '');
-            console.log('Custom select closed - window resize/scroll');
-        });
+        // Handle window resize and scroll to update dropdown position with debouncing
+        var positionUpdateTimeout;
+        var positionUpdateHandler = function() {
+            clearTimeout(positionUpdateTimeout);
+            positionUpdateTimeout = setTimeout(function() {
+                updateDropdownPosition();
+            }, 16); // ~60fps throttling
+        };
+        
+        $(window).on('resize.mptbm-dropdown scroll.mptbm-dropdown', positionUpdateHandler);
+        
+        // Clean up event listeners when dropdown is removed
+        var originalRemove = $customWrapper.remove;
+        $customWrapper.remove = function() {
+            clearTimeout(positionUpdateTimeout);
+            $(window).off('resize.mptbm-dropdown scroll.mptbm-dropdown');
+            return originalRemove.call(this);
+        };
         
         // Handle escape key
         $searchInput.on('keydown', function(e) {
@@ -1750,4 +1864,63 @@ function gm_authFailure() {
 // Utility: Detect iOS
 function mptbm_is_ios() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+// Utility: Detect Safari
+function mptbm_is_safari() {
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+}
+
+// Fallback distance calculation for Safari when Google Maps API fails
+function mptbm_fallback_distance_calculation(start_place, end_place) {
+    console.log("Using fallback distance calculation for Safari");
+    
+    // Simple fallback: show placeholder values
+    var fallback_distance = "Calculating...";
+    var fallback_duration = "Calculating...";
+    
+    // Update UI with fallback values
+    jQuery(".mptbm_total_distance").html(fallback_distance);
+    jQuery(".mptbm_total_time").html(fallback_duration);
+    jQuery(".mptbm_distance_time").slideDown("fast");
+    
+    // Set cookies with fallback values
+    var now = new Date();
+    var time = now.getTime();
+    var expireTime = time + 3600 * 1000 * 12;
+    now.setTime(expireTime);
+    
+    var cookieOptions = "; expires=" + now.toUTCString() + "; path=/; SameSite=Lax";
+    document.cookie = "mptbm_distance=" + encodeURIComponent("0") + cookieOptions;
+    document.cookie = "mptbm_distance_text=" + encodeURIComponent(fallback_distance) + cookieOptions;
+    document.cookie = "mptbm_duration=" + encodeURIComponent("0") + cookieOptions;
+    document.cookie = "mptbm_duration_text=" + encodeURIComponent(fallback_duration) + cookieOptions;
+    
+    // Try to use server-side calculation as backup
+    if (typeof mp_ajax_url !== 'undefined') {
+        jQuery.ajax({
+            type: "POST",
+            url: mp_ajax_url,
+            data: {
+                action: "mptbm_calculate_distance_fallback",
+                start_place: start_place,
+                end_place: end_place
+            },
+            success: function(response) {
+                if (response.success && response.data) {
+                    jQuery(".mptbm_total_distance").html(response.data.distance_text);
+                    jQuery(".mptbm_total_time").html(response.data.duration_text);
+                    
+                    // Update cookies with server response
+                    document.cookie = "mptbm_distance=" + encodeURIComponent(response.data.distance) + cookieOptions;
+                    document.cookie = "mptbm_distance_text=" + encodeURIComponent(response.data.distance_text) + cookieOptions;
+                    document.cookie = "mptbm_duration=" + encodeURIComponent(response.data.duration) + cookieOptions;
+                    document.cookie = "mptbm_duration_text=" + encodeURIComponent(response.data.duration_text) + cookieOptions;
+                }
+            },
+            error: function() {
+                console.log("Server-side distance calculation also failed");
+            }
+        });
+    }
 }
