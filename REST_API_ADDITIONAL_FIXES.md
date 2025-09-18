@@ -278,7 +278,10 @@ Per testare le modifiche:
 if (empty($extra_service_price) && !empty($extra_services) && is_array($extra_services)) {
     $calculated_extra_price = 0;
     foreach ($extra_services as $service) {
-        if (isset($service['price']) && isset($service['quantity'])) {
+        // Check for different possible field names
+        if (isset($service['service_price']) && isset($service['service_quantity'])) {
+            $calculated_extra_price += floatval($service['service_price']) * intval($service['service_quantity']);
+        } elseif (isset($service['price']) && isset($service['quantity'])) {
             $calculated_extra_price += floatval($service['price']) * intval($service['quantity']);
         }
     }
