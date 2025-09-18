@@ -985,12 +985,6 @@ if (!class_exists('MPTBM_Rest_Api')) {
                             case 'Seating Capacity':
                                 $seating_capacity = $feature['text'];
                                 break;
-                            case 'Max people':
-                            case 'Max luggage':
-                            case 'Maximum Passengers':
-                            case 'Maximum Bags':
-                                // Skip these as they are handled separately in max_passenger and max_bag
-                                break;
                             default:
                                 // Handle custom features (exclude predefined ones)
                                 $custom_features[] = array(
