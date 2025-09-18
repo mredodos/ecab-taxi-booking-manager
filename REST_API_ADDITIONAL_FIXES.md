@@ -285,7 +285,7 @@ if (empty($extra_service_price) && !empty($extra_services) && is_array($extra_se
             $calculated_extra_price += floatval($service['price']) * intval($service['quantity']);
         }
     }
-    $extra_service_price = $calculated_extra_price > 0 ? strval($calculated_extra_price) : '';
+    $extra_service_price = $calculated_extra_price > 0 ? number_format($calculated_extra_price, 2, '.', '') : '';
 }
 ```
 
@@ -294,6 +294,7 @@ if (empty($extra_service_price) && !empty($extra_services) && is_array($extra_se
 - Compatibilità con bookings creati tramite WooCommerce che non avevano questo campo salvato
 - Calcolo dinamico basato sui servizi extra effettivamente selezionati
 - Fallback robusto per garantire che il campo abbia sempre un valore corretto
+- Formattazione standardizzata con sempre 2 decimali (es. "25.00" invece di "25")
 
 ### 6. **Journey Time Non Popolato**
 

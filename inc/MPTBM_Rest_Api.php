@@ -867,7 +867,7 @@ if (!class_exists('MPTBM_Rest_Api')) {
                         $calculated_extra_price += floatval($service['price']) * intval($service['quantity']);
                     }
                 }
-                $extra_service_price = $calculated_extra_price > 0 ? strval($calculated_extra_price) : '';
+                $extra_service_price = $calculated_extra_price > 0 ? number_format($calculated_extra_price, 2, '.', '') : '';
             }
             
             // Get transport quantity
