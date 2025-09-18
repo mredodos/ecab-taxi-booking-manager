@@ -264,4 +264,32 @@ Per testare le modifiche:
 3. Verificare che passengers e bags corrispondano ai valori del frontend
 4. Controllare che le order notes siano incluse nella risposta API
 5. Testare con ordini creati in diverse modalità (WooCommerce, diretti, etc.)
-fix 
+
+### 5. **Extra Service Price Vuoto**
+
+**Problema:** Il campo `extra_service_price` non riportava alcun valore nelle REST API.
+
+**Causa:** Il plugin non salvava il campo `mptbm_extra_service_price` quando veniva creato il booking tramite WooCommerce.
+
+**Soluzione:** Aggiunta logica per calcolare il prezzo dei servizi extra dall'array `extra_services` quando il campo non è presente:
+
+```php
+// If extra_service_price is empty, calculate it from extra_services array
+if (empty($extra_service_price) && !empty($extra_services) && is_array($extra_services)) {
+    $calculated_extra_price = 0;
+    foreach ($extra_services as $service) {
+        if (isset($service['price']) && isset($service['quantity'])) {
+            $calculated_extra_price += floatval($service['price']) * intval($service['quantity']);
+        }
+    }
+    $extra_service_price = $calculated_extra_price > 0 ? strval($calculated_extra_price) : '';
+}
+```
+
+**Vantaggi:**
+
+- Compatibilità con bookings creati tramite WooCommerce che non avevano questo campo salvato
+- Calcolo dinamico basato sui servizi extra effettivamente selezionati
+- Fallback robusto per garantire che il campo abbia sempre un valore corretto
+
+fix

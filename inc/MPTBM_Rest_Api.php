@@ -848,6 +848,17 @@ if (!class_exists('MPTBM_Rest_Api')) {
             $base_price = get_post_meta($booking_id, 'mptbm_base_price', true);
             $extra_service_price = get_post_meta($booking_id, 'mptbm_extra_service_price', true);
             
+            // If extra_service_price is empty, calculate it from extra_services array
+            if (empty($extra_service_price) && !empty($extra_services) && is_array($extra_services)) {
+                $calculated_extra_price = 0;
+                foreach ($extra_services as $service) {
+                    if (isset($service['price']) && isset($service['quantity'])) {
+                        $calculated_extra_price += floatval($service['price']) * intval($service['quantity']);
+                    }
+                }
+                $extra_service_price = $calculated_extra_price > 0 ? strval($calculated_extra_price) : '';
+            }
+            
             // Get transport quantity
             $transport_quantity = get_post_meta($booking_id, 'mptbm_transport_quantity', true);
             if (empty($transport_quantity)) {
