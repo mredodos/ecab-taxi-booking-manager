@@ -770,11 +770,8 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 $customer_phone = get_post_meta($booking_id, 'mptbm_billing_phone', true);
             }
             
-            // Get passengers and bags information
-            $passengers = get_post_meta($booking_id, 'mptbm_passenger', true);
-            if (empty($passengers)) {
-                $passengers = get_post_meta($booking_id, 'mptbm_passengers', true);
-            }
+            // Get passengers and bags information - use correct metadata fields from plugin
+            $passengers = get_post_meta($booking_id, 'mptbm_passengers', true);
             if (empty($passengers)) {
                 $passengers = 1; // Default value
             }
@@ -803,9 +800,45 @@ if (!class_exists('MPTBM_Rest_Api')) {
             $return_date = get_post_meta($booking_id, 'mptbm_return_date', true);
             $return_time = get_post_meta($booking_id, 'mptbm_return_time', true);
             
+            // Check if this is actually a return trip (has return date and is not empty/false)
+            $is_actual_return = false;
+            if (!empty($is_return) && $is_return != '0' && $is_return != 'false' && $is_return !== false) {
+                if (!empty($return_date)) {
+                    $is_actual_return = true;
+                }
+            }
+            
             // Get waiting time and fixed hours
             $waiting_time = get_post_meta($booking_id, 'mptbm_waiting_time', true);
             $fixed_hours = get_post_meta($booking_id, 'mptbm_fixed_hours', true);
+            
+            // Get order notes from WooCommerce order if available - using WooCommerce best practices
+            $order_notes = array();
+            $order_id = get_post_meta($booking_id, 'mptbm_order_id', true);
+            if (!empty($order_id) && class_exists('WooCommerce')) {
+                $order = wc_get_order($order_id);
+                if ($order) {
+                    // Get all order notes using WooCommerce best practices
+                    $notes = wc_get_order_notes(array(
+                        'order_id' => $order_id,
+                        'limit' => 50,
+                        'orderby' => 'date_created',
+                        'order' => 'DESC'
+                    ));
+                    
+                    foreach ($notes as $note) {
+                        $order_notes[] = array(
+                            'id' => $note->comment_ID,
+                            'date' => $note->comment_date,
+                            'author' => $note->comment_author,
+                            'content' => $note->comment_content,
+                            'customer_note' => $note->comment_type === 'customer',
+                            'added_by' => $note->comment_author,
+                            'date_created' => $note->comment_date
+                        );
+                    }
+                }
+            }
             
             // Get distance and duration
             $distance = get_post_meta($booking_id, 'mptbm_distance', true);
@@ -862,9 +895,9 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 'vehicle_details' => $vehicle_details,
                 
                 // Return trip
-                'is_return' => !empty($is_return) && $is_return != '0',
-                'return_date' => $return_date,
-                'return_time' => $return_time,
+                'is_return' => $is_actual_return,
+                'return_date' => $is_actual_return ? $return_date : null,
+                'return_time' => $is_actual_return ? $return_time : null,
                 
                 // Additional services
                 'waiting_time' => $waiting_time,
@@ -881,7 +914,10 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 
                 // Payment information
                 'payment_method' => $payment_method,
-                'order_status' => $order_status
+                'order_status' => $order_status,
+                
+                // Order notes
+                'order_notes' => $order_notes
             );
         }
 
@@ -949,8 +985,14 @@ if (!class_exists('MPTBM_Rest_Api')) {
                             case 'Seating Capacity':
                                 $seating_capacity = $feature['text'];
                                 break;
+                            case 'Max people':
+                            case 'Max luggage':
+                            case 'Maximum Passengers':
+                            case 'Maximum Bags':
+                                // Skip these as they are handled separately in max_passenger and max_bag
+                                break;
                             default:
-                                // Handle custom features
+                                // Handle custom features (exclude predefined ones)
                                 $custom_features[] = array(
                                     'label' => $feature['label'],
                                     'value' => $feature['text'],
