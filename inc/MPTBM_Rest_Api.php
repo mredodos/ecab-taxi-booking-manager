@@ -736,10 +736,26 @@ if (!class_exists('MPTBM_Rest_Api')) {
                 $journey_date = get_post_meta($booking_id, 'mptbm_date', true);
             }
             
+            // Clean journey_date to contain only date (remove time if present)
+            if (!empty($journey_date)) {
+                // If journey_date contains time, extract only the date part
+                if (preg_match('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/', $journey_date)) {
+                    $journey_date = date('Y-m-d', strtotime($journey_date));
+                }
+            }
+            
             // Try to get journey time from different possible meta fields
             $journey_time = get_post_meta($booking_id, 'mptbm_journey_time', true);
             if (empty($journey_time)) {
                 $journey_time = get_post_meta($booking_id, 'mptbm_time', true);
+            }
+            
+            // If journey_time is still empty, extract time from journey_date
+            if (empty($journey_time) && !empty($journey_date)) {
+                // Check if journey_date contains time (format: Y-m-d H:i:s or Y-m-d H:i)
+                if (preg_match('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/', $journey_date)) {
+                    $journey_time = date('H:i', strtotime($journey_date));
+                }
             }
             
             // Try to get total price from different possible meta fields

@@ -292,4 +292,41 @@ if (empty($extra_service_price) && !empty($extra_services) && is_array($extra_se
 - Calcolo dinamico basato sui servizi extra effettivamente selezionati
 - Fallback robusto per garantire che il campo abbia sempre un valore corretto
 
+### 6. **Journey Time Non Popolato**
+
+**Problema:** Il campo `journey_time` non veniva popolato nelle REST API anche se `journey_date` conteneva la data e l'ora completa.
+
+**Causa:** Il plugin non salvava separatamente il campo `mptbm_time` o `mptbm_journey_time`, ma `journey_date` conteneva già la data e l'ora completa.
+
+**Soluzione:** Implementata logica per estrarre l'orario dalla data completa:
+
+```php
+// If journey_time is still empty, extract time from journey_date
+if (empty($journey_time) && !empty($journey_date)) {
+    // Check if journey_date contains time (format: Y-m-d H:i:s or Y-m-d H:i)
+    if (preg_match('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/', $journey_date)) {
+        $journey_time = date('H:i', strtotime($journey_date));
+    }
+}
+```
+
+E pulizia della data per contenere solo la parte data:
+
+```php
+// Clean journey_date to contain only date (remove time if present)
+if (!empty($journey_date)) {
+    // If journey_date contains time, extract only the date part
+    if (preg_match('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/', $journey_date)) {
+        $journey_date = date('Y-m-d', strtotime($journey_date));
+    }
+}
+```
+
+**Vantaggi:**
+
+- Estrazione intelligente dell'orario dalla data completa
+- Separazione corretta tra data e ora
+- Compatibilità con diversi formati di data
+- Soluzione semplice e robusta
+
 fix

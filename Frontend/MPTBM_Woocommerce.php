@@ -131,8 +131,9 @@ if (!class_exists('MPTBM_Woocommerce')) {
 				$cart_item_data['mptbm_tp'] = $total_price;
 				$cart_item_data['line_total'] = $total_price;
 				$cart_item_data['line_subtotal'] = $total_price;
-				$cart_item_data['mptbm_passengers'] = isset($_POST['mptbm_passengers']) ? absint($_POST['mptbm_passengers']) : 1;
-				$cart_item_data['mptbm_bags'] = isset($_POST['mptbm_bags']) ? absint($_POST['mptbm_bags']) : 0;
+				// Support both mptbm_passengers/mptbm_bags and mptbm_max_passenger/mptbm_max_bag
+				$cart_item_data['mptbm_passengers'] = isset($_POST['mptbm_passengers']) ? absint($_POST['mptbm_passengers']) : (isset($_POST['mptbm_max_passenger']) ? absint($_POST['mptbm_max_passenger']) : 1);
+				$cart_item_data['mptbm_bags'] = isset($_POST['mptbm_bags']) ? absint($_POST['mptbm_bags']) : (isset($_POST['mptbm_max_bag']) ? absint($_POST['mptbm_max_bag']) : 0);
 				if ($return > 1 && MP_Global_Function::get_settings('mptbm_general_settings', 'enable_return_in_different_date') == 'yes') {
 					$return_target_date = isset($_POST['mptbm_return_date']) ? sanitize_text_field($_POST['mptbm_return_date']) : '';
 					$return_target_time = isset($_POST['mptbm_return_time']) ? sanitize_text_field($_POST['mptbm_return_time']) : '';
