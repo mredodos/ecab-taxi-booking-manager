@@ -310,22 +310,12 @@ if (empty($journey_time) && !empty($journey_date)) {
 }
 ```
 
-E pulizia della data per contenere solo la parte data:
-
-```php
-// Clean journey_date to contain only date (remove time if present)
-if (!empty($journey_date)) {
-    // If journey_date contains time, extract only the date part
-    if (preg_match('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/', $journey_date)) {
-        $journey_date = date('Y-m-d', strtotime($journey_date));
-    }
-}
-```
+La data originale viene mantenuta intatta per preservare tutte le informazioni:
 
 **Vantaggi:**
 
 - Estrazione intelligente dell'orario dalla data completa
-- Separazione corretta tra data e ora
+- Preservazione della data originale con tutte le informazioni
 - Compatibilità con diversi formati di data
 - Soluzione semplice e robusta
 
