@@ -39,6 +39,9 @@
 			add_filter('woocommerce_billing_fields', array($this, 'modify_billing_fields'), 10, 1);
 			add_filter('woocommerce_shipping_fields', array($this, 'modify_shipping_fields'), 10, 1);
 			add_filter('woocommerce_checkout_fields', array($this, 'modify_order_fields'), 10, 1);
+			
+			// Add filter for header field type
+			add_filter('woocommerce_form_field_header', array($this, 'header_field_element'), 10, 4);
 				
 				// Render file fields after WooCommerce fields in each section
 				add_action('woocommerce_after_checkout_billing_form', function() { $this->output_file_fields_for_section('billing'); });
@@ -586,6 +589,22 @@
 					echo '</p>';
 				}
 			}
+
+			public function header_field_element($field, $key, $args, $value) {
+				$label = isset($args['label']) ? $args['label'] : $key;
+				$header_type = isset($args['header_type']) ? $args['header_type'] : 'h2';
+				$class = isset($args['class']) && is_array($args['class']) ? implode(' ', $args['class']) : '';
+				
+				// Add default classes for styling
+				$default_class = 'mptbm-checkout-header mptbm-header-' . esc_attr($header_type);
+				$full_class = $class ? $default_class . ' ' . $class : $default_class;
+				
+				$html = '<div class="form-row form-row-wide ' . esc_attr($full_class) . '">';
+				$html .= '<' . esc_attr($header_type) . ' class="mptbm-header-text">' . esc_html($label) . '</' . esc_attr($header_type) . '>';
+				$html .= '</div>';
+				
+				return $html;
+			}
 			function save_custom_checkout_fields_to_order($order_id, $data) {
 					
 				$checkout_key_fields = $this->get_checkout_fields_for_checkout();				
@@ -902,6 +921,22 @@
 					}
 					
 				} else {
+					// Handle header fields specially
+					if (isset($field['type']) && $field['type'] === 'header') {
+						$header_field = array(
+							'type' => 'header',
+							'label' => $field['label'],
+							'header_type' => isset($field['header_type']) ? $field['header_type'] : 'h2',
+							'class' => isset($field['class']) ? $field['class'] : array(),
+							'priority' => isset($field['priority']) ? intval($field['priority']) : 10,
+							'custom_field' => '1',
+							'required' => '',
+							'disabled' => '',
+						);
+						$fields[$key] = $header_field;
+						continue;
+					}
+					
 					// It's a completely new custom field
 					if (isset($field['required'])) {
 						$field['required'] = ($field['required'] === '1') ? true : false;
@@ -991,6 +1026,22 @@
 						}
 						
 					} else {
+						// Handle header fields specially
+						if (isset($field['type']) && $field['type'] === 'header') {
+							$header_field = array(
+								'type' => 'header',
+								'label' => $field['label'],
+								'header_type' => isset($field['header_type']) ? $field['header_type'] : 'h2',
+								'class' => isset($field['class']) ? $field['class'] : array(),
+								'priority' => isset($field['priority']) ? intval($field['priority']) : 10,
+								'custom_field' => '1',
+								'required' => '',
+								'disabled' => '',
+							);
+							$fields[$key] = $header_field;
+							continue;
+						}
+						
 						// It's a completely new custom field
 						if (isset($field['required'])) {
 							$field['required'] = ($field['required'] === '1') ? true : false;
@@ -1080,6 +1131,22 @@
 						}
 						
 					} else {
+						// Handle header fields specially
+						if (isset($field['type']) && $field['type'] === 'header') {
+							$header_field = array(
+								'type' => 'header',
+								'label' => $field['label'],
+								'header_type' => isset($field['header_type']) ? $field['header_type'] : 'h2',
+								'class' => isset($field['class']) ? $field['class'] : array(),
+								'priority' => isset($field['priority']) ? intval($field['priority']) : 10,
+								'custom_field' => '1',
+								'required' => '',
+								'disabled' => '',
+							);
+							$fields['order'][$key] = $header_field;
+							continue;
+						}
+						
 						// It's a completely new custom field
 						if (isset($field['required'])) {
 							$field['required'] = ($field['required'] === '1') ? true : false;
@@ -1145,6 +1212,60 @@
 				/* Fallback for any remaining hidden fields */
 				.mptbm-hidden-field {
 					display: none !important;
+				}
+				
+				/* Header field styling */
+				.woocommerce .mptbm-checkout-header {
+					margin: 20px 0 15px 0 !important;
+					padding: 0 !important;
+					border: none !important;
+					background: none !important;
+					clear: both !important;
+				}
+				
+				.woocommerce .mptbm-checkout-header h1,
+				.woocommerce .mptbm-checkout-header h2,
+				.woocommerce .mptbm-checkout-header h3,
+				.woocommerce .mptbm-checkout-header p {
+					margin: 0 0 10px 0 !important;
+					padding: 10px 0 !important;
+					font-weight: bold !important;
+					border-bottom: 2px solid #e1e1e1 !important;
+					text-transform: uppercase !important;
+					letter-spacing: 0.5px !important;
+					width: 100% !important;
+					display: block !important;
+				}
+				
+				/* H1 styling */
+				.woocommerce .mptbm-header-h1 h1 {
+					font-size: 24px !important;
+					color: #2c3e50 !important;
+					border-bottom: 3px solid #3498db !important;
+				}
+				
+				/* H2 styling */
+				.woocommerce .mptbm-header-h2 h2 {
+					font-size: 20px !important;
+					color: #34495e !important;
+					border-bottom: 2px solid #95a5a6 !important;
+				}
+				
+				/* H3 styling */
+				.woocommerce .mptbm-header-h3 h3 {
+					font-size: 16px !important;
+					color: #7f8c8d !important;
+					border-bottom: 1px solid #bdc3c7 !important;
+				}
+				
+				/* P styling */
+				.woocommerce .mptbm-header-p p {
+					font-size: 14px !important;
+					color: #95a5a6 !important;
+					font-style: italic !important;
+					border-bottom: 1px dashed #bdc3c7 !important;
+					text-transform: none !important;
+					letter-spacing: normal !important;
 				}
 				</style>
 				<?php

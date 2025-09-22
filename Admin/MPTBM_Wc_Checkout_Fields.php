@@ -257,6 +257,7 @@
 				$priority = isset($_POST['priority']) ? sanitize_text_field($_POST['priority']) : null;
 				$required = isset($_POST['required']) ? sanitize_text_field($_POST['required']) : null;
 				$disabled = isset($_POST['disabled']) ? sanitize_text_field($_POST['disabled']) : null;
+				$header_type = isset($_POST['header_type']) ? sanitize_text_field($_POST['header_type']) : 'h2';
 				
 				$field_data = array(
 					'type' => $type,
@@ -268,6 +269,15 @@
 					'required' => $required == 'on' ? '1' : '',
 					'disabled' => $disabled == 'on' ? '1' : '',
 				);
+				
+				// Add header type for header fields
+				if ($type === 'header') {
+					$field_data['header_type'] = $header_type;
+					// Headers are never required or disabled in the traditional sense
+					$field_data['required'] = '';
+					$field_data['disabled'] = '';
+					
+				}
 				
 				// Only mark as custom field if it's not a default WooCommerce field
 				if (!$is_default_field) {
@@ -313,6 +323,7 @@
                                                     <option value="text">Text</option>
                                                     <option value="select">Select</option>
                                                     <option value="file">Image</option>
+                                                    <option value="header">Header/Separator</option>
                                                 </select>
                                                 <label for="name">Name:</label>
                                                 <input type="text" name="name" id="name" required>
@@ -327,6 +338,16 @@
                                                 <div class="custom-var-attr-section">
                                                     <label for="placeholder">Placeholder:</label>
                                                     <input type="text" name="placeholder" id="placeholder">
+                                                </div>
+                                                <!-- Header type field -->
+                                                <div class="header-type-section" style="display: none;">
+                                                    <label for="header_type">Header Type:</label>
+                                                    <select name="header_type" id="header_type">
+                                                        <option value="h1">H1 (Large)</option>
+                                                        <option value="h2" selected>H2 (Medium)</option>
+                                                        <option value="h3">H3 (Small)</option>
+                                                        <option value="p">Paragraph</option>
+                                                    </select>
                                                 </div>
                                                 <label><input type="checkbox" name="required"> Required</label>
                                                 <label><input type="checkbox" name="disabled"> Disabled</label>
