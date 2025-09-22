@@ -899,16 +899,15 @@ function mptbm_map_area_init() {
         const timeInMinutes =
           Math.floor(timeValue) * 60 + (timeValue % 1) * 100;
 
-        // If this is tomorrow and buffer extends to tomorrow, apply buffer
-        if (mptbm_buffer_end_minutes > 1440) {
-          const adjustedBufferMinutes = mptbm_buffer_end_minutes - 1440;
-          if (timeInMinutes > adjustedBufferMinutes) {
+        // If there's a buffer remaining, apply it to the first available date
+        if (mptbm_buffer_end_minutes > 0) {
+          if (timeInMinutes > mptbm_buffer_end_minutes) {
             $('#mptbm_map_start_time')
               .siblings('.start_time_list')
               .append($(this).clone());
           }
         } else {
-          // For other dates, show all times
+          // No buffer remaining, show all times
           $('#mptbm_map_start_time')
             .siblings('.start_time_list')
             .append($(this).clone());
