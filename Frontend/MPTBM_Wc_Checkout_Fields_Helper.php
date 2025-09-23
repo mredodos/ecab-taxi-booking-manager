@@ -594,12 +594,13 @@
 				$label = isset($args['label']) ? $args['label'] : $key;
 				$header_type = isset($args['header_type']) ? $args['header_type'] : 'h2';
 				$class = isset($args['class']) && is_array($args['class']) ? implode(' ', $args['class']) : '';
+				$priority = isset($args['priority']) ? $args['priority'] : '10';
 				
 				// Add default classes for styling
 				$default_class = 'mptbm-checkout-header mptbm-header-' . esc_attr($header_type);
 				$full_class = $class ? $default_class . ' ' . $class : $default_class;
 				
-				$html = '<div class="form-row form-row-wide ' . esc_attr($full_class) . '">';
+				$html = '<div class="form-row form-row-wide ' . esc_attr($full_class) . '" data-priority="' . esc_attr($priority) . '">';
 				$html .= '<' . esc_attr($header_type) . ' class="mptbm-header-text">' . esc_html($label) . '</' . esc_attr($header_type) . '>';
 				$html .= '</div>';
 				
