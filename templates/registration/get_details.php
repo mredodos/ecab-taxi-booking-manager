@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				<?php if ($pro_active && $enable_max_bag_filter === 'yes'): ?>
 				<div class="inputList mp_input_select">
 					<label class="fdColumn">
-						<span><?php esc_html_e('Maximum Bag', 'ecab-taxi-booking-manager'); ?></span>
+						<span> <?php echo mptbm_get_translation('max_bag_label', __('Maximum Bag', 'ecab-taxi-booking-manager')); ?> </span>
 						<select id="mptbm_max_bag" class="formControl" name="mptbm_max_bag">
 							<?php for ($i = 0; $i <= $max_bag; $i++) { ?>
 								<option value="<?php echo esc_attr($i); ?>"><?php echo esc_html($i); ?></option>
