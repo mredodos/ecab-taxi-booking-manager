@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				<?php if ($pro_active && $enable_max_passenger_filter === 'yes'): ?>
 				<div class="inputList mp_input_select">
 					<label class="fdColumn">
-						<span><?php esc_html_e('Maximum Passenger', 'ecab-taxi-booking-manager'); ?></span>
+						<span><?php echo mptbm_get_translation('max_passenger_label', __('Maximum Passenger', 'ecab-taxi-booking-manager')); ?></span>
 						<select id="mptbm_max_passenger" class="formControl" name="mptbm_max_passenger">
 							<?php for ($i = 1; $i <= $max_passenger; $i++) { ?>
 								<option value="<?php echo esc_attr($i); ?>"><?php echo esc_html($i); ?></option>
