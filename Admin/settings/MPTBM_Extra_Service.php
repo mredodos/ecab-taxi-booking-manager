@@ -236,7 +236,16 @@
 				$extra_count               = count( $extra_names );
 				for ( $i = 0; $i < $extra_count; $i ++ ) {
 					if ( $extra_names[ $i ] && $extra_price[ $i ] >= 0 ) {
-						$new_extra_service[ $i ]['service_icon']              = $extra_icon[ $i ] ?? '';
+						$icon = $image = "";
+						if ( $extra_icon[ $i ] ) {
+							if ( preg_match( '/\s/', $extra_icon[ $i ] ) ) {
+								$icon = $extra_icon[ $i ];
+							} else {
+								$image = $extra_icon[ $i ];
+							}
+						}
+						$new_extra_service[ $i ]['service_icon']              = $icon;
+						$new_extra_service[ $i ]['service_image']            = $image;
 						$new_extra_service[ $i ]['service_name']              = $extra_names[ $i ];
 						$new_extra_service[ $i ]['service_price']             = $extra_price[ $i ];
 						$new_extra_service[ $i ]['service_qty_type']          = $extra_qty_type[ $i ] ?? 'inputbox';
