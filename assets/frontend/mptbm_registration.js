@@ -873,7 +873,25 @@ function mptbm_map_area_init() {
     var year = today.getFullYear();
     var currentDate = year + '-' + month + '-' + day;
 
+    // Use the buffer values already calculated by PHP
+    // The PHP has already removed the days and calculated the remaining buffer
+    var remainingBufferMinutes = mptbm_buffer_end_minutes;
+
+    // Calculate the buffer end date based on the first available date
+    // If there's remaining buffer, it applies to the first available date
+    var bufferEndDateString = mptbm_first_calendar_date;
+
+    // DEBUG: Log all the important values
+    console.log('=== BUFFER DEBUG ===');
+    console.log('Current date:', currentDate);
+    console.log('Selected date:', selectedDate);
+    console.log('Buffer end minutes (from PHP):', mptbm_buffer_end_minutes);
+    console.log('Remaining buffer minutes:', remainingBufferMinutes);
+    console.log('Buffer end date string:', bufferEndDateString);
+    console.log('First calendar date:', mptbm_first_calendar_date);
+
     if (selectedDate == currentDate) {
+      console.log('DEBUG: Executing TODAY condition');
       // For today's date, apply buffer time restrictions
       var currentTime = new Date();
       var currentHour = currentTime.getHours();
@@ -892,29 +910,37 @@ function mptbm_map_area_init() {
             .append($(this).clone());
         }
       });
-    } else if (selectedDate == mptbm_first_calendar_date) {
-      // For the first available date (which might be today or tomorrow depending on buffer)
+    } else if (selectedDate == bufferEndDateString) {
+      console.log('DEBUG: Executing BUFFER END DATE condition');
+      // For the buffer end date, apply remaining buffer time restrictions
       $('.start_time_list-no-dsiplay li').each(function () {
         const timeValue = parseFloat($(this).attr('data-value'));
         const timeInMinutes =
           Math.floor(timeValue) * 60 + (timeValue % 1) * 100;
 
-        // If there's a buffer remaining, apply it to the first available date
-        if (mptbm_buffer_end_minutes > 0) {
-          if (timeInMinutes > mptbm_buffer_end_minutes) {
+        // If there's remaining buffer time, apply it
+        if (remainingBufferMinutes > 0) {
+          console.log(
+            'DEBUG: Applying remaining buffer:',
+            remainingBufferMinutes,
+            'minutes'
+          );
+          if (timeInMinutes > remainingBufferMinutes) {
             $('#mptbm_map_start_time')
               .siblings('.start_time_list')
               .append($(this).clone());
           }
         } else {
-          // No buffer remaining, show all times
+          console.log('DEBUG: No remaining buffer, showing all times');
+          // No remaining buffer time, show all times
           $('#mptbm_map_start_time')
             .siblings('.start_time_list')
             .append($(this).clone());
         }
       });
     } else {
-      // For future dates, show all available times
+      console.log('DEBUG: Executing OTHER DATES condition - showing all times');
+      // For all other dates (after buffer), show all available times
       $('.start_time_list-no-dsiplay li').each(function () {
         $('#mptbm_map_start_time')
           .siblings('.start_time_list')

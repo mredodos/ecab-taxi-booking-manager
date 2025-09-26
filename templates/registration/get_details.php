@@ -112,18 +112,48 @@ $current_minutes = intval($current_hour) * 60 + intval($current_minute);
 // Calculate buffer end time in minutes since midnight
 $buffer_end_minutes = $current_minutes + $buffer_time;
 
+// DEBUG: Log buffer calculation
+error_log("=== PHP BUFFER DEBUG ===");
+error_log("Current time: " . $current_hour . ":" . $current_minute);
+error_log("Current minutes: " . $current_minutes);
+error_log("Buffer time: " . $buffer_time);
+error_log("Initial buffer_end_minutes: " . $buffer_end_minutes);
+
 // Ensure buffer_end_minutes is not negative
 $buffer_end_minutes = max($buffer_end_minutes, 0);
 
 // If buffer extends beyond current day, remove today from available dates
+$days_removed = 0;
 while ($buffer_end_minutes >= 1440) {
 	// Remove today from available dates
 	if (!empty($all_dates)) {
 		array_shift($all_dates);
+		$days_removed++;
 	}
 	// Adjust buffer_end_minutes for next day
 	$buffer_end_minutes = $buffer_end_minutes - 1440;
 }
+
+// CORRECTION: If we removed days, calculate the remaining buffer time
+// The remaining buffer should be applied to the first available day
+if ($days_removed > 0) {
+	// Calculate how much buffer time remains after removing full days
+	$total_buffer_minutes = $current_minutes + $buffer_time;
+	$full_days_minutes = $days_removed * 1440;
+	$buffer_end_minutes = $total_buffer_minutes - $full_days_minutes;
+	
+	// If the remaining buffer is still >= 1440, it means we need to remove another day
+	while ($buffer_end_minutes >= 1440) {
+		if (!empty($all_dates)) {
+			array_shift($all_dates);
+			$days_removed++;
+		}
+		$buffer_end_minutes = $buffer_end_minutes - 1440;
+	}
+}
+
+error_log("Days removed: " . $days_removed);
+error_log("Final buffer_end_minutes: " . $buffer_end_minutes);
 
 if (sizeof($all_dates) > 0) {
 	$taxi_return = MPTBM_Function::get_general_settings('taxi_return', 'enable');
@@ -193,21 +223,8 @@ if (sizeof($all_dates) > 0) {
 
 					<ul class="mp_input_select_list start_time_list">
 						<?php
-						// Determine the minimum time for the first available day
-						$effective_min_minutes = $min_minutes;
-						
-						// If buffer_end_minutes is greater than 0, it means we need to start from a specific time
-						// on the first available day (not from the beginning of the day)
-						if ($buffer_end_minutes > 0) {
-							// Round buffer_end_minutes up to the nearest interval
-							$effective_min_minutes = ceil($buffer_end_minutes / $interval_time) * $interval_time;
-							// Ensure it doesn't exceed max_minutes
-							$effective_min_minutes = min($effective_min_minutes, $max_minutes);
-							// Ensure it's not less than the minimum schedule time
-							$effective_min_minutes = max($effective_min_minutes, $min_minutes);
-						}
-						
-						for ($i = $effective_min_minutes; $i <= $max_minutes; $i += $interval_time) {
+						// Generate all available times from min to max (buffer will be applied by JavaScript)
+						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
 
 							// Calculate hours and minutes
 							$hours = floor($i / 60);
@@ -231,8 +248,8 @@ if (sizeof($all_dates) > 0) {
 					</ul>
 					<ul class="start_time_list-no-dsiplay" style="display:none">
 						<?php
-						// Use the same effective_min_minutes as the visible list
-						for ($i = $effective_min_minutes; $i <= $max_minutes; $i += $interval_time) {
+						// Generate all available times from min to max (buffer will be applied by JavaScript)
+						for ($i = $min_minutes; $i <= $max_minutes; $i += $interval_time) {
 
 							// Calculate hours and minutes
 							$hours = floor($i / 60);
