@@ -75,17 +75,25 @@
 			public function extra_service_item( $field = array() ) {
 				$field         = $field ?: array();
 				$service_icon  = array_key_exists( 'service_icon', $field ) ? $field['service_icon'] : '';
+				$service_image = array_key_exists( 'service_image', $field ) ? $field['service_image'] : '';
 				$service_name  = array_key_exists( 'service_name', $field ) ? $field['service_name'] : '';
 				$service_price = array_key_exists( 'service_price', $field ) ? $field['service_price'] : '';
 				$input_type    = array_key_exists( 'service_qty_type', $field ) ? $field['service_qty_type'] : 'inputbox';
 				$description   = array_key_exists( 'extra_service_description', $field ) ? $field['extra_service_description'] : '';
 				$icon          = $image = "";
+				
+				// Handle service_icon (for backward compatibility)
 				if ( $service_icon ) {
 					if ( preg_match( '/\s/', $service_icon ) ) {
 						$icon = $service_icon;
 					} else {
 						$image = $service_icon;
 					}
+				}
+				
+				// Handle separate service_image field
+				if ( $service_image ) {
+					$image = $service_image;
 				}
 				?>
 				<tr class="mp_remove_area">
