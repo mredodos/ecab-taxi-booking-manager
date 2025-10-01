@@ -432,9 +432,14 @@ function InitMapFixed(geoLocationOne) {
         map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(centerControlDiv);
     }
 }
-InitMapOne(geoLocationOne);
-InitMapTwo(geoLocationOne);
-InitMapFixed(geoLocationOne,formattedAddress);
+
+// Only auto-initialize Google Maps if Google Maps API is loaded
+// OpenStreetMap initialization is handled separately in the template
+if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+    InitMapOne(geoLocationOne);
+    InitMapTwo(geoLocationOne);
+    InitMapFixed(geoLocationOne, formattedAddress);
+}
 
 
 
@@ -644,11 +649,535 @@ function iniSavedtMap(coordinates,mapCanvasId,mapAppendId) {
         }
         
         // Initialize autocomplete for all three location inputs
-        initializeAutocomplete('mptbm-starting-location-one', InitMapOne);
-        initializeAutocomplete('mptbm-starting-location-two', InitMapTwo);
-        initializeAutocomplete('mptbm-starting-location-three', InitMapFixed);
+        // Only initialize Google Maps autocomplete if Google Maps API is loaded
+        // OpenStreetMap autocomplete is handled in the OSM functions
+        if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+            initializeAutocomplete('mptbm-starting-location-one', InitMapOne);
+            initializeAutocomplete('mptbm-starting-location-two', InitMapTwo);
+            initializeAutocomplete('mptbm-starting-location-three', InitMapFixed);
+        }
         
     });
     
 })(jQuery);
 
+// ==========================================
+// OpenStreetMap Functions for Operation Areas
+// ==========================================
+
+// Global OSM variables
+var osmMapOne, osmMapTwo, osmMapFixed;
+var osmDrawLayerOne, osmDrawLayerTwo, osmDrawLayerFixed;
+var osmDrawControlOne, osmDrawControlTwo, osmDrawControlFixed;
+
+// Initialize OSM Map One (Intercity - Location 1)
+function InitOSMMapOne(geoLocation) {
+    var mapCanvas1 = document.getElementById('mptbm-map-canvas-one');
+    if (!mapCanvas1) return;
+    
+    // Check if already initialized and clean up
+    if (osmMapOne) {
+        console.log('[OSM] Map One already initialized, removing...');
+        try {
+            osmMapOne.remove();
+        } catch (e) {
+            console.log('[OSM] Error removing map:', e);
+        }
+        osmMapOne = null;
+    }
+    
+    // Clear Leaflet's internal reference on the container
+    mapCanvas1._leaflet_id = null;
+    mapCanvas1.innerHTML = '';
+    
+    // Default location: Dhaka
+    var defaultLat = geoLocation ? geoLocation.lat : 23.8103;
+    var defaultLng = geoLocation ? geoLocation.lng : 90.4125;
+    
+    // Initialize map
+    osmMapOne = L.map('mptbm-map-canvas-one').setView([defaultLat, defaultLng], 10);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(osmMapOne);
+    
+    // Feature group to store drawn items
+    osmDrawLayerOne = new L.FeatureGroup();
+    osmMapOne.addLayer(osmDrawLayerOne);
+    
+    // Initialize draw control
+    osmDrawControlOne = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                drawError: {
+                    color: '#e1e100',
+                    message: '<strong>Error:</strong> Shape edges cannot cross!'
+                },
+                shapeOptions: {
+                    color: '#ADFF2F',
+                    fillOpacity: 0.5
+                }
+            },
+            polyline: false,
+            circle: false,
+            rectangle: false,
+            marker: false,
+            circlemarker: false
+        },
+        edit: {
+            featureGroup: osmDrawLayerOne,
+            remove: true
+        }
+    });
+    osmMapOne.addControl(osmDrawControlOne);
+    
+    // Handle polygon creation
+    osmMapOne.on(L.Draw.Event.CREATED, function (e) {
+        osmDrawLayerOne.clearLayers();
+        var layer = e.layer;
+        osmDrawLayerOne.addLayer(layer);
+        saveOSMPolygonCoordinates(layer, 'mptbm-coordinates-one');
+    });
+    
+    // Handle polygon edit
+    osmMapOne.on(L.Draw.Event.EDITED, function (e) {
+        var layers = e.layers;
+        layers.eachLayer(function (layer) {
+            saveOSMPolygonCoordinates(layer, 'mptbm-coordinates-one');
+        });
+    });
+    
+    // Handle polygon delete
+    osmMapOne.on(L.Draw.Event.DELETED, function (e) {
+        document.getElementById('mptbm-coordinates-one').value = '';
+    });
+    
+    // Setup autocomplete for location search
+    setupOSMLocationSearch('mptbm-starting-location-one', osmMapOne, function(lat, lng, displayName) {
+        osmMapOne.setView([lat, lng], 13);
+        document.getElementById('mptbm-starting-location-one-hidden').value = displayName;
+    });
+    
+    // Force Leaflet to recalculate map size (fixes partial rendering)
+    // Longer delay to ensure container is fully visible
+    setTimeout(function() {
+        osmMapOne.invalidateSize();
+        console.log('[OSM] Map One size invalidated');
+    }, 500);
+}
+
+// Initialize OSM Map Two (Intercity - Location 2)
+function InitOSMMapTwo(geoLocation) {
+    var mapCanvas2 = document.getElementById('mptbm-map-canvas-two');
+    if (!mapCanvas2) return;
+    
+    // Check if already initialized and clean up
+    if (osmMapTwo) {
+        console.log('[OSM] Map Two already initialized, removing...');
+        try {
+            osmMapTwo.remove();
+        } catch (e) {
+            console.log('[OSM] Error removing map:', e);
+        }
+        osmMapTwo = null;
+    }
+    
+    // Clear Leaflet's internal reference on the container
+    mapCanvas2._leaflet_id = null;
+    mapCanvas2.innerHTML = '';
+    
+    var defaultLat = geoLocation ? geoLocation.lat : 23.8103;
+    var defaultLng = geoLocation ? geoLocation.lng : 90.4125;
+    
+    osmMapTwo = L.map('mptbm-map-canvas-two').setView([defaultLat, defaultLng], 10);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(osmMapTwo);
+    
+    osmDrawLayerTwo = new L.FeatureGroup();
+    osmMapTwo.addLayer(osmDrawLayerTwo);
+    
+    osmDrawControlTwo = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                drawError: {
+                    color: '#e1e100',
+                    message: '<strong>Error:</strong> Shape edges cannot cross!'
+                },
+                shapeOptions: {
+                    color: '#ADFF2F',
+                    fillOpacity: 0.5
+                }
+            },
+            polyline: false,
+            circle: false,
+            rectangle: false,
+            marker: false,
+            circlemarker: false
+        },
+        edit: {
+            featureGroup: osmDrawLayerTwo,
+            remove: true
+        }
+    });
+    osmMapTwo.addControl(osmDrawControlTwo);
+    
+    osmMapTwo.on(L.Draw.Event.CREATED, function (e) {
+        osmDrawLayerTwo.clearLayers();
+        var layer = e.layer;
+        osmDrawLayerTwo.addLayer(layer);
+        saveOSMPolygonCoordinates(layer, 'mptbm-coordinates-two');
+    });
+    
+    osmMapTwo.on(L.Draw.Event.EDITED, function (e) {
+        var layers = e.layers;
+        layers.eachLayer(function (layer) {
+            saveOSMPolygonCoordinates(layer, 'mptbm-coordinates-two');
+        });
+    });
+    
+    osmMapTwo.on(L.Draw.Event.DELETED, function (e) {
+        document.getElementById('mptbm-coordinates-two').value = '';
+    });
+    
+    setupOSMLocationSearch('mptbm-starting-location-two', osmMapTwo, function(lat, lng, displayName) {
+        osmMapTwo.setView([lat, lng], 13);
+        document.getElementById('mptbm-starting-location-two-hidden').value = displayName;
+    });
+    
+    // Force Leaflet to recalculate map size (fixes partial rendering)
+    // Longer delay to ensure container is fully visible
+    setTimeout(function() {
+        osmMapTwo.invalidateSize();
+        console.log('[OSM] Map Two size invalidated');
+    }, 500);
+}
+
+// Initialize OSM Map Fixed (Single Operation Area)
+function InitOSMMapFixed(geoLocation, formattedAddress) {
+    var mapCanvas3 = document.getElementById('mptbm-map-canvas-three');
+    if (!mapCanvas3) return;
+    
+    // Check if already initialized and clean up
+    if (osmMapFixed) {
+        console.log('[OSM] Map Fixed already initialized, removing...');
+        try {
+            osmMapFixed.remove();
+        } catch (e) {
+            console.log('[OSM] Error removing map:', e);
+        }
+        osmMapFixed = null;
+    }
+    
+    // Clear Leaflet's internal reference on the container
+    mapCanvas3._leaflet_id = null;
+    mapCanvas3.innerHTML = '';
+    
+    var defaultLat = geoLocation ? geoLocation.lat : 23.8103;
+    var defaultLng = geoLocation ? geoLocation.lng : 90.4125;
+    
+    osmMapFixed = L.map('mptbm-map-canvas-three').setView([defaultLat, defaultLng], 10);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(osmMapFixed);
+    
+    osmDrawLayerFixed = new L.FeatureGroup();
+    osmMapFixed.addLayer(osmDrawLayerFixed);
+    
+    osmDrawControlFixed = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                drawError: {
+                    color: '#e1e100',
+                    message: '<strong>Error:</strong> Shape edges cannot cross!'
+                },
+                shapeOptions: {
+                    color: '#ADFF2F',
+                    fillOpacity: 0.5
+                }
+            },
+            polyline: false,
+            circle: false,
+            rectangle: false,
+            marker: false,
+            circlemarker: false
+        },
+        edit: {
+            featureGroup: osmDrawLayerFixed,
+            remove: true
+        }
+    });
+    osmMapFixed.addControl(osmDrawControlFixed);
+    
+    osmMapFixed.on(L.Draw.Event.CREATED, function (e) {
+        osmDrawLayerFixed.clearLayers();
+        var layer = e.layer;
+        osmDrawLayerFixed.addLayer(layer);
+        saveOSMPolygonCoordinates(layer, 'mptbm-coordinates-three');
+    });
+    
+    osmMapFixed.on(L.Draw.Event.EDITED, function (e) {
+        var layers = e.layers;
+        layers.eachLayer(function (layer) {
+            saveOSMPolygonCoordinates(layer, 'mptbm-coordinates-three');
+        });
+    });
+    
+    osmMapFixed.on(L.Draw.Event.DELETED, function (e) {
+        document.getElementById('mptbm-coordinates-three').value = '';
+    });
+    
+    setupOSMLocationSearch('mptbm-starting-location-three', osmMapFixed, function(lat, lng, displayName) {
+        osmMapFixed.setView([lat, lng], 13);
+        document.getElementById('mptbm-starting-location-three-hidden').value = displayName;
+    });
+    
+    // Force Leaflet to recalculate map size (fixes partial rendering)
+    // Longer delay to ensure container is fully visible
+    setTimeout(function() {
+        osmMapFixed.invalidateSize();
+        console.log('[OSM] Map Fixed size invalidated');
+    }, 500);
+}
+
+// Save polygon coordinates to hidden input
+function saveOSMPolygonCoordinates(layer, inputId) {
+    var coordinates = [];
+    var latlngs = layer.getLatLngs()[0]; // Get first ring of polygon
+    
+    latlngs.forEach(function(latlng) {
+        coordinates.push(latlng.lat.toFixed(6));
+        coordinates.push(latlng.lng.toFixed(6));
+    });
+    
+    var inputElement = document.getElementById(inputId);
+    if (inputElement) {
+        inputElement.value = coordinates.join(',');
+    }
+}
+
+// Load saved polygon onto map
+function iniOSMSavedMap(coordinates, mapCanvasId, mapAppendId) {
+    var mapCanvas = document.getElementById(mapCanvasId);
+    if (!mapCanvas) return;
+    
+    // Clear any existing Leaflet instance
+    if (mapCanvas._leaflet_id) {
+        console.log('[OSM] Clearing existing map instance for:', mapCanvasId);
+        mapCanvas._leaflet_id = null;
+        mapCanvas.innerHTML = '';
+    }
+    
+    // Initialize map
+    var savedMap = L.map(mapCanvasId).setView([parseFloat(coordinates[0]), parseFloat(coordinates[1])], 10);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(savedMap);
+    
+    // Feature group for drawn items
+    var savedDrawLayer = new L.FeatureGroup();
+    savedMap.addLayer(savedDrawLayer);
+    
+    // Draw control
+    var savedDrawControl = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                shapeOptions: {
+                    color: '#ADFF2F',
+                    fillOpacity: 0.5
+                }
+            },
+            polyline: false,
+            circle: false,
+            rectangle: false,
+            marker: false,
+            circlemarker: false
+        },
+        edit: {
+            featureGroup: savedDrawLayer,
+            remove: true
+        }
+    });
+    savedMap.addControl(savedDrawControl);
+    
+    // Convert coordinates array to LatLng array
+    var latlngs = [];
+    for (var i = 0; i < coordinates.length; i += 2) {
+        latlngs.push([parseFloat(coordinates[i]), parseFloat(coordinates[i + 1])]);
+    }
+    
+    // Draw the saved polygon
+    var polygon = L.polygon(latlngs, {
+        color: '#ADFF2F',
+        fillOpacity: 0.5
+    }).addTo(savedDrawLayer);
+    
+    // Fit map to polygon bounds
+    savedMap.fitBounds(polygon.getBounds());
+    
+    // Force map to recalculate size after container is visible
+    setTimeout(function() {
+        savedMap.invalidateSize();
+        savedMap.fitBounds(polygon.getBounds());
+    }, 300);
+    
+    // Handle edits
+    savedMap.on(L.Draw.Event.EDITED, function (e) {
+        var layers = e.layers;
+        layers.eachLayer(function (layer) {
+            if (mapAppendId) {
+                saveOSMPolygonCoordinates(layer, mapAppendId);
+            }
+        });
+    });
+    
+    savedMap.on(L.Draw.Event.DELETED, function (e) {
+        if (mapAppendId) {
+            document.getElementById(mapAppendId).value = '';
+        }
+    });
+    
+    savedMap.on(L.Draw.Event.CREATED, function (e) {
+        savedDrawLayer.clearLayers();
+        var layer = e.layer;
+        savedDrawLayer.addLayer(layer);
+        if (mapAppendId) {
+            saveOSMPolygonCoordinates(layer, mapAppendId);
+        }
+    });
+}
+
+// Setup location search with autocomplete
+function setupOSMLocationSearch(inputId, map, callback) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    
+    var debounceTimer;
+    var resultsContainer = document.createElement('div');
+    resultsContainer.className = 'osm-location-autocomplete';
+    resultsContainer.style.cssText = 'position: absolute; background: white; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 99999; display: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);';
+    
+    // Append to body to avoid parent overflow issues
+    document.body.appendChild(resultsContainer);
+    
+    // Function to position the dropdown
+    function positionDropdown() {
+        var rect = input.getBoundingClientRect();
+        var top = rect.bottom + window.scrollY + 2;
+        var left = rect.left + window.scrollX;
+        var width = rect.width;
+        
+        resultsContainer.style.top = top + 'px';
+        resultsContainer.style.left = left + 'px';
+        resultsContainer.style.width = width + 'px';
+    }
+    
+    input.addEventListener('input', function(e) {
+        clearTimeout(debounceTimer);
+        var query = e.target.value.trim();
+        
+        if (query.length < 3) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+        
+        debounceTimer = setTimeout(function() {
+            positionDropdown(); // Position before showing
+            searchOSMLocation(query, resultsContainer, input, map, callback);
+        }, 300);
+    });
+    
+    // Reposition on scroll or resize
+    window.addEventListener('scroll', function() {
+        if (resultsContainer.style.display !== 'none') {
+            positionDropdown();
+        }
+    });
+    
+    window.addEventListener('resize', function() {
+        if (resultsContainer.style.display !== 'none') {
+            positionDropdown();
+        }
+    });
+    
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target !== input && !resultsContainer.contains(e.target)) {
+            resultsContainer.style.display = 'none';
+        }
+    });
+}
+
+// Search location using Photon API
+function searchOSMLocation(query, container, input, map, callback) {
+    var url = 'https://photon.komoot.io/api/?q=' + encodeURIComponent(query) + '&limit=5';
+    
+    container.innerHTML = '<div style="padding: 10px; text-align: center; color: #666;">Searching...</div>';
+    container.style.display = 'block';
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            container.innerHTML = '';
+            
+            if (!data.features || data.features.length === 0) {
+                container.innerHTML = '<div style="padding: 10px; color: #666;">No results found</div>';
+                return;
+            }
+            
+            data.features.forEach(function(feature) {
+                var properties = feature.properties;
+                var coordinates = feature.geometry.coordinates;
+                
+                var name_parts = [];
+                if (properties.name) name_parts.push(properties.name);
+                if (properties.city) name_parts.push(properties.city);
+                if (properties.state) name_parts.push(properties.state);
+                if (properties.country) name_parts.push(properties.country);
+                
+                var displayName = name_parts.join(', ');
+                
+                var item = document.createElement('div');
+                item.style.cssText = 'padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;';
+                item.textContent = displayName;
+                
+                item.addEventListener('click', function() {
+                    input.value = displayName;
+                    container.style.display = 'none';
+                    
+                    var lat = coordinates[1];
+                    var lng = coordinates[0];
+                    
+                    if (callback) {
+                        callback(lat, lng, displayName);
+                    }
+                });
+                
+                item.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f5f5f5';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = 'white';
+                });
+                
+                container.appendChild(item);
+            });
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            container.innerHTML = '<div style="padding: 10px; color: #f00;">Search failed</div>';
+        });
+}

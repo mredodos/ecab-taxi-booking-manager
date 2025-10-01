@@ -18,6 +18,7 @@ $restrict_search_country = MP_Global_Function::get_settings('mptbm_map_api_setti
 $country = MP_Global_Function::get_settings('mptbm_map_api_settings', 'mp_country', 'no');
 $km_or_mile = MP_Global_Function::get_settings('mp_global_settings', 'km_or_mile', 'km');
 $price_based = $price_based ?? '';
+$map_type = MP_Global_Function::get_settings('mptbm_map_api_settings', 'display_map', 'openstreetmap');
 
 set_transient('original_price_based', $price_based);
 
@@ -174,6 +175,7 @@ if (sizeof($all_dates) > 0) {
 				<input type='hidden' id="mptbm_first_calendar_date" name="mptbm_first_calendar_date" value="<?php echo $all_dates[0]; ?>" />
 				<input type='hidden' id="mptbm_country" name="mptbm_country" value="<?php echo $country; ?>" />
 				<input type='hidden' id="mptbm_restrict_search_country" name="mptbm_restrict_search_country" value="<?php echo $restrict_search_country; ?>" />
+				<input type='hidden' id="mptbm_map_type" name="mptbm_map_type" value="<?php echo esc_attr($map_type); ?>" />
 				<div class="inputList">
 					<label class="fdColumn">
 						<input type="hidden" id="mptbm_map_start_date" value="" />
@@ -513,15 +515,60 @@ document.addEventListener('DOMContentLoaded', function() {
 				<?php } ?>
 			</div>
 		</div>
-		<?php $map_key = get_option('mptbm_map_api_settings',true);?>
-		<span class="mptbm-map-warning" style="display:none"><?php _e('Google Map Authentication Failed! Please contact site admin.','ecab-taxi-booking-manager'); ?></span>
+		<?php 
+		$map_key = get_option('mptbm_map_api_settings',true);
+		?>
+		
+		<?php if($map_type === 'openstreetmap'): ?>
+		<!-- OpenStreetMap CSS -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+		<!-- OpenStreetMap JavaScript -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+		<script>
+		console.log('[OSM] Map type:', '<?php echo $map_type; ?>');
+		console.log('[OSM] Leaflet loading...');
+		</script>
+		<style>
+		#mptbm_map_area {
+			height: 86% !important;
+			width: 100% !important;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+		}
+		.mptbm-osm-autocomplete {
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			background: white;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			max-height: 200px;
+			overflow-y: auto;
+			z-index: 9999;
+			display: none;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			margin-top: 2px;
+		}
+		.inputList label {
+			position: relative;
+		}
+		</style>
+		<?php endif; ?>
+		<span class="mptbm-map-warning" style="display:none"><?php _e('Map Authentication Failed! Please contact site admin.','ecab-taxi-booking-manager'); ?></span>
 		<div class="mptbm_map_area fdColumn" style="display: <?php echo ($price_based != 'manual' && $map === 'yes' && !($hide_dropoff && $price_based === 'fixed_hourly')) ? 'block' : 'none'; ?>;">
 			<div class="fullHeight">
-				<?php if(!empty($map_key['gmap_api_key'])): ?>
+				<?php if($map_type === 'openstreetmap'): ?>
 					<div id="mptbm_map_area"></div>
+				<?php elseif($map_type === 'enable' && !empty($map_key['gmap_api_key'])): ?>
+					<div id="mptbm_map_area"></div>
+				<?php elseif($map_type === 'enable' && empty($map_key['gmap_api_key'])): ?>
+					<div class="mptbm-map-warning"><h6>
+						<?php _e('Google Map API key not configured! Please contact site admin.','ecab-taxi-booking-manager'); ?></h6>
+					</div>
 				<?php else: ?>
 					<div class="mptbm-map-warning"><h6>
-						<?php _e('Google Map not working! Please contact site admin.','ecab-taxi-booking-manager'); ?></h6>
+						<?php _e('Map functionality is disabled.','ecab-taxi-booking-manager'); ?></h6>
 					</div>
 				<?php endif; ?>
 			</div>
@@ -555,6 +602,8 @@ document.addEventListener('DOMContentLoaded', function() {
 			</div>
 		</div>
 	</div>
+	
+	
 	<div class="_fullWidth get_details_next_link">
 		<div class="divider"></div>
 		<div class="justifyBetween">

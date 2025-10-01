@@ -1,4 +1,21 @@
  /******************************************************************** ************************************************/
+/* Loading Spinner Animation */
+.mptbm-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: mptbm-spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes mptbm-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/******************************************************************** ************************************************/
 @media only screen and (min-width: 10px) {
 	div.mptbm_transport_search_area {width: 100%;max-width: 1200px;
 		box-shadow: 0 0 10px #ddd;

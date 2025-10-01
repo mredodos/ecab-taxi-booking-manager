@@ -36,6 +36,9 @@ if (!class_exists('MPTBM_Operation_Areas')) {
             $mptbm_geo_fence_fixed_price_amount = MP_Global_Function::get_post_info($post_id, 'mptbm-geo-fence-fixed-price-amount');
             $mptbm_geo_fence_percentage_amount = MP_Global_Function::get_post_info($post_id, 'mptbm-geo-fence-percentage-amount');
             $mptbm_geo_fence_direction = MP_Global_Function::get_post_info($post_id, 'mptbm-geo-fence-direction');
+            
+            // Get map type setting
+            $map_type = MP_Global_Function::get_settings('mptbm_map_api_settings', 'display_map', 'openstreetmap');
             if ($coordinates_three) {
 ?>
                 <script>
@@ -43,7 +46,11 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                         var coordinates = <?php echo wp_json_encode($coordinates_three); ?>;
                         var mapCanvasId = 'mptbm-map-canvas-three';
                         var mapAppendId = 'mptbm-coordinates-three';
+                        <?php if ($map_type === 'openstreetmap'): ?>
+                        iniOSMSavedMap(coordinates, mapCanvasId, mapAppendId);
+                        <?php else: ?>
                         iniSavedtMap(coordinates, mapCanvasId, mapAppendId);
+                        <?php endif; ?>
                     });
                 </script>
 
@@ -57,7 +64,11 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                         var coordinates = <?php echo wp_json_encode($coordinates_two); ?>;
                         var mapCanvasId = 'mptbm-map-canvas-two';
                         var mapAppendId = 'mptbm-coordinates-two';
+                        <?php if ($map_type === 'openstreetmap'): ?>
+                        iniOSMSavedMap(coordinates, mapCanvasId, mapAppendId);
+                        <?php else: ?>
                         iniSavedtMap(coordinates, mapCanvasId, mapAppendId);
+                        <?php endif; ?>
                     });
                 </script>
 
@@ -71,7 +82,11 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                         var coordinates = <?php echo wp_json_encode($coordinates_one); ?>;
                         var mapCanvasId = 'mptbm-map-canvas-one';
                         var mapAppendId = 'mptbm-coordinates-one';
+                        <?php if ($map_type === 'openstreetmap'): ?>
+                        iniOSMSavedMap(coordinates, mapCanvasId, mapAppendId);
+                        <?php else: ?>
                         iniSavedtMap(coordinates, mapCanvasId, mapAppendId);
+                        <?php endif; ?>
                     });
                 </script>
 
@@ -113,7 +128,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                         <input class="formControl" type="hidden" name="mptbm-coordinates-one" id="mptbm-coordinates-one" />
                                     </div>
                                     </br>
-                                    <div id="mptbm-map-canvas-one"></div>
+                                    <div id="mptbm-map-canvas-one" style="width: 100%; height: 600px;"></div>
 
                                 </div>
                                 <div id="mptbm_start_location_two" class="mptbm_map_area padding">
@@ -125,7 +140,7 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                         <input class="formControl" type="hidden" name="mptbm-coordinates-two" id="mptbm-coordinates-two" />
                                     </div>
                                     </br>
-                                    <div id="mptbm-map-canvas-two"></div>
+                                    <div id="mptbm-map-canvas-two" style="width: 100%; height: 600px;"></div>
 
                                 </div>
 
@@ -211,6 +226,78 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                     </div>
                 </div>
             </div>
+            
+            <?php if ($map_type === 'openstreetmap'): ?>
+            <!-- OpenStreetMap Initialization -->
+            <style>
+                #mptbm-map-canvas-one,
+                #mptbm-map-canvas-two,
+                #mptbm-map-canvas-three {
+                    width: 100% !important;
+                    height: 600px !important;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }
+            </style>
+            <script>
+                jQuery(document).ready(function($) {
+                    console.log('[OSM Operation Areas] Initializing OpenStreetMap');
+                    var geoLocationOne = { lat: 23.8103, lng: 90.4125 };
+                    
+                    // Wait for operation type selection to initialize maps
+                    function initializeMapsBasedOnType() {
+                        var selectedType = $('#mptbm-operation-type').val();
+                        console.log('[OSM] Selected operation type:', selectedType);
+                        
+                        // Small delay to ensure containers are visible
+                        setTimeout(function() {
+                            if (selectedType === 'geo-fence-operation-area-type') {
+                                // Initialize intercity maps
+                                <?php if (!$coordinates_one): ?>
+                                if (document.getElementById('mptbm-map-canvas-one')) {
+                                    console.log('[OSM] Initializing Map One');
+                                    InitOSMMapOne(geoLocationOne);
+                                }
+                                <?php endif; ?>
+                                
+                                <?php if (!$coordinates_two): ?>
+                                if (document.getElementById('mptbm-map-canvas-two')) {
+                                    console.log('[OSM] Initializing Map Two');
+                                    InitOSMMapTwo(geoLocationOne);
+                                }
+                                <?php endif; ?>
+                            } else if (selectedType === 'fixed-operation-area-type') {
+                                // Initialize single operation area map
+                                <?php if (!$coordinates_three): ?>
+                                if (document.getElementById('mptbm-map-canvas-three')) {
+                                    console.log('[OSM] Initializing Map Fixed');
+                                    InitOSMMapFixed(geoLocationOne, '');
+                                }
+                                <?php endif; ?>
+                            }
+                        }, 300);
+                    }
+                    
+                    // Initialize on page load
+                    initializeMapsBasedOnType();
+                    
+                    // Re-initialize when operation type changes
+                    $('#mptbm-operation-type').on('change', function() {
+                        initializeMapsBasedOnType();
+                    });
+                });
+            </script>
+            <?php else: ?>
+            <!-- Google Maps Initialization -->
+            <script>
+                jQuery(document).ready(function($) {
+                    var geoLocationOne = new google.maps.LatLng(23.8103, 90.4125);
+                    InitMapOne(geoLocationOne);
+                    InitMapTwo(geoLocationOne);
+                    InitMapFixed(geoLocationOne, '');
+                });
+            </script>
+            <?php endif; ?>
         <?php
         }
 
@@ -298,6 +385,9 @@ if (!class_exists('MPTBM_Operation_Areas')) {
             if (!is_array($selected_operation_areas)) {
                 $selected_operation_areas = array();
             }
+            
+            // Get map type setting
+            $map_type = MP_Global_Function::get_settings('mptbm_map_api_settings', 'display_map', 'openstreetmap');
         ?>
             <div class="tabsItem " data-tabs="#mptbm_setting_operation_area">
                 <?php wp_nonce_field('mptbm_operate_areas_tab', 'mptbm_operate_areas_tab'); ?>
@@ -388,6 +478,10 @@ if (!class_exists('MPTBM_Operation_Areas')) {
 
             <script>
                 jQuery(document).ready(function($) {
+                    // Get map type from PHP
+                    var mapType = '<?php echo esc_js($map_type); ?>';
+                    console.log('[Operation Areas Selection] Map type:', mapType);
+                    
                     // Handle operation type change
                     $('#mptbm_operation_area_type').on('change', function() {
                         var selectedType = $(this).val();
@@ -437,59 +531,112 @@ if (!class_exists('MPTBM_Operation_Areas')) {
 
                             if (areaInfo) {
                                 var mapsWrapper = $('<div style="display: flex; justify-content: space-around;"></div>');
+                                var hasMapOne = false;
+                                var hasMapTwo = false;
+                                var mapOneId, mapTwoId;
+                                var formattedCoordinatesOne = [];
+                                var formattedCoordinatesTwo = [];
                                 
+                                // Prepare Map One
                                 if (areaInfo.coordinates_one && areaInfo.coordinates_one.length > 0) {
                                     var mapOneContainer = $('<div class="mptbm_geo_fence_settings_map" style="width: 49%; margin-right: 5px;"></div>');
-                                    var mapOneId = 'geo_fence_map_one_' + selectedAreaId;
+                                    mapOneId = 'geo_fence_map_one_' + selectedAreaId;
                                     mapOneContainer.append($('<div class="mptbm_map_area padding" style="height: 600px; width: 100%;"></div>').attr('id', mapOneId));
                                     mapsWrapper.append(mapOneContainer);
 
-                                    // Convert coordinates to the format expected by iniSavedtMap
+                                    // Convert coordinates
                                     var coordinates = areaInfo.coordinates_one;
-                                    var formattedCoordinates = [];
                                     for (var i = 0; i < coordinates.length; i += 2) {
                                         var lat = parseFloat(coordinates[i]);
                                         var lng = parseFloat(coordinates[i + 1]);
                                         if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-                                            formattedCoordinates.push(lat);
-                                            formattedCoordinates.push(lng);
+                                            formattedCoordinatesOne.push(lat);
+                                            formattedCoordinatesOne.push(lng);
                                         }
                                     }
-
-                                    if (formattedCoordinates.length > 0) {
-                                        mapsContainer.append(mapsWrapper);
-                                        try {
-                                            iniSavedtMap(formattedCoordinates, mapOneId, null);
-                                        } catch (e) {
-                                            console.error('Error initializing map one:', e);
-                                        }
+                                    if (formattedCoordinatesOne.length > 0) {
+                                        hasMapOne = true;
                                     }
                                 }
 
+                                // Prepare Map Two
                                 if (areaInfo.coordinates_two && areaInfo.coordinates_two.length > 0) {
                                     var mapTwoContainer = $('<div class="mptbm_geo_fence_settings_map" style="width: 49%; margin-left: 5px;"></div>');
-                                    var mapTwoId = 'geo_fence_map_two_' + selectedAreaId;
+                                    mapTwoId = 'geo_fence_map_two_' + selectedAreaId;
                                     mapTwoContainer.append($('<div class="mptbm_map_area padding" style="height: 600px; width: 100%;"></div>').attr('id', mapTwoId));
                                     mapsWrapper.append(mapTwoContainer);
 
-                                    // Convert coordinates to the format expected by iniSavedtMap
+                                    // Convert coordinates
                                     var coordinates = areaInfo.coordinates_two;
-                                    var formattedCoordinates = [];
                                     for (var i = 0; i < coordinates.length; i += 2) {
                                         var lat = parseFloat(coordinates[i]);
                                         var lng = parseFloat(coordinates[i + 1]);
                                         if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-                                            formattedCoordinates.push(lat);
-                                            formattedCoordinates.push(lng);
+                                            formattedCoordinatesTwo.push(lat);
+                                            formattedCoordinatesTwo.push(lng);
                                         }
                                     }
-
-                                    if (formattedCoordinates.length > 0) {
-                                        try {
-                                            iniSavedtMap(formattedCoordinates, mapTwoId, null);
-                                        } catch (e) {
-                                            console.error('Error initializing map two:', e);
+                                    if (formattedCoordinatesTwo.length > 0) {
+                                        hasMapTwo = true;
+                                    }
+                                }
+                                
+                                // Append wrapper to container ONCE
+                                if (hasMapOne || hasMapTwo) {
+                                    mapsContainer.append(mapsWrapper);
+                                    
+                                    // Wait until containers have actual dimensions before initializing
+                                    function waitForContainerAndInit(mapId, coordinates, isMapOne) {
+                                        var attempts = 0;
+                                        var maxAttempts = 50; // Increased for hidden tabs
+                                        var initDone = false;
+                                        
+                                        function checkAndInit() {
+                                            if (initDone) return;
+                                            
+                                            var elem = document.getElementById(mapId);
+                                            if (elem && elem.offsetWidth > 0 && elem.offsetHeight > 0) {
+                                                console.log('[Geo Fence] Container ready for', mapId, '- dimensions:', elem.offsetWidth + 'x' + elem.offsetHeight);
+                                                initDone = true;
+                                                try {
+                                                    if (mapType === 'openstreetmap') {
+                                                        iniOSMSavedMap(coordinates, mapId, null);
+                                                    } else {
+                                                        iniSavedtMap(coordinates, mapId, null);
+                                                    }
+                                                } catch (e) {
+                                                    console.error('Error initializing map', mapId, ':', e);
+                                                }
+                                            } else {
+                                                attempts++;
+                                                if (attempts < maxAttempts) {
+                                                    setTimeout(checkAndInit, 200);
+                                                } else {
+                                                    // Tab might be hidden - set up observer to init when visible
+                                                    console.log('[Geo Fence] Container still hidden, will init when tab becomes visible');
+                                                    var observer = new MutationObserver(function() {
+                                                        checkAndInit();
+                                                    });
+                                                    if (elem && elem.parentElement) {
+                                                        observer.observe(elem.parentElement, { attributes: true, childList: true, subtree: true });
+                                                    }
+                                                    // Also try on next user interaction
+                                                    $(document).one('click', function() {
+                                                        setTimeout(checkAndInit, 300);
+                                                    });
+                                                }
+                                            }
                                         }
+                                        
+                                        setTimeout(checkAndInit, 100);
+                                    }
+                                    
+                                    if (hasMapOne) {
+                                        waitForContainerAndInit(mapOneId, formattedCoordinatesOne, true);
+                                    }
+                                    
+                                    if (hasMapTwo) {
+                                        waitForContainerAndInit(mapTwoId, formattedCoordinatesTwo, false);
                                     }
                                 }
                             }
@@ -527,11 +674,49 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                     }
 
                                     if (formattedCoordinates.length > 0) {
-                                        try {
-                                            iniSavedtMap(formattedCoordinates, mapId, null);
-                                        } catch (e) {
-                                            console.error('Error initializing map:', e);
-                                        }
+                                        // Wait until container has actual dimensions before initializing
+                                        (function(id, coords) {
+                                            var attempts = 0;
+                                            var maxAttempts = 50;
+                                            var initDone = false;
+                                            
+                                            function checkAndInit() {
+                                                if (initDone) return;
+                                                
+                                                var elem = document.getElementById(id);
+                                                if (elem && elem.offsetWidth > 0 && elem.offsetHeight > 0) {
+                                                    console.log('[Fixed Area] Container ready for', id, '- dimensions:', elem.offsetWidth + 'x' + elem.offsetHeight);
+                                                    initDone = true;
+                                                    try {
+                                                        if (mapType === 'openstreetmap') {
+                                                            iniOSMSavedMap(coords, id, null);
+                                                        } else {
+                                                            iniSavedtMap(coords, id, null);
+                                                        }
+                                                    } catch (e) {
+                                                        console.error('Error initializing map', id, ':', e);
+                                                    }
+                                                } else {
+                                                    attempts++;
+                                                    if (attempts < maxAttempts) {
+                                                        setTimeout(checkAndInit, 200);
+                                                    } else {
+                                                        console.log('[Fixed Area] Container still hidden, will init when tab becomes visible');
+                                                        var observer = new MutationObserver(function() {
+                                                            checkAndInit();
+                                                        });
+                                                        if (elem && elem.parentElement) {
+                                                            observer.observe(elem.parentElement, { attributes: true, childList: true, subtree: true });
+                                                        }
+                                                        $(document).one('click', function() {
+                                                            setTimeout(checkAndInit, 300);
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                            
+                                            setTimeout(checkAndInit, 100);
+                                        })(mapId, formattedCoordinates);
                                     }
                                 }
                             });
@@ -567,13 +752,51 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                     }
                                 }
 
-                                if (formattedCoordinates.length > 0) {
-                                    try {
-                                        iniSavedtMap(formattedCoordinates, mapId, null);
-                                    } catch (e) {
-                                        console.error('Error initializing geo-matched map:', e);
+                                    if (formattedCoordinates.length > 0) {
+                                        // Wait until container has actual dimensions before initializing
+                                        (function(id, coords) {
+                                            var attempts = 0;
+                                            var maxAttempts = 50;
+                                            var initDone = false;
+                                            
+                                            function checkAndInit() {
+                                                if (initDone) return;
+                                                
+                                                var elem = document.getElementById(id);
+                                                if (elem && elem.offsetWidth > 0 && elem.offsetHeight > 0) {
+                                                    console.log('[Geo-Matched Area] Container ready for', id, '- dimensions:', elem.offsetWidth + 'x' + elem.offsetHeight);
+                                                    initDone = true;
+                                                    try {
+                                                        if (mapType === 'openstreetmap') {
+                                                            iniOSMSavedMap(coords, id, null);
+                                                        } else {
+                                                            iniSavedtMap(coords, id, null);
+                                                        }
+                                                    } catch (e) {
+                                                        console.error('Error initializing map', id, ':', e);
+                                                    }
+                                                } else {
+                                                    attempts++;
+                                                    if (attempts < maxAttempts) {
+                                                        setTimeout(checkAndInit, 200);
+                                                    } else {
+                                                        console.log('[Geo-Matched Area] Container still hidden, will init when tab becomes visible');
+                                                        var observer = new MutationObserver(function() {
+                                                            checkAndInit();
+                                                        });
+                                                        if (elem && elem.parentElement) {
+                                                            observer.observe(elem.parentElement, { attributes: true, childList: true, subtree: true });
+                                                        }
+                                                        $(document).one('click', function() {
+                                                            setTimeout(checkAndInit, 300);
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                            
+                                            setTimeout(checkAndInit, 100);
+                                        })(mapId, formattedCoordinates);
                                     }
-                                }
                             }
                         }
                     });

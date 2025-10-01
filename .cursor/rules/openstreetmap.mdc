@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+description: make sure work does not effect other element. if needed create extra clss , ids
+---

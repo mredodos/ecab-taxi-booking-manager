@@ -10,7 +10,9 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 $progressbar = $progressbar ?? 'yes';
-$progressbar_class = $progressbar == 'yes' ? '' : 'dNone';
+$tab = $tab ?? 'no';
+// Hide progress bar when tabs are enabled OR when progressbar is set to 'no'
+$progressbar_class = ($progressbar == 'yes' && $tab == 'no') ? '' : 'dNone';
 ?>
 <div class="mpStyle mptbm_transport_search_area">
 	<div class="mpTabsNext">

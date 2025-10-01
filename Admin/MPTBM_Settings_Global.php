@@ -66,8 +66,8 @@ if (!class_exists('MPTBM_Settings_Global')) {
 			$sections = array(
 				array(
 					'id' => 'mptbm_map_api_settings',
-					'icon' => 'fab fa-google',
-					'title' => esc_html__('Google Map API Settings', 'ecab-taxi-booking-manager')
+					'icon' => 'fa fa-map',
+					'title' => esc_html__('Map API Settings', 'ecab-taxi-booking-manager')
 				),
 				array(
 					'id' => 'mptbm_general_settings',
@@ -373,13 +373,15 @@ if (!class_exists('MPTBM_Settings_Global')) {
 				'mptbm_map_api_settings' => apply_filters('filter_mptbm_map_api_settings', array(
 					array(
 						'name' => 'display_map',
-						'label' => esc_html__('Pricing system based on google map', 'ecab-taxi-booking-manager'),
-						'desc' => esc_html__('If you want to disable Pricing system based on google map, please select Without google map. default Google map', 'ecab-taxi-booking-manager'),
+						'label' => esc_html__('Pricing system based on  map', 'ecab-taxi-booking-manager'),
+						'desc' => esc_html__('If you want to disable Pricing system based on  map, please select Without map. default Google map', 'ecab-taxi-booking-manager'),
 						'type' => 'select',
-						'default' => 'enable',
+						'default' => 'openstreetmap',
 						'options' => array(
 							'enable' => esc_html__('Google map', 'ecab-taxi-booking-manager'),
-							'disable' => esc_html__('Without google map', 'ecab-taxi-booking-manager')
+							'openstreetmap' => esc_html__('Openstreetmap', 'ecab-taxi-booking-manager'),
+							'disable' => esc_html__('Without google map', 'ecab-taxi-booking-manager'),
+
 						)
 					),
 					array(
