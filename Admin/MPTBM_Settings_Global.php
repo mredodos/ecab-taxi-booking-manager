@@ -374,7 +374,7 @@ if (!class_exists('MPTBM_Settings_Global')) {
 					array(
 						'name' => 'display_map',
 						'label' => esc_html__('Pricing system based on  map', 'ecab-taxi-booking-manager'),
-						'desc' => esc_html__('If you want to disable Pricing system based on  map, please select Without map. default Google map', 'ecab-taxi-booking-manager'),
+						'desc' => esc_html__('If you want to disable Pricing system based on  map, please select Without map. default openstreet map', 'ecab-taxi-booking-manager'),
 						'type' => 'select',
 						'default' => 'openstreetmap',
 						'options' => array(

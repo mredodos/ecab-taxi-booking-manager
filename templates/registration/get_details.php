@@ -525,8 +525,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		<!-- OpenStreetMap JavaScript -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 		<script>
-		console.log('[OSM] Map type:', '<?php echo $map_type; ?>');
-		console.log('[OSM] Leaflet loading...');
+		
 		</script>
 		<style>
 		#mptbm_map_area {

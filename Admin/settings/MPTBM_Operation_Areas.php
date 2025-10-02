@@ -241,13 +241,11 @@ if (!class_exists('MPTBM_Operation_Areas')) {
             </style>
             <script>
                 jQuery(document).ready(function($) {
-                    console.log('[OSM Operation Areas] Initializing OpenStreetMap');
                     var geoLocationOne = { lat: 23.8103, lng: 90.4125 };
                     
                     // Wait for operation type selection to initialize maps
                     function initializeMapsBasedOnType() {
                         var selectedType = $('#mptbm-operation-type').val();
-                        console.log('[OSM] Selected operation type:', selectedType);
                         
                         // Small delay to ensure containers are visible
                         setTimeout(function() {
@@ -255,14 +253,12 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                 // Initialize intercity maps
                                 <?php if (!$coordinates_one): ?>
                                 if (document.getElementById('mptbm-map-canvas-one')) {
-                                    console.log('[OSM] Initializing Map One');
                                     InitOSMMapOne(geoLocationOne);
                                 }
                                 <?php endif; ?>
                                 
                                 <?php if (!$coordinates_two): ?>
                                 if (document.getElementById('mptbm-map-canvas-two')) {
-                                    console.log('[OSM] Initializing Map Two');
                                     InitOSMMapTwo(geoLocationOne);
                                 }
                                 <?php endif; ?>
@@ -270,7 +266,6 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                 // Initialize single operation area map
                                 <?php if (!$coordinates_three): ?>
                                 if (document.getElementById('mptbm-map-canvas-three')) {
-                                    console.log('[OSM] Initializing Map Fixed');
                                     InitOSMMapFixed(geoLocationOne, '');
                                 }
                                 <?php endif; ?>
@@ -480,7 +475,6 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                 jQuery(document).ready(function($) {
                     // Get map type from PHP
                     var mapType = '<?php echo esc_js($map_type); ?>';
-                    console.log('[Operation Areas Selection] Map type:', mapType);
                     
                     // Handle operation type change
                     $('#mptbm_operation_area_type').on('change', function() {
@@ -596,7 +590,6 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                             
                                             var elem = document.getElementById(mapId);
                                             if (elem && elem.offsetWidth > 0 && elem.offsetHeight > 0) {
-                                                console.log('[Geo Fence] Container ready for', mapId, '- dimensions:', elem.offsetWidth + 'x' + elem.offsetHeight);
                                                 initDone = true;
                                                 try {
                                                     if (mapType === 'openstreetmap') {
@@ -612,8 +605,6 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                                 if (attempts < maxAttempts) {
                                                     setTimeout(checkAndInit, 200);
                                                 } else {
-                                                    // Tab might be hidden - set up observer to init when visible
-                                                    console.log('[Geo Fence] Container still hidden, will init when tab becomes visible');
                                                     var observer = new MutationObserver(function() {
                                                         checkAndInit();
                                                     });
@@ -685,7 +676,6 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                                 
                                                 var elem = document.getElementById(id);
                                                 if (elem && elem.offsetWidth > 0 && elem.offsetHeight > 0) {
-                                                    console.log('[Fixed Area] Container ready for', id, '- dimensions:', elem.offsetWidth + 'x' + elem.offsetHeight);
                                                     initDone = true;
                                                     try {
                                                         if (mapType === 'openstreetmap') {
@@ -701,7 +691,6 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                                     if (attempts < maxAttempts) {
                                                         setTimeout(checkAndInit, 200);
                                                     } else {
-                                                        console.log('[Fixed Area] Container still hidden, will init when tab becomes visible');
                                                         var observer = new MutationObserver(function() {
                                                             checkAndInit();
                                                         });
@@ -764,7 +753,6 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                                 
                                                 var elem = document.getElementById(id);
                                                 if (elem && elem.offsetWidth > 0 && elem.offsetHeight > 0) {
-                                                    console.log('[Geo-Matched Area] Container ready for', id, '- dimensions:', elem.offsetWidth + 'x' + elem.offsetHeight);
                                                     initDone = true;
                                                     try {
                                                         if (mapType === 'openstreetmap') {
@@ -780,7 +768,6 @@ if (!class_exists('MPTBM_Operation_Areas')) {
                                                     if (attempts < maxAttempts) {
                                                         setTimeout(checkAndInit, 200);
                                                     } else {
-                                                        console.log('[Geo-Matched Area] Container still hidden, will init when tab becomes visible');
                                                         var observer = new MutationObserver(function() {
                                                             checkAndInit();
                                                         });

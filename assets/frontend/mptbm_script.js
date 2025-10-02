@@ -23,7 +23,6 @@
             if (className.startsWith("feature_passenger_")) {
               const parts = className.split("_");
 
-              console.log("Parts:", parts); // Check the parts array to ensure correct splitting
 
               passengerComparisonNumber = parseInt(parts[2], 10); // Index 2 for feature passenger number
               bagComparisonNumber = parseInt(parts[5], 10); // Index 5 for feature bag number

@@ -74,8 +74,6 @@ function mptbm_check_transport_area_geo_fence($post_id, $operation_area_id, $sta
             var end_place_coordinates = <?php echo wp_json_encode($end_place_coordinates); ?>;
             var startInArea = geolib.isPointInPolygon(start_place_coordinates, operation_area_coordinates);
             var endInArea = geolib.isPointInPolygon(end_place_coordinates, operation_area_coordinates);
-            // For debugging, output to console
-            console.log('Geo-matched debug: post_id', post_id, 'startInArea', startInArea, 'endInArea', endInArea, 'start', start_place_coordinates, 'end', end_place_coordinates, 'polygon', operation_area_coordinates);
             if (startInArea || endInArea) {
                 var selectorClass = `.mptbm_booking_item_${post_id}`;
                 jQuery(selectorClass).removeClass('mptbm_booking_item_hidden');

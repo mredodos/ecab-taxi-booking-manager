@@ -21,20 +21,13 @@ function mptbm_cleanup_map() {
     }
 }
 function mptbm_set_cookie_distance_duration(start_place, end_place) {
-    console.log('[Cookie Distance] mptbm_set_cookie_distance_duration called');
     
     // Check if OpenStreetMap is active
     var mapType = document.getElementById('mptbm_map_type');
-    console.log('[Cookie Distance] Map type element:', mapType);
-    console.log('[Cookie Distance] Map type value:', mapType ? mapType.value : 'NULL');
     
     if (mapType && mapType.value === 'openstreetmap') {
-        console.log('[Cookie Distance] ✓ OpenStreetMap active - skipping Google Maps initialization');
-        console.log('[Cookie Distance] Distance/duration will be set by OSM route calculation');
         return false;
     }
-    
-    console.log('[Cookie Distance] ⚠ Using Google Maps for distance calculation');
     
     // Safari compatibility: provide default values
     start_place = start_place || "";
@@ -43,21 +36,22 @@ function mptbm_set_cookie_distance_duration(start_place, end_place) {
     // Check if map container exists before initializing
     var mapContainer = document.getElementById("mptbm_map_area");
     if (!mapContainer) {
-        console.warn("[Cookie Distance] Map container #mptbm_map_area not found. Map initialization skipped.");
         return false;
     }
     
     // Check if Google Maps API is loaded
     if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-        console.warn("[Cookie Distance] Google Maps API not loaded. Distance calculation skipped.");
         return false;
     }
     
-    mptbm_map = new google.maps.Map(mapContainer, {
-        mapTypeControl: false,
-        center: mp_lat_lng,
-        zoom: 15,
-    });
+    // Only create a new map if one doesn't exist
+    if (!mptbm_map) {
+        mptbm_map = new google.maps.Map(mapContainer, {
+            mapTypeControl: false,
+            center: mp_lat_lng,
+            zoom: 15,
+        });
+    }
     
     if (start_place && end_place) {
         var directionsService = new google.maps.DirectionsService();
@@ -78,7 +72,6 @@ function mptbm_set_cookie_distance_duration(start_place, end_place) {
         
         // Safari compatibility: use function instead of arrow function
         directionsService.route(request, function(result, status) {
-            console.log("Directions API status:", status);
             
             if (status === google.maps.DirectionsStatus.OK) {
                 try {
@@ -110,17 +103,14 @@ function mptbm_set_cookie_distance_duration(start_place, end_place) {
                     jQuery(".mptbm_total_time").html(duration_text);
                     jQuery(".mptbm_distance_time").slideDown("fast");
                     
-                    console.log("Distance calculation successful:", distance_text, duration_text);
                     
                 } catch (error) {
-                    console.error("Error processing directions result:", error);
                     // Use fallback for Safari
                     if (mptbm_is_safari()) {
                         mptbm_fallback_distance_calculation(start_place, end_place);
                     }
                 }
             } else {
-                console.error("Directions API error:", status);
                 
                 // Use fallback for Safari when API fails
                 if (mptbm_is_safari()) {
@@ -144,26 +134,28 @@ function mptbm_set_cookie_distance_duration(start_place, end_place) {
             return false;
         }
         
-        var map = new google.maps.Map(mapContainer, {
-            center: mp_lat_lng,
-            zoom: 15,
-        });
+        // Only create a new map if one doesn't exist
+        if (!mptbm_map) {
+            mptbm_map = new google.maps.Map(mapContainer, {
+                center: mp_lat_lng,
+                zoom: 15,
+            });
+        }
         
         var request = {
             query: place,
             fields: ["name", "geometry"],
         };
         
-        var service = new google.maps.places.PlacesService(map);
+        var service = new google.maps.places.PlacesService(mptbm_map);
         // Safari compatibility: use function instead of arrow function
         service.findPlaceFromQuery(request, function(results, status) {
-            console.log("Places API status:", status);
             
             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                 for (var i = 0; i < results.length; i++) {
                     mptbmCreateMarker(results[i]);
                 }
-                map.setCenter(results[0].geometry.location);
+                mptbm_map.setCenter(results[0].geometry.location);
             } else {
                 console.error("Places API error:", status);
             }
@@ -178,21 +170,37 @@ function mptbm_set_cookie_distance_duration(start_place, end_place) {
 function mptbmCreateMarker(place) {
     if (!place.geometry || !place.geometry.location) return;
     
+    // Clear existing markers before adding new ones
+    if (mptbm_map && mptbm_map.markers) {
+        mptbm_map.markers.forEach(function(marker) {
+            marker.setMap(null);
+        });
+        mptbm_map.markers = [];
+    } else if (mptbm_map) {
+        mptbm_map.markers = [];
+    }
+    
     // Safari compatibility: use var instead of const
     var marker = new google.maps.Marker({
         map: mptbm_map,
         position: place.geometry.location,
     });
     
+    // Store marker reference for future clearing
+    if (mptbm_map) {
+        mptbm_map.markers = mptbm_map.markers || [];
+        mptbm_map.markers.push(marker);
+    }
+    
     // Safari compatibility: use function instead of arrow function
     google.maps.event.addListener(marker, "click", function() {
-        mptbm_map_window.setContent(place.name || "");
-        mptbm_map_window.open(mptbm_map);
+        if (mptbm_map_window) {
+            mptbm_map_window.setContent(place.name || "");
+            mptbm_map_window.open(mptbm_map);
+        }
     });
 }
 function mptbm_map_area_init() {
-    console.log('[Map Init] ========================================');
-    console.log('[Map Init] mptbm_map_area_init() called');
     
     // Check if map container exists and is visible before initializing
     var mapContainer = document.getElementById("mptbm_map_area");
@@ -210,49 +218,36 @@ function mptbm_map_area_init() {
     
     // Check map type setting
     var mapType = document.getElementById('mptbm_map_type');
-    console.log('[Map Init] Map type element:', mapType);
     
     if (!mapType) {
-        console.log("[Map Init] ⚠ Map type input not found, defaulting to Google Maps");
         mapType = { value: 'enable' };
     }
     
-    console.log("[Map Init] Map type value:", mapType.value);
     
     // Initialize based on map type
     if (mapType.value === 'openstreetmap') {
-        console.log("[Map Init] ✓ Using OpenStreetMap - Calling mptbm_init_osm_map()");
         return mptbm_init_osm_map();
     } else if (mapType.value === 'enable') {
-        console.log("[Map Init] ⚠ Using Google Maps - Calling mptbm_init_google_map()");
         return mptbm_init_google_map();
     } else {
-        console.log("[Map Init] Map disabled");
         return false;
     }
 }
 
 function mptbm_init_osm_map() {
-    console.log("[OSM] mptbm_init_osm_map() called");
     
-    // Check if Leaflet is loaded
-    console.log("[OSM] Leaflet available:", typeof L !== 'undefined');
     if (typeof L === 'undefined') {
-        console.log("[OSM] ERROR: Leaflet library not loaded");
         return false;
     }
     
     // Check if map container exists
     var mapContainer = document.getElementById("mptbm_map_area");
-    console.log("[OSM] Map container found:", mapContainer !== null);
     if (!mapContainer) {
-        console.log("[OSM] ERROR: Container #mptbm_map_area not found");
         return false;
     }
     
     // Clean up existing map instance if it exists
     if (mptbm_osm_map) {
-        console.log("[OSM] Cleaning up existing map instance");
         try {
             mptbm_osm_map.remove();
             mptbm_osm_map = null;
@@ -265,67 +260,54 @@ function mptbm_init_osm_map() {
         }
     }
     
-    console.log("[OSM] Initializing map...");
     
     // Initialize OpenStreetMap
     mptbm_osm_map = L.map('mptbm_map_area').setView([23.8103, 90.4125], 10);
-    console.log("[OSM] Map object created");
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(mptbm_osm_map);
-    console.log("[OSM] Tiles added");
     
     // Initialize address search functionality
     mptbm_init_osm_address_search();
-    console.log("[OSM] Address search initialized");
     
-    console.log("[OSM] SUCCESS: Map initialized");
     return true;
 }
 
 function mptbm_init_osm_address_search() {
-    console.log("[OSM Search] Initializing address search");
     
     // Clean up any existing autocomplete containers
     var existingContainers = document.querySelectorAll('.mptbm-osm-autocomplete');
     existingContainers.forEach(function(container) {
         container.remove();
     });
-    console.log("[OSM Search] Removed " + existingContainers.length + " existing autocomplete containers");
     
     var startInput = document.getElementById('mptbm_map_start_place');
     var endInput = document.getElementById('mptbm_map_end_place');
     
-    console.log("[OSM Search] Start input found:", startInput !== null);
-    console.log("[OSM Search] End input found:", endInput !== null);
     
     if (startInput) {
         mptbm_setup_osm_autocomplete(startInput, 'start');
-        console.log("[OSM Search] Autocomplete attached to start input");
     }
     if (endInput) {
         mptbm_setup_osm_autocomplete(endInput, 'end');
-        console.log("[OSM Search] Autocomplete attached to end input");
     }
 }
 
 function mptbm_setup_osm_autocomplete(input, type) {
     // Check if autocomplete is already initialized on this input
     if (input.hasAttribute('data-osm-autocomplete-initialized')) {
-        console.log("[OSM Setup] Autocomplete already initialized for", type);
         return;
     }
     
-    console.log("[OSM Setup] Setting up autocomplete for", type);
     
     var debounceTimer;
     var currentSearchQuery = '';
     var resultsContainer = document.createElement('div');
     resultsContainer.className = 'mptbm-osm-autocomplete';
     resultsContainer.setAttribute('data-autocomplete-type', type);
-    resultsContainer.style.cssText = 'position: fixed; background: white; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 99999 !important; display: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);';
+    resultsContainer.style.cssText = 'position: fixed; font-size:16px; background: white; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 99999 !important; display: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);';
     
     // Append to body to avoid parent overflow issues
     document.body.appendChild(resultsContainer);
@@ -345,7 +327,6 @@ function mptbm_setup_osm_autocomplete(input, type) {
         resultsContainer.style.left = left + 'px';
         resultsContainer.style.width = width + 'px';
         
-        console.log('[OSM] Dropdown positioned at:', {top: top, left: left, width: width, inputRect: rect});
     }
     
     input.addEventListener('input', function(e) {
@@ -380,46 +361,38 @@ function mptbm_setup_osm_autocomplete(input, type) {
 }
 
 function mptbm_search_osm_address(query, container, input, type, expectedQuery) {
-    console.log('[OSM Search] Query:', query);
     container.innerHTML = '<div style="padding: 10px; text-align: center; color: #666;">Searching...</div>';
     container.style.display = 'block';
     
     // Use WordPress AJAX proxy
     var ajaxUrl = mptbm_ajax.ajax_url + '?action=mptbm_osm_search&nonce=' + mptbm_ajax.osm_nonce + '&q=' + encodeURIComponent(query);
-    console.log('[OSM Search] AJAX URL:', ajaxUrl);
     
     fetch(ajaxUrl)
         .then(response => {
-            console.log('[OSM Search] Response status:', response.status);
             return response.json();
         })
         .then(response => {
             // Check if this response is still relevant (user hasn't typed more)
             var currentValue = input.value.trim();
             if (expectedQuery && currentValue !== expectedQuery) {
-                console.log('[OSM Search] Ignoring outdated response for:', query, 'Current:', currentValue);
                 return;
             }
             
-            console.log('[OSM Search] Response data:', response);
             container.innerHTML = '';
             
             if (!response.success) {
-                console.log('[OSM Search] ERROR: Request failed -', response.data);
                 container.innerHTML = '<div style="padding: 10px; color: #f00;">Error: ' + response.data + '</div>';
                 container.style.display = 'block';
                 return;
             }
             
             if (!response.data || response.data.length === 0) {
-                console.log('[OSM Search] No results found');
                 container.innerHTML = '<div style="padding: 10px; color: #666;">No results found</div>';
                 container.style.display = 'block';
                 return;
             }
             
             var data = response.data;
-            console.log('[OSM Search] Results count:', data.length);
             
             data.forEach(function(result) {
                 var item = document.createElement('div');
@@ -445,7 +418,6 @@ function mptbm_search_osm_address(query, container, input, type, expectedQuery) 
             
             // Ensure container is visible and positioned
             container.style.display = 'block';
-            console.log('[OSM Search] Container displayed, items:', container.children.length);
         })
         .catch(error => {
             console.error('[OSM Search] Fetch error:', error);
@@ -493,7 +465,6 @@ function mptbm_calculate_osm_distance() {
     var startLatLng = mptbm_osm_start_marker.getLatLng();
     var endLatLng = mptbm_osm_end_marker.getLatLng();
     
-    console.log('[OSM Route] Fetching route from', startLatLng, 'to', endLatLng);
     
     // Get route from OSRM (Open Source Routing Machine)
     var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' + 
@@ -504,7 +475,6 @@ function mptbm_calculate_osm_distance() {
     fetch(osrmUrl)
         .then(response => response.json())
         .then(data => {
-            console.log('[OSM Route] OSRM response:', data);
             
             if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
                 var route = data.routes[0];
@@ -513,7 +483,6 @@ function mptbm_calculate_osm_distance() {
                 var distance = distanceInMeters / 1000; // Convert meters to km
                 var duration = durationInSeconds / 3600; // Convert seconds to hours
                 
-                console.log('[OSM Route] Distance:', distance, 'km, Duration:', duration, 'hours');
                 
                 // Prepare cookie data
                 var kmOrMile = document.getElementById('mptbm_km_or_mile').value;
@@ -549,7 +518,6 @@ function mptbm_calculate_osm_distance() {
                 document.cookie = "mptbm_duration=" + encodeURIComponent(durationInSeconds) + cookieOptions;
                 document.cookie = "mptbm_duration_text=" + encodeURIComponent(duration_text) + cookieOptions;
                 
-                console.log('[OSM Route] Cookies set - Distance:', distanceInMeters, 'Duration:', durationInSeconds);
                 
                 // Update distance display
                 var distanceElement = document.querySelector('.mptbm_total_distance');
@@ -585,7 +553,6 @@ function mptbm_calculate_osm_distance() {
                 // Fit map to show the entire route
                 mptbm_osm_map.fitBounds(mptbm_osm_route.getBounds().pad(0.1));
                 
-                console.log('[OSM Route] Route drawn successfully');
             } else {
                 console.error('[OSM Route] No route found');
                 // Fallback to straight line
@@ -628,7 +595,6 @@ function mptbm_calculate_osm_distance() {
 
 
 function mptbm_init_google_map() {
-    console.log('[Google Map] mptbm_init_google_map() called');
     
     // Check if Google Maps API is loaded
     if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
@@ -636,7 +602,6 @@ function mptbm_init_google_map() {
         return false;
     }
     
-    console.log('[Google Map] ⚠ Proceeding with Google Map initialization');
     
     mptbm_set_cookie_distance_duration();
 
@@ -658,7 +623,6 @@ function mptbm_init_google_map() {
             
             // Only sync dropoff with pickup if dropoff is hidden (hourly pricing with disabled dropoff)
             if (end_place && end_place.type === 'hidden') {
-                console.log('Syncing dropoff with pickup (dropoff is hidden)');
                 end_place.value = start_place.value;
             }
             
@@ -722,16 +686,12 @@ function mptbm_init_google_map() {
         window.initializeGooglePlacesAutocomplete = function(retryCount = 0) {
             // Check if OpenStreetMap is being used instead
             var mapType = document.getElementById('mptbm_map_type');
-            console.log('[Google Places] initializeGooglePlacesAutocomplete called, retry count:', retryCount);
-            console.log('[Google Places] Map type element:', mapType);
-            console.log('[Google Places] Map type value:', mapType ? mapType.value : 'NULL');
+           
             
             if (mapType && mapType.value === 'openstreetmap') {
-                console.log('[OSM] ✓ Skipping Google Places - using OpenStreetMap');
                 return;
             }
             
-            console.log('[Google Places] ⚠ Proceeding with Google Places initialization');
             
             // Maximum retry attempts to prevent infinite loops
             const MAX_RETRIES = 10;
@@ -746,7 +706,6 @@ function mptbm_init_google_map() {
                 
                 // Exponential backoff: 100ms, 200ms, 400ms, 800ms, etc.
                 const delay = INITIAL_DELAY * Math.pow(2, retryCount);
-                console.log('Google Maps API not loaded yet, retrying in', delay, 'ms... (attempt', retryCount + 1, 'of', MAX_RETRIES, ')');
                 
                 setTimeout(function() {
                     initializeGooglePlacesAutocomplete(retryCount + 1);
@@ -755,9 +714,7 @@ function mptbm_init_google_map() {
             }
             
                         var startPlaceInput = document.getElementById('mptbm_map_start_place');
-            console.log('Pickup location input found:', startPlaceInput);
             if (startPlaceInput && !startPlaceInput.hasAttribute('data-autocomplete-initialized')) {
-                    console.log('Initializing Google Places autocomplete for pickup location');
                     var startPlaceAutocomplete = new google.maps.places.Autocomplete(startPlaceInput);
                     var mptbmRestrictSearchToCountry = $('[name="mptbm_restrict_search_country"]').val();
                     var mptbmCountry = $('[name="mptbm_country"]').val();
@@ -773,7 +730,6 @@ function mptbm_init_google_map() {
                         
                         // Only sync dropoff with pickup if dropoff is hidden (hourly pricing with disabled dropoff)
                         if (endPlaceInput && endPlaceInput.type === 'hidden') {
-                            console.log('Syncing dropoff with pickup (dropoff is hidden)');
                             endPlaceInput.value = startPlaceInput.value;
                         }
                         
@@ -790,7 +746,6 @@ function mptbm_init_google_map() {
             // Initialize Google Places autocomplete for dropoff location as well (independent of map visibility)
             var endPlaceInput = document.getElementById('mptbm_map_end_place');
             if (endPlaceInput && !endPlaceInput.hasAttribute('data-autocomplete-initialized') && endPlaceInput.type !== 'hidden') {
-                console.log('Initializing Google Places autocomplete for dropoff location');
                 var endPlaceAutocomplete = new google.maps.places.Autocomplete(endPlaceInput);
                 var restrictToCountry = $('[name="mptbm_restrict_search_country"]').val();
                 var countryCode = $('[name="mptbm_country"]').val();
@@ -815,17 +770,11 @@ function mptbm_init_google_map() {
         }
 
         // Initialize Google Places autocomplete on page load with a delay to ensure API is loaded
-        console.log('[Init] Setting up Google Places autocomplete initialization...');
         setTimeout(function() {
-            console.log('[Init] Page load timeout triggered');
             var mapType = document.getElementById('mptbm_map_type');
-            console.log('[Init] Map type element:', mapType);
-            console.log('[Init] Map type value:', mapType ? mapType.value : 'NULL');
             
             if (mapType && mapType.value === 'openstreetmap') {
-                console.log('[OSM] ✓ Page load - skipping Google Places init (using OpenStreetMap)');
             } else {
-                console.log('[Init] ⚠ Calling initializeGooglePlacesAutocomplete from page load');
             initializeGooglePlacesAutocomplete();
             }
         }, 100); // Reduced from 500ms to 100ms for faster initialization
@@ -889,13 +838,10 @@ function mptbm_init_google_map() {
             var tabContainer = $('.mptb-tab-container');
             
             if (loadingGif.length === 0 && tabContainer.length > 0) {
-                console.log('Loading spinner element not found, creating it...');
                 var loadingSpinnerHtml = '<div class="mptbm-hide-gif mptbm-gif" style="display: none;"><div class="mptbm-spinner"></div></div>';
                 tabContainer.append(loadingSpinnerHtml);
-                console.log('Loading spinner element created');
                 return true;
             } else if (loadingGif.length === 0 && tabContainer.length === 0) {
-                console.log('Tab container not found, will create loading spinner when needed');
                 return false;
             }
             return true;
@@ -1054,7 +1000,6 @@ function mptbm_init_google_map() {
                 var coordinatesOfPlace = {};
                 
                 geocoder.geocode({ address: address }, function (results, status) {
-                    console.log("Geocoding status for", address, ":", status);
                     
                     if (status === "OK") {
                         try {
@@ -1452,7 +1397,6 @@ function mptbm_init_google_map() {
                         dLoader(target.closest(".mptbm_search_area"));
                     },
                     success: function (data) {
-                        console.log('AJAX response for end locations:', data);
                         target
                             .html(data)
                             .promise()
@@ -1467,7 +1411,7 @@ function mptbm_init_google_map() {
                                 
                                 // Add a small delay to ensure the select is properly updated
                                 setTimeout(function() {
-                                    console.log('Select updated, options count:', target.find('option:not([disabled])').length);
+                                    //console.log('Select updated, options count:', target.find('option:not([disabled])').length);
                                 }, 100);
                             });
                     },
@@ -1517,14 +1461,11 @@ function mptbm_init_google_map() {
 
 // Add this test to verify jQuery and event handlers are working
 jQuery(document).ready(function($) {
-    console.log('MPTBM Registration JS loaded - jQuery working');
     
     // Test if info buttons exist
     setTimeout(function() {
         var infoButtons = $('.mptbm-info-button');
-        console.log('Info buttons found:', infoButtons.length);
         if (infoButtons.length > 0) {
-            console.log('Info buttons are present in DOM');
         }
     }, 1000);
 });
@@ -1976,11 +1917,9 @@ function mptbm_price_calculation(parent) {
                 
                 // Force display block if CSS class doesn't work
                 if (!targetTabContainer.is(':visible')) {
-                    console.log('Tab not visible, forcing display block');
                     targetTabContainer.css('display', 'block');
                 }
                 
-                console.log('Switched to existing tab content without AJAX');
                 return; // Exit the click handler early
             }
             
@@ -2017,14 +1956,11 @@ function mptbm_price_calculation(parent) {
                     }
                 },
                 success: function (data) {
-                    console.log('=== LOADING GIF DEBUG ===');
-                    console.log('AJAX response received for tab:', tab_id);
-                    console.log('Response data length:', data.length);
+                 
                     
                     // Check if the tab container exists
                     var tabContainer = $("#" + tab_id);
                     if (tabContainer.length === 0) {
-                        console.log('Tab container not found, creating new one:', tab_id);
                         
                         // Try to create the tab container if it doesn't exist
                         var tabContainerParent = $('.mptb-tab-container');
@@ -2032,7 +1968,6 @@ function mptbm_price_calculation(parent) {
                             var newTabContainer = $('<div id="' + tab_id + '" class="mptb-tab-content"></div>');
                             tabContainerParent.append(newTabContainer);
                             tabContainer = newTabContainer;
-                            console.log('Created new tab container:', tab_id);
                         } else {
                             console.error('Tab container parent not found');
                             return;
@@ -2048,19 +1983,16 @@ function mptbm_price_calculation(parent) {
                     
                     // Force display block if CSS class doesn't work
                     if (!tabContainer.is(':visible')) {
-                        console.log('Tab not visible, forcing display block');
                         tabContainer.css('display', 'block');
                     }
                     
                     // Hide loading GIF after content is loaded with a minimum display time
-                    console.log('Hiding loading GIF...');
                     
                     // Add a minimum display time of 1000ms to ensure the loading GIF is visible
                     // This gives more time for the user to see the loading state
                     setTimeout(function() {
                         // Remove the loading overlay
                         $('.mptbm-loading-overlay').remove();
-                        console.log('Removed loading overlay');
                     }, 1000);
                     
                                          // Add a small delay to ensure DOM is fully updated before initializing map
@@ -2076,26 +2008,19 @@ function mptbm_price_calculation(parent) {
                          }
                          
                          // Reinitialize autocomplete based on map type
-                         console.log('[Template] Template loaded, checking map type...');
                          var mapType = document.getElementById('mptbm_map_type');
-                         console.log('[Template] Map type element:', mapType);
-                         console.log('[Template] Map type value:', mapType ? mapType.value : 'NULL');
                          
                          if (mapType && mapType.value === 'openstreetmap') {
-                             console.log('[OSM] ✓ Template loaded - skipping Google Places init');
                          } else {
-                             console.log('[Template] ⚠ Calling initializeGooglePlacesAutocomplete from template load');
                          initializeGooglePlacesAutocomplete();
                          }
                      }, 100);
                 },
                 error: function (response) {
-                    console.log('AJAX Error:', response);
                     // Hide loading GIF on error with minimum display time
                     setTimeout(function() {
                         // Remove the loading overlay
                         $('.mptbm-loading-overlay').remove();
-                        console.log('Removed loading overlay on error');
                     }, 1000);
                     // Show error message
                     var tabContainer = $("#" + tab_id);
@@ -2117,17 +2042,14 @@ function mptbm_price_calculation(parent) {
         var $select = $(this);
         var selectId = $select.attr('id');
         
-        console.log('Select clicked:', selectId);
         
         // Remove any existing custom search elements
         $('.mptbm-custom-select-wrapper').remove();
         
         // Check if select has options (dropoff might be empty initially)
         var $options = $select.find('option:not([disabled])');
-        console.log('Available options for', selectId + ':', $options.length);
         
         if ($options.length <= 0) {
-            console.log('No options available for:', selectId);
             return;
         }
         
@@ -2193,7 +2115,6 @@ function mptbm_price_calculation(parent) {
         var $originalOptions = $select.find('option:not([disabled])');
         var optionsHtml = '';
         
-        console.log('Creating custom dropdown with', $originalOptions.length, 'options');
         
         $originalOptions.each(function() {
             var optionText = $(this).text();
@@ -2214,8 +2135,6 @@ function mptbm_price_calculation(parent) {
         $('.mptbm_map_area').css('z-index', '1');
         $('.mptbm_map_area #mptbm_map_area').css('z-index', '1');
         
-        console.log('Custom select created');
-        
         // Focus on search input
         $searchInput.focus();
         
@@ -2224,7 +2143,6 @@ function mptbm_price_calculation(parent) {
             var searchTerm = $(this).val().toLowerCase();
             var $options = $customWrapper.find('.mptbm-custom-option');
             
-            console.log('Searching for:', searchTerm);
             
             $options.each(function() {
                 var optionText = $(this).text().toLowerCase();
@@ -2255,7 +2173,6 @@ function mptbm_price_calculation(parent) {
             $('.mptbm_map_area').css('z-index', '');
             $('.mptbm_map_area #mptbm_map_area').css('z-index', '');
             
-            console.log('Option selected:', selectedValue);
         });
         
         // Handle select change event to clean up custom dropdown
@@ -2273,7 +2190,6 @@ function mptbm_price_calculation(parent) {
                 // Restore map z-index
                 $('.mptbm_map_area').css('z-index', '');
                 $('.mptbm_map_area #mptbm_map_area').css('z-index', '');
-                console.log('Custom select closed - clicked outside');
             }
         });
         
@@ -2303,7 +2219,6 @@ function mptbm_price_calculation(parent) {
                 // Restore map z-index
                 $('.mptbm_map_area').css('z-index', '');
                 $('.mptbm_map_area #mptbm_map_area').css('z-index', '');
-                console.log('Custom select closed - escape key');
             }
         });
     });
@@ -2325,17 +2240,12 @@ function mptbm_price_calculation(parent) {
         e.preventDefault();
         e.stopPropagation();
         
-        console.log('Info button clicked!'); // Debug log
-        
         var $button = $(this);
         var postId = $button.data('post-id');
         var $vehicleWrapper = $button.closest('.mptbm-vehicle-wrapper');
         var $content = $vehicleWrapper.find('.mptbm-extra-info-content[data-post-id="' + postId + '"]');
         var $icon = $button.find('i');
-        
-        console.log('Post ID:', postId); // Debug log
-        console.log('Vehicle wrapper found:', $vehicleWrapper.length); // Debug log
-        console.log('Content found:', $content.length); // Debug log
+       
         
         // Close other open info panels
         $('.mptbm-extra-info-content').not($content).slideUp(200);
@@ -2382,7 +2292,6 @@ function mptbm_is_safari() {
 
 // Fallback distance calculation for Safari when Google Maps API fails
 function mptbm_fallback_distance_calculation(start_place, end_place) {
-    console.log("Using fallback distance calculation for Safari");
     
     // Simple fallback: show placeholder values
     var fallback_distance = "Calculating...";

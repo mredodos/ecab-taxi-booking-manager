@@ -112,7 +112,6 @@ function mp_load_date_picker(parent = jQuery('.mpStyle')) {
 			changeMonth: true,
 			changeYear: false,
 			onSelect: function (dateString, data) {
-				//console.log(mp_date_format_without_year);
 				let date = ('0' + (parseInt(data.selectedMonth) + 1)).slice(-2) + '-' + ('0' + parseInt(data.selectedDay)).slice(-2);
 				jQuery(this).closest('label').find('input[type="hidden"]').val(date).trigger('change');
 			}

@@ -325,7 +325,6 @@
         var typeEqualDependency = function (element, depObject, parent, useEvent) {
 
 
-            console.log(useEvent);
 
             if (typeof useEvent == 'undefined') {
                 useEvent = false;

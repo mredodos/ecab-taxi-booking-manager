@@ -677,7 +677,6 @@ function InitOSMMapOne(geoLocation) {
     
     // Check if already initialized and clean up
     if (osmMapOne) {
-        console.log('[OSM] Map One already initialized, removing...');
         try {
             osmMapOne.remove();
         } catch (e) {
@@ -765,7 +764,6 @@ function InitOSMMapOne(geoLocation) {
     // Longer delay to ensure container is fully visible
     setTimeout(function() {
         osmMapOne.invalidateSize();
-        console.log('[OSM] Map One size invalidated');
     }, 500);
 }
 
@@ -776,7 +774,6 @@ function InitOSMMapTwo(geoLocation) {
     
     // Check if already initialized and clean up
     if (osmMapTwo) {
-        console.log('[OSM] Map Two already initialized, removing...');
         try {
             osmMapTwo.remove();
         } catch (e) {
@@ -855,7 +852,6 @@ function InitOSMMapTwo(geoLocation) {
     // Longer delay to ensure container is fully visible
     setTimeout(function() {
         osmMapTwo.invalidateSize();
-        console.log('[OSM] Map Two size invalidated');
     }, 500);
 }
 
@@ -866,7 +862,6 @@ function InitOSMMapFixed(geoLocation, formattedAddress) {
     
     // Check if already initialized and clean up
     if (osmMapFixed) {
-        console.log('[OSM] Map Fixed already initialized, removing...');
         try {
             osmMapFixed.remove();
         } catch (e) {
@@ -945,7 +940,6 @@ function InitOSMMapFixed(geoLocation, formattedAddress) {
     // Longer delay to ensure container is fully visible
     setTimeout(function() {
         osmMapFixed.invalidateSize();
-        console.log('[OSM] Map Fixed size invalidated');
     }, 500);
 }
 
@@ -972,7 +966,6 @@ function iniOSMSavedMap(coordinates, mapCanvasId, mapAppendId) {
     
     // Clear any existing Leaflet instance
     if (mapCanvas._leaflet_id) {
-        console.log('[OSM] Clearing existing map instance for:', mapCanvasId);
         mapCanvas._leaflet_id = null;
         mapCanvas.innerHTML = '';
     }
@@ -1124,7 +1117,7 @@ function setupOSMLocationSearch(inputId, map, callback) {
 function searchOSMLocation(query, container, input, map, callback) {
     var url = 'https://photon.komoot.io/api/?q=' + encodeURIComponent(query) + '&limit=5';
     
-    container.innerHTML = '<div style="padding: 10px; text-align: center; color: #666;">Searching...</div>';
+    container.innerHTML = '<div style="padding: 2px; text-align: center; color: #666;">Searching...</div>';
     container.style.display = 'block';
     
     fetch(url)
@@ -1133,7 +1126,7 @@ function searchOSMLocation(query, container, input, map, callback) {
             container.innerHTML = '';
             
             if (!data.features || data.features.length === 0) {
-                container.innerHTML = '<div style="padding: 10px; color: #666;">No results found</div>';
+                container.innerHTML = '<div style="padding: 2px; color: #666;">No results found</div>';
                 return;
             }
             

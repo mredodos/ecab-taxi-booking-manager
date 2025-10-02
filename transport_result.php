@@ -355,7 +355,6 @@ jQuery(document).ready(function($) {
             });
         }
         
-        console.log('Transport Result Page: Forced refresh of vehicle pricing and visibility. Vehicles visible:', $('.mptbm_booking_item:visible').length);
         
     }, 100); // Small delay to ensure DOM is ready
 });

@@ -443,7 +443,6 @@
         
         
         let html = '';
-        console.log(bookings);
         bookings.forEach(function(booking) {
             html += '<tr>';
             html += '<td>#' + booking.order_id + '</td>';
