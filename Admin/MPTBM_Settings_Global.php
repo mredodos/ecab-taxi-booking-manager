@@ -380,7 +380,7 @@ if (!class_exists('MPTBM_Settings_Global')) {
 						'options' => array(
 							'enable' => esc_html__('Google map', 'ecab-taxi-booking-manager'),
 							'openstreetmap' => esc_html__('Openstreetmap', 'ecab-taxi-booking-manager'),
-							'disable' => esc_html__('Without google map', 'ecab-taxi-booking-manager'),
+							'disable' => esc_html__('Without map api', 'ecab-taxi-booking-manager'),
 
 						)
 					),

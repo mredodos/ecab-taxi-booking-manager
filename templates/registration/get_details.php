@@ -517,6 +517,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		</div>
 		<?php 
 		$map_key = get_option('mptbm_map_api_settings',true);
+		$default_latitude = MP_Global_Function::get_settings('mptbm_map_api_settings', 'mp_latitude', '40.7128');
+		$default_longitude = MP_Global_Function::get_settings('mptbm_map_api_settings', 'mp_longitude', '-74.0060');
 		?>
 		
 		<?php if($map_type === 'openstreetmap'): ?>
@@ -525,7 +527,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		<!-- OpenStreetMap JavaScript -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 		<script>
-		
+		// Pass the configured coordinates to JavaScript
+		var mptbm_default_lat = <?php echo esc_js($default_latitude); ?>;
+		var mptbm_default_lng = <?php echo esc_js($default_longitude); ?>;
 		</script>
 		<style>
 		#mptbm_map_area {

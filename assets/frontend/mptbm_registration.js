@@ -261,8 +261,12 @@ function mptbm_init_osm_map() {
     }
     
     
-    // Initialize OpenStreetMap
-    mptbm_osm_map = L.map('mptbm_map_area').setView([23.8103, 90.4125], 10);
+    // Get default coordinates from PHP or use fallback
+    var defaultLat = (typeof mptbm_default_lat !== 'undefined') ? mptbm_default_lat : 40.7128;
+    var defaultLng = (typeof mptbm_default_lng !== 'undefined') ? mptbm_default_lng : -74.0060;
+    
+    // Initialize OpenStreetMap with configured coordinates
+    mptbm_osm_map = L.map('mptbm_map_area').setView([defaultLat, defaultLng], 10);
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -716,12 +720,12 @@ function mptbm_init_google_map() {
                         var startPlaceInput = document.getElementById('mptbm_map_start_place');
             if (startPlaceInput && !startPlaceInput.hasAttribute('data-autocomplete-initialized')) {
                     var startPlaceAutocomplete = new google.maps.places.Autocomplete(startPlaceInput);
-                    var mptbmRestrictSearchToCountry = $('[name="mptbm_restrict_search_country"]').val();
-                    var mptbmCountry = $('[name="mptbm_country"]').val();
+                    var mptbm_restrict_search_to_country = $('[name="mptbm_restrict_search_country"]').val();
+                    var mptbm_country = $('[name="mptbm_country"]').val();
 
-                    if (mptbmRestrictSearchToCountry == 'yes') {
+                    if (mptbm_restrict_search_to_country == 'yes') {
                         startPlaceAutocomplete.setComponentRestrictions({
-                            country: [mptbmCountry]
+                            country: [mptbm_country]
                         });
                     }
 
@@ -747,12 +751,12 @@ function mptbm_init_google_map() {
             var endPlaceInput = document.getElementById('mptbm_map_end_place');
             if (endPlaceInput && !endPlaceInput.hasAttribute('data-autocomplete-initialized') && endPlaceInput.type !== 'hidden') {
                 var endPlaceAutocomplete = new google.maps.places.Autocomplete(endPlaceInput);
-                var restrictToCountry = $('[name="mptbm_restrict_search_country"]').val();
-                var countryCode = $('[name="mptbm_country"]').val();
+                var mptbm_restrict_search_to_country = $('[name="mptbm_restrict_search_country"]').val();
+                var mptbm_country = $('[name="mptbm_country"]').val();
 
-                if (restrictToCountry == 'yes') {
+                if (mptbm_restrict_search_to_country == 'yes') {
                     endPlaceAutocomplete.setComponentRestrictions({
-                        country: [countryCode]
+                        country: [mptbm_country]
                     });
                 }
 

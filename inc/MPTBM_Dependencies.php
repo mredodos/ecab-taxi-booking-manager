@@ -192,12 +192,26 @@ if (!class_exists('MPTBM_Dependencies')) {
 				return;
 			}
 			
-			// Use Photon API (OpenStreetMap-based, more lenient)
-			$url = 'https://photon.komoot.io/api/?' . http_build_query(array(
+			// Get country restriction settings
+			$restrict_to_country = MP_Global_Function::get_settings('mptbm_map_api_settings', 'mp_country_restriction', 'no');
+			$country_code = MP_Global_Function::get_settings('mptbm_map_api_settings', 'mp_country', 'BD');
+			
+			// Build search parameters
+			$search_params = array(
 				'q' => $query,
 				'limit' => 5,
 				'lang' => 'en'
-			));
+			);
+			
+			// Add country restriction if enabled
+			if ($restrict_to_country === 'yes' && !empty($country_code)) {
+				// For Bangladesh, we'll rely on server-side filtering since osm_tag might be too restrictive
+				// The osm_tag parameter can be too restrictive and block valid results
+				// We'll filter results server-side instead
+			}
+			
+			// Use Photon API (OpenStreetMap-based, more lenient)
+			$url = 'https://photon.komoot.io/api/?' . http_build_query($search_params);
 			
 			$response = wp_remote_get($url, array(
 				'timeout' => 15,
@@ -244,10 +258,66 @@ if (!class_exists('MPTBM_Dependencies')) {
 			
 			// Convert Photon GeoJSON format to Nominatim-compatible format
 			$results = array();
+			
+			// Debug: Log the raw response for troubleshooting
+			if ($restrict_to_country === 'yes' && !empty($country_code)) {
+				error_log('OSM Search Debug - Query: ' . $query);
+				error_log('OSM Search Debug - Country Code: ' . $country_code);
+				error_log('OSM Search Debug - Raw Response: ' . json_encode($data));
+			}
+			
 			if (isset($data['features']) && is_array($data['features'])) {
 				foreach ($data['features'] as $feature) {
 					$properties = isset($feature['properties']) ? $feature['properties'] : array();
 					$coordinates = isset($feature['geometry']['coordinates']) ? $feature['geometry']['coordinates'] : array();
+					
+					// Additional country filtering if restriction is enabled
+					if ($restrict_to_country === 'yes' && !empty($country_code)) {
+						$feature_country = isset($properties['countrycode']) ? strtoupper($properties['countrycode']) : '';
+						$feature_country_name = isset($properties['country']) ? strtoupper($properties['country']) : '';
+						$feature_state = isset($properties['state']) ? strtoupper($properties['state']) : '';
+						$feature_city = isset($properties['city']) ? strtoupper($properties['city']) : '';
+						
+						// Check both country code and country name for better matching
+						$country_matches = false;
+						
+						// Direct country code match
+						if (!empty($feature_country) && $feature_country === strtoupper($country_code)) {
+							$country_matches = true;
+						}
+						
+						// Country name matching for Bangladesh
+						if (!$country_matches && strtoupper($country_code) === 'BD') {
+							$bangladesh_names = ['BANGLADESH', 'BD'];
+							if (!empty($feature_country_name) && in_array($feature_country_name, $bangladesh_names)) {
+								$country_matches = true;
+							}
+							
+							// Also check for Bangladesh cities and states
+							$bangladesh_cities = ['DHAKA', 'CHITTAGONG', 'SYLHET', 'RAJSHAHI', 'KHULNA', 'BARISAL', 'RANGPUR', 'COMILLA', 'NARAYANGANJ', 'GAZIPUR'];
+							$bangladesh_states = ['DHAKA', 'CHITTAGONG', 'SYLHET', 'RAJSHAHI', 'KHULNA', 'BARISAL', 'RANGPUR', 'DIVISION'];
+							
+							if (!$country_matches) {
+								if (!empty($feature_city) && in_array($feature_city, $bangladesh_cities)) {
+									$country_matches = true;
+								} elseif (!empty($feature_state) && in_array($feature_state, $bangladesh_states)) {
+									$country_matches = true;
+								}
+							}
+						}
+						
+						// If no country information is available, allow the result for now
+						// This helps with cases where the API doesn't provide country info
+						if (empty($feature_country) && empty($feature_country_name) && empty($feature_city) && empty($feature_state)) {
+							$country_matches = true;
+						}
+						
+						if (!$country_matches) {
+							// Debug: Log filtered out results
+							error_log('OSM Search Debug - Filtered out result: ' . json_encode($properties));
+							continue; // Skip results from other countries
+						}
+					}
 					
 					// Build display name from properties
 					$name_parts = array();
