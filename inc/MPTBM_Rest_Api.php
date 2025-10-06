@@ -2489,7 +2489,6 @@ if (!class_exists('MPTBM_REST_API')) {
                 'ip_address' => $this->get_client_ip()
             );
             
-            error_log('MPTBM API Error: ' . json_encode($log_entry));
         }
         
         // Webhook functionality
@@ -2529,10 +2528,7 @@ if (!class_exists('MPTBM_REST_API')) {
                 'blocking' => false // Don't wait for response
             ));
             
-            // Log webhook for debugging
-            if (MP_Global_Function::get_settings('mptbm_rest_api_settings', 'webhook_logging', 'no') === 'yes') {
-                error_log(sprintf('MPTBM Webhook triggered: %s for event %s', $webhook_url, $event));
-            }
+           
         }
         
         // Location operations
@@ -2837,10 +2833,7 @@ if (!class_exists('MPTBM_REST_API')) {
                  LIMIT 1000"
             );
             
-            // Log the cleanup activity
-            if ($deleted) {
-                error_log("MPTBM API: Cleaned up {$deleted} old API log entries");
-            }
+            
         }
     }
 }

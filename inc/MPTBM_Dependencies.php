@@ -181,17 +181,13 @@ if (!class_exists('MPTBM_Dependencies')) {
         }
 		
 		public function osm_search_proxy() {
-			error_log('[OSM Proxy] Request received');
 			
 			// Check nonce for security
 			check_ajax_referer('mptbm_osm_search', 'nonce');
-			error_log('[OSM Proxy] Nonce verified');
 			
 			$query = isset($_GET['q']) ? sanitize_text_field($_GET['q']) : '';
-			error_log('[OSM Proxy] Query: ' . $query);
 			
 			if (empty($query)) {
-				error_log('[OSM Proxy] ERROR: Empty query');
 				wp_send_json_error('No search query provided');
 				return;
 			}
@@ -202,7 +198,6 @@ if (!class_exists('MPTBM_Dependencies')) {
 				'limit' => 5,
 				'lang' => 'en'
 			));
-			error_log('[OSM Proxy] Request URL: ' . $url);
 			
 			$response = wp_remote_get($url, array(
 				'timeout' => 15,
@@ -212,29 +207,23 @@ if (!class_exists('MPTBM_Dependencies')) {
 			));
 			
 			if (is_wp_error($response)) {
-				error_log('[OSM Proxy] ERROR: ' . $response->get_error_message());
 				wp_send_json_error($response->get_error_message());
 				return;
 			}
 			
 			$status_code = wp_remote_retrieve_response_code($response);
-			error_log('[OSM Proxy] Response status: ' . $status_code);
 			
 			// Check if status is not 200
 			if ($status_code !== 200) {
 				$body = wp_remote_retrieve_body($response);
-				error_log('[OSM Proxy] ERROR: Non-200 response. Body: ' . $body);
 				wp_send_json_error('OpenStreetMap returned status ' . $status_code . ': ' . $body);
 				return;
 			}
 			
 			$body = wp_remote_retrieve_body($response);
-			error_log('[OSM Proxy] Response body: ' . substr($body, 0, 500)); // Log first 500 chars
-			error_log('[OSM Proxy] Response body length: ' . strlen($body));
 			
 			// Check if response looks like HTML (error page)
 			if (stripos($body, '<html') !== false || stripos($body, '<!DOCTYPE') !== false) {
-				error_log('[OSM Proxy] ERROR: Received HTML instead of JSON');
 				wp_send_json_error('OpenStreetMap returned an error page. Please try again later.');
 				return;
 			}
@@ -242,17 +231,13 @@ if (!class_exists('MPTBM_Dependencies')) {
 			$data = json_decode($body, true);
 			$json_error = json_last_error();
 			
-			error_log('[OSM Proxy] JSON decode error code: ' . $json_error);
 			
 			if ($json_error !== JSON_ERROR_NONE) {
-				error_log('[OSM Proxy] ERROR: JSON decode failed - ' . json_last_error_msg());
-				error_log('[OSM Proxy] Full response body: ' . $body);
 				wp_send_json_error('Invalid response from OpenStreetMap: ' . json_last_error_msg());
 				return;
 			}
 			
 			if (!is_array($data)) {
-				error_log('[OSM Proxy] ERROR: Response is not an array, type: ' . gettype($data));
 				wp_send_json_error('Invalid response format from OpenStreetMap');
 				return;
 			}
@@ -283,8 +268,6 @@ if (!class_exists('MPTBM_Dependencies')) {
 				}
 			}
 			
-			error_log('[OSM Proxy] Results count: ' . count($results));
-			error_log('[OSM Proxy] Sending success response');
 			wp_send_json_success($results);
 		}
     }

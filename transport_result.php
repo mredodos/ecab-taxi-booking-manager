@@ -13,18 +13,15 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Debug logging for transport result page
-error_log('=== MPTBM DEBUG: Transport Result Page Started ===');
-error_log('MPTBM DEBUG: Session data available: ' . (isset($_SESSION['custom_content']) ? 'YES' : 'NO'));
+
 
 // Retrieve the content from the session variable
 $content = isset($_SESSION['custom_content']) ? $_SESSION['custom_content'] : '';
 
-error_log('MPTBM DEBUG: Content length: ' . strlen($content));
+
 
 // Check if $content is empty, redirect to homepage if it is
 if (empty($content)) {
-    error_log('MPTBM DEBUG: No content found, redirecting to homepage');
     wp_redirect(home_url());
     exit;
 }
@@ -303,7 +300,6 @@ if (function_exists('wp_is_block_theme') && wp_is_block_theme()) {
                                 // Output the cleaned content
                                 echo $clean_content;
                             } else {
-                                error_log('Transport Result - No display content available');
                                 echo '<div style="text-align: center; padding: 50px; color: #666;">';
                                 echo '<h3>No content available</h3>';
                                 echo '<p>Please go back and search for transport again.</p>';
