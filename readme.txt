@@ -47,8 +47,9 @@ Easily integrate with popular payment gateways to offer secure and diverse payme
 🤹 Booking Management
 Efficiently manage all taxi bookings from your WordPress dashboard, with the ability to view, modify, or cancel bookings as needed.
 
-🗺 Google Maps API
-Google Maps API is integrated for route mapping, enhancing the navigation experience for both customers and drivers.
+🗺 Multiple Map Providers
+**OpenStreetMap Integration (FREE)**: Use OpenStreetMap with no API costs or Google API key required! Full route mapping, distance calculation, and address search functionality.
+**Google Maps API**: Google Maps integration with faster place search and more places than OpenStreetMap. Choose your preferred map provider in settings.
 
 💦 Responsive Design
 The plugin is designed to be fully responsive, offering a smooth booking experience across various devices.
@@ -112,8 +113,10 @@ Add distance-based tiered pricing to your E-Cab rides. Automatically adjust fare
 **≣ Comprehensive Order List Section
 View and manage all bookings in a detailed order list
 
-**Third-Party Service:**
-This plugin relies on the Google Maps API, a service provided by Google, Inc. It is used for displaying Google Maps and finding distance. Please note that your usage of this plugin constitutes acceptance of Google's terms and policies.
+**Third-Party Services:**
+**OpenStreetMap (Default - FREE)**: The plugin uses OpenStreetMap by default, which is completely free and requires no API keys. OpenStreetMap provides route mapping, distance calculation, and address search functionality at no cost.
+
+**Google Maps API (Optional)**: If you choose to use Google Maps, this plugin relies on the Google Maps API, a service provided by Google, Inc. Google Maps offers faster place search and more places than OpenStreetMap. Please note that your usage of Google Maps constitutes acceptance of Google's terms and policies.
 
 **Link to Google Maps API:**
 For more information about the Google Maps API, visit: [Google Maps API Link](https://developers.google.com/maps/documentation/javascript/get-api-key)
@@ -133,6 +136,8 @@ Navigate to "Plugins" > "Add New."
 Click the "Upload Plugin" button at the top of the page.
 Choose the ecab-taxi-booking-manager.zip file and click "Install Now."
 Once installed, click "Activate" to enable the Ecab Taxi Booking Manager WordPress plugin.
+
+**Note**: The plugin works out of the box with OpenStreetMap (no API key required). If you prefer to use Google Maps, you can configure your Google Maps API key in the plugin settings.
 
 == Guideline ==
 Shortcode:
@@ -212,6 +217,10 @@ This transparency is crucial for legal protection. By using this plugin, you ack
 
 
 == Changelog ==
+= 2.0.0 = 
+1. Openstreet map implemented
+2. extra service image issue fixed 
+3. Safari/iphone price not showing issue fixed
 = 1.3.2 = 
 1. Made compatiable with major caching plugins 
 2. Manual shortcode div not properly closing issue fixed
