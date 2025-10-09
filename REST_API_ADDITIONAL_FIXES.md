@@ -1,14 +1,14 @@
 # REST API Additional Fixes - ECAB Taxi Booking Manager
 
-## Problemi Risolti
+## Fixed Issues
 
-### 1. **Custom Features che Mostrano Campi Non Custom**
+### 1. **Custom Features Showing Non-Custom Fields**
 
-**Problema:** I campi "Max people" e "Max luggage" apparivano nelle custom features anche se erano già gestiti separatamente nei campi `max_passenger` e `max_bag`.
+**Problem:** The fields "Max people" and "Max luggage" appeared in custom features even though they were already handled separately in the `max_passenger` and `max_bag` fields.
 
-**Causa:** La funzione `prepare_transport_service()` non filtrava correttamente i campi predefiniti dalle custom features.
+**Cause:** The `prepare_transport_service()` function didn't properly filter default fields from custom features.
 
-**Soluzione:** Aggiunto filtro per escludere i campi predefiniti dalle custom features:
+**Solution:** Added filter to exclude default fields from custom features:
 
 ```php
 case 'Max people':
@@ -19,13 +19,13 @@ case 'Maximum Bags':
     break;
 ```
 
-### 2. **Logica del Parametro is_return**
+### 2. **is_return Parameter Logic**
 
-**Problema:** Il parametro `is_return` veniva impostato a `true` anche quando non c'era un viaggio di ritorno effettivo.
+**Problem:** The `is_return` parameter was set to `true` even when there was no actual return trip.
 
-**Causa:** La logica controllava solo se il campo esisteva, non se era effettivamente un viaggio di ritorno.
+**Cause:** The logic only checked if the field existed, not if it was actually a return trip.
 
-**Soluzione:** Implementata logica più robusta per determinare se è un viaggio di ritorno:
+**Solution:** Implemented more robust logic to determine if it's a return trip:
 
 ```php
 // Check if this is actually a return trip (has return date and is not empty/false)
@@ -37,7 +37,7 @@ if (!empty($is_return) && $is_return != '0' && $is_return != 'false' && $is_retu
 }
 ```
 
-E aggiornata la risposta dell'API:
+And updated the API response:
 
 ```php
 'is_return' => $is_actual_return,
@@ -45,13 +45,13 @@ E aggiornata la risposta dell'API:
 'return_time' => $is_actual_return ? $return_time : null,
 ```
 
-### 3. **Valori di Passengers e Bags Non Corrispondenti**
+### 3. **Non-Matching Passengers and Bags Values**
 
-**Problema:** I valori di `passengers` e `bags` non corrispondevano a quelli selezionati nel frontend.
+**Problem:** The `passengers` and `bags` values didn't match those selected in the frontend.
 
-**Causa:** Utilizzo di campi metadata non corretti invece di quelli effettivamente utilizzati dal plugin.
+**Cause:** Using incorrect metadata fields instead of those actually used by the plugin.
 
-**Soluzione:** Utilizzati i campi metadata corretti identificati dal codice del plugin:
+**Solution:** Used the correct metadata fields identified from the plugin code:
 
 ```php
 // Get passengers and bags information - use correct metadata fields from plugin
@@ -66,18 +66,18 @@ if (empty($bags)) {
 }
 ```
 
-**Campi Metadata Identificati:**
+**Identified Metadata Fields:**
 
-- **Passengers**: `mptbm_passengers` (usato nel frontend e WooCommerce)
-- **Bags**: `mptbm_bags` (usato nel frontend e WooCommerce)
+- **Passengers**: `mptbm_passengers` (used in frontend and WooCommerce)
+- **Bags**: `mptbm_bags` (used in frontend and WooCommerce)
 
-### 4. **Order Notes Mancanti**
+### 4. **Missing Order Notes**
 
-**Problema:** Le order notes non erano incluse nella risposta dell'API.
+**Problem:** Order notes were not included in the API response.
 
-**Causa:** Le order notes non erano state implementate nella funzione `prepare_booking_data()`.
+**Cause:** Order notes were not implemented in the `prepare_booking_data()` function.
 
-**Soluzione:** Aggiunta recupero delle order notes dall'ordine WooCommerce associato seguendo le best practice di WooCommerce:
+**Solution:** Added retrieval of order notes from the associated WooCommerce order following WooCommerce best practices:
 
 ```php
 // Get order notes from WooCommerce order if available - using WooCommerce best practices
@@ -109,59 +109,59 @@ if (!empty($order_id) && class_exists('WooCommerce')) {
 }
 ```
 
-**Best Practice WooCommerce:**
+**WooCommerce Best Practice:**
 
-- Utilizzo della funzione `wc_get_order_notes()` per recuperare le note
-- Parametri corretti per limit, orderby e order
-- Gestione corretta dei tipi di note (customer vs private)
+- Using the `wc_get_order_notes()` function to retrieve notes
+- Correct parameters for limit, orderby and order
+- Proper handling of note types (customer vs private)
 
-E aggiunta alla risposta dell'API:
+And added to the API response:
 
 ```php
 // Order notes
 'order_notes' => $order_notes
 ```
 
-## Nuovi Campi Aggiunti
+## New Fields Added
 
 ### **Order Notes**
 
-- `order_notes`: Array di note dell'ordine con la seguente struttura:
-  - `id`: ID della nota
-  - `date`: Data di creazione della nota
-  - `author`: Autore della nota
-  - `content`: Contenuto della nota
-  - `customer_note`: Se è una nota del cliente (boolean)
+- `order_notes`: Array of order notes with the following structure:
+  - `id`: Note ID
+  - `date`: Note creation date
+  - `author`: Note author
+  - `content`: Note content
+  - `customer_note`: Whether it's a customer note (boolean)
 
-## Miglioramenti Implementati
+## Implemented Improvements
 
-### **1. Filtro Custom Features Migliorato**
+### **1. Enhanced Custom Features Filter**
 
-- Esclusi i campi predefiniti dalle custom features
-- Gestione di varianti dei nomi dei campi (Max people, Maximum Passengers, etc.)
-- Custom features ora contengono solo campi effettivamente personalizzati
+- Excluded default fields from custom features
+- Handling of field name variants (Max people, Maximum Passengers, etc.)
+- Custom features now contain only truly custom fields
 
-### **2. Logica is_return Più Robusta**
+### **2. More Robust is_return Logic**
 
-- Controllo effettivo se è un viaggio di ritorno
-- Validazione della presenza di una data di ritorno
-- Gestione corretta dei valori null per viaggi non di ritorno
+- Actual check if it's a return trip
+- Validation of return date presence
+- Proper handling of null values for non-return trips
 
-### **3. Recupero Dati Semplificato e Corretto**
+### **3. Simplified and Correct Data Retrieval**
 
-- Utilizzo dei campi metadata corretti identificati dal codice del plugin
-- Rimozione di ricerche non necessarie in campi inesistenti
-- Codice più pulito e mantenibile
+- Using correct metadata fields identified from the plugin code
+- Removal of unnecessary searches in non-existent fields
+- Cleaner and more maintainable code
 
-### **4. Order Notes Complete con Best Practice WooCommerce**
+### **4. Complete Order Notes with WooCommerce Best Practices**
 
-- Recupero di tutte le note dell'ordine WooCommerce usando `wc_get_order_notes()`
-- Informazioni complete per ogni nota
-- Distinzione tra note del sistema e note del cliente
-- Ordinamento per data di creazione (più recenti prima)
-- Conformità alle best practice di WooCommerce
+- Retrieval of all WooCommerce order notes using `wc_get_order_notes()`
+- Complete information for each note
+- Distinction between system notes and customer notes
+- Sorting by creation date (most recent first)
+- Compliance with WooCommerce best practices
 
-## Esempio di Risposta API Migliorata
+## Improved API Response Example
 
 ```json
 {
@@ -247,31 +247,31 @@ E aggiunta alla risposta dell'API:
 }
 ```
 
-## Note Tecniche
+## Technical Notes
 
-- **Compatibilità:** Tutte le modifiche sono backward compatible
-- **Performance:** Le query sono ottimizzate per evitare overhead
-- **Sicurezza:** Tutti i dati sono sanitizzati prima dell'uso
-- **Fallback:** Implementati fallback robusti per garantire dati consistenti
-- **Filtri:** Custom features ora contengono solo campi effettivamente personalizzati
+- **Compatibility:** All modifications are backward compatible
+- **Performance:** Queries are optimized to avoid overhead
+- **Security:** All data is sanitized before use
+- **Fallback:** Robust fallbacks implemented to ensure consistent data
+- **Filters:** Custom features now contain only truly custom fields
 
 ## Testing
 
-Per testare le modifiche:
+To test the modifications:
 
-1. Verificare che le custom features non mostrino più campi predefiniti
-2. Testare che `is_return` sia `false` per viaggi non di ritorno
-3. Verificare che passengers e bags corrispondano ai valori del frontend
-4. Controllare che le order notes siano incluse nella risposta API
-5. Testare con ordini creati in diverse modalità (WooCommerce, diretti, etc.)
+1. Verify that custom features no longer show default fields
+2. Test that `is_return` is `false` for non-return trips
+3. Verify that passengers and bags match frontend values
+4. Check that order notes are included in the API response
+5. Test with orders created in different ways (WooCommerce, direct, etc.)
 
-### 5. **Extra Service Price Vuoto**
+### 5. **Empty Extra Service Price**
 
-**Problema:** Il campo `extra_service_price` non riportava alcun valore nelle REST API.
+**Problem:** The `extra_service_price` field didn't report any value in the REST API.
 
-**Causa:** Il plugin non salvava il campo `mptbm_extra_service_price` quando veniva creato il booking tramite WooCommerce.
+**Cause:** The plugin didn't save the `mptbm_extra_service_price` field when the booking was created via WooCommerce.
 
-**Soluzione:** Aggiunta logica per calcolare il prezzo dei servizi extra dall'array `extra_services` quando il campo non è presente:
+**Solution:** Added logic to calculate extra services price from the `extra_services` array when the field is not present:
 
 ```php
 // If extra_service_price is empty, calculate it from extra_services array
@@ -289,20 +289,20 @@ if (empty($extra_service_price) && !empty($extra_services) && is_array($extra_se
 }
 ```
 
-**Vantaggi:**
+**Advantages:**
 
-- Compatibilità con bookings creati tramite WooCommerce che non avevano questo campo salvato
-- Calcolo dinamico basato sui servizi extra effettivamente selezionati
-- Fallback robusto per garantire che il campo abbia sempre un valore corretto
-- Formattazione standardizzata con sempre 2 decimali (es. "25.00" invece di "25")
+- Compatibility with bookings created via WooCommerce that didn't have this field saved
+- Dynamic calculation based on actually selected extra services
+- Robust fallback to ensure the field always has a correct value
+- Standardized formatting with always 2 decimals (e.g. "25.00" instead of "25")
 
-### 6. **Journey Time Non Popolato**
+### 6. **Unpopulated Journey Time**
 
-**Problema:** Il campo `journey_time` non veniva popolato nelle REST API anche se `journey_date` conteneva la data e l'ora completa.
+**Problem:** The `journey_time` field was not populated in the REST API even though `journey_date` contained the complete date and time.
 
-**Causa:** Il plugin non salvava separatamente il campo `mptbm_time` o `mptbm_journey_time`, ma `journey_date` conteneva già la data e l'ora completa.
+**Cause:** The plugin didn't save the `mptbm_time` or `mptbm_journey_time` field separately, but `journey_date` already contained the complete date and time.
 
-**Soluzione:** Implementata logica per estrarre l'orario dalla data completa:
+**Solution:** Implemented logic to extract time from the complete date:
 
 ```php
 // If journey_time is still empty, extract time from journey_date
@@ -314,13 +314,11 @@ if (empty($journey_time) && !empty($journey_date)) {
 }
 ```
 
-La data originale viene mantenuta intatta per preservare tutte le informazioni:
+The original date is kept intact to preserve all information:
 
-**Vantaggi:**
+**Advantages:**
 
-- Estrazione intelligente dell'orario dalla data completa
-- Preservazione della data originale con tutte le informazioni
-- Compatibilità con diversi formati di data
-- Soluzione semplice e robusta
-
-fix
+- Intelligent extraction of time from complete date
+- Preservation of original date with all information
+- Compatibility with different date formats
+- Simple and robust solution
