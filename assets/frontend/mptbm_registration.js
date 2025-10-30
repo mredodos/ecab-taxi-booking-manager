@@ -39,10 +39,9 @@ function mptbm_set_cookie_distance_duration(start_place = '', end_place = '') {
       travelMode: google.maps.TravelMode.DRIVING,
       unitSystem: google.maps.UnitSystem.METRIC,
     };
-    let now = new Date();
-    let time = now.getTime();
-    let expireTime = time + 3600 * 1000 * 12;
-    now.setTime(expireTime);
+    // Use UTC string for cookie expiry to ensure Safari/iOS compatibility
+    const expireTimeMs = Date.now() + 3600 * 1000 * 12;
+    const expires = new Date(expireTimeMs).toUTCString();
     directionsService.route(request, (result, status) => {
       if (status === google.maps.DirectionsStatus.OK) {
         let distance = result.routes[0].legs[0].distance.value;
@@ -58,21 +57,29 @@ function mptbm_set_cookie_distance_duration(start_place = '', end_place = '') {
         }
         // Build the set-cookie string:
         document.cookie =
-          'mptbm_distance=' + distance + '; expires=' + now + '; path=/; ';
+          'mptbm_distance=' +
+          distance +
+          '; expires=' +
+          expires +
+          '; path=/; SameSite=Lax';
         document.cookie =
           'mptbm_distance_text=' +
           distance_text +
           '; expires=' +
-          now +
-          '; path=/; ';
+          expires +
+          '; path=/; SameSite=Lax';
         document.cookie =
-          'mptbm_duration=' + duration + ';  expires=' + now + '; path=/; ';
+          'mptbm_duration=' +
+          duration +
+          ';  expires=' +
+          expires +
+          '; path=/; SameSite=Lax';
         document.cookie =
           'mptbm_duration_text=' +
           duration_text +
           ';  expires=' +
-          now +
-          '; path=/; ';
+          expires +
+          '; path=/; SameSite=Lax';
         directionsRenderer.setDirections(result);
         jQuery('.mptbm_total_distance').html(distance_text);
         jQuery('.mptbm_total_time').html(duration_text);
@@ -95,7 +102,8 @@ function mptbm_set_cookie_distance_duration(start_place = '', end_place = '') {
       return false;
     }
 
-    map = new google.maps.Map(mapContainer, {
+    // Use the shared mptbm_map reference instead of creating implicit globals
+    mptbm_map = new google.maps.Map(mapContainer, {
       center: mp_lat_lng,
       zoom: 15,
     });
@@ -103,13 +111,13 @@ function mptbm_set_cookie_distance_duration(start_place = '', end_place = '') {
       query: place,
       fields: ['name', 'geometry'],
     };
-    service = new google.maps.places.PlacesService(map);
+    const service = new google.maps.places.PlacesService(mptbm_map);
     service.findPlaceFromQuery(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
         for (let i = 0; i < results.length; i++) {
           mptbmCreateMarker(results[i]);
         }
-        map.setCenter(results[0].geometry.location);
+        mptbm_map.setCenter(results[0].geometry.location);
       }
     });
   } else {
@@ -122,12 +130,12 @@ function mptbm_set_cookie_distance_duration(start_place = '', end_place = '') {
 function mptbmCreateMarker(place) {
   if (!place.geometry || !place.geometry.location) return;
   const marker = new google.maps.Marker({
-    map,
+    map: mptbm_map,
     position: place.geometry.location,
   });
   google.maps.event.addListener(marker, 'click', () => {
     mptbm_map_window.setContent(place.name || '');
-    mptbm_map_window.open(map);
+    mptbm_map_window.open(mptbm_map);
   });
 }
 function mptbm_map_area_init() {
